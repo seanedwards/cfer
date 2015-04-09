@@ -11,13 +11,13 @@ module Cfer
     end
 
     def method_missing(method_sym, *arguments, &block)
-      method_sym = method_sym.to_s.camelize.to_sym
+      method_sym = method_sym.to_s.camelize
       if block
         @_options[method_sym] = Cfer::build HashBuilder, &block
       else
         case arguments.size
         when 0
-          @_options[method_sym] ||= {}
+          @_options[method_sym] ||= HashWithIndifferentAccess.new
         when 1
           @_options[method_sym] = arguments.first
         else
@@ -33,7 +33,7 @@ module Cfer
     end
 
     def initialize
-      @_options = Hash.new
+      @_options = HashWithIndifferentAccess.new
     end
   end
 end

@@ -5,7 +5,7 @@ module Cfer
     end
 
     def parameter(name, ty, d=nil)
-      @parameters[name.to_s.camelize.to_sym] = Cfer::build do
+      @parameters[name.to_s.camelize] = Cfer::build do
         type ty
         default d
       end
@@ -13,7 +13,7 @@ module Cfer
 
     def resource(name, type, &block)
       clazz = "Cfer::#{type}".split('::').inject(Object) { |o, c| o.const_get c } || Cfer::Resource
-      @resources[name.to_s.camelize.to_sym] = Cfer::build clazz, &block
+      @resources[name.to_s.camelize] = Cfer::build clazz, &block
     end
 
     def pre_block
