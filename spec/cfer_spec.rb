@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module Cfer
+module CferExt
   module A
     class B < Cfer::Resource
       def c(e)
