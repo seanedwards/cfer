@@ -15,7 +15,7 @@ module Cfer
     end
 
     def resource(name, type, &block)
-      clazz = "Cfer::#{type}".split('::').inject(Object) { |o, c| o.const_get c if o && o.const_defined?(c) } || Cfer::Resource
+      clazz = "CferExt::#{type}".split('::').inject(Object) { |o, c| o.const_get c if o && o.const_defined?(c) } || Cfer::Resource
       @resources[name.to_s.camelize] = Cfer::build clazz, &block
     end
 
