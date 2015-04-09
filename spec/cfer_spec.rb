@@ -7,9 +7,14 @@ module CferExt
         d e
       end
 
-      def post_block
+      def pre_block
         super
+        k "l"
+      end
+
+      def post_block
         i "j"
+        super
       end
     end
   end
@@ -49,6 +54,9 @@ describe Cfer do
 
     expect(h[:Resources][:R]).to have_key :I
     expect(h[:Resources][:R][:I]).to eq("j")
+
+    expect(h[:Resources][:R]).to have_key :K
+    expect(h[:Resources][:R][:K]).to eq("l")
 
     expect(h[:Resources][:R]).to have_key :Properties
     expect(h[:Resources][:R][:Properties]).to have_key :Tags
