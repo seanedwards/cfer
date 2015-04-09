@@ -2,6 +2,8 @@ require "cfer/version"
 require 'cfer/hasher'
 require 'cfer/stack'
 require 'cfer/resource'
+require 'active_support/all'
+require 'json'
 
 module Cfer
 
@@ -24,10 +26,10 @@ module Cfer
   end
 
   def self.ref(r)
-    {"Ref" => r}
+    {"Ref" => r.to_s.camelize}
   end
 
   def self.get_att(r, att)
-    {"Fn::GetAtt" => [r, att]}
+    {"Fn::GetAtt" => [r.to_s.camelize, att]}
   end
 end

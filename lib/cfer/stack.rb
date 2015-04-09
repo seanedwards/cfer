@@ -1,4 +1,3 @@
-require 'active_support/all'
 module Cfer
   class Stack < Cfer::HashBuilder
     def version(v)

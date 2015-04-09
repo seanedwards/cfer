@@ -1,7 +1,3 @@
-require "cfer/version"
-require 'json'
-require 'active_support/all'
-
 module Cfer
   class HashBuilder
     attr_reader :_options
