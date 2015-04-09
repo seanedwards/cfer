@@ -26,6 +26,12 @@ module Cfer
       end
     end
 
+    def set(options = {})
+      options.each do |k, v|
+        @_options[k] = v
+      end
+    end
+
     def pre_block
     end
 
