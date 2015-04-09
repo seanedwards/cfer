@@ -11,7 +11,6 @@ module Cfer
 
     def post_block
       properties[:Tags] = @tags.to_a.map do |kv|
-        puts kv
         {"Key" => kv[0], "Value" => kv[1]}
       end
       super

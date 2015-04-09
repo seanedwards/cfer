@@ -24,7 +24,6 @@ describe Cfer do
         b "c"
       end
     end
-    puts h
     expect(h).to have_key :A
     expect(h[:A]).to have_key :B
   end
@@ -37,7 +36,6 @@ describe Cfer do
         tag "x", "y"
       end
     end
-    puts h
 
     expect(h).to have_key :Resources
     expect(h[:Resources]).to have_key :R
