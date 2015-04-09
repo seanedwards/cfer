@@ -3,10 +3,6 @@ require 'cri'
 module Cfer
   module Cli
     def self.main(args)
-      commands = [
-
-      ]
-
       root = Cri::Command.define do
         name 'cfer'
         summary 'Evaluates a Cloudformer script'
@@ -32,7 +28,6 @@ module Cfer
         end
       end
 
-      commands.each { |cmd| root.add_command(cmd) }
       root.run(args)
     end
   end
