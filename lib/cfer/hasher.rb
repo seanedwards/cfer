@@ -1,34 +1,29 @@
 module Cfer
-  class HashBuilder
-    attr_reader :_options
-
-    def []=(k, v)
-      @_options[k] = v
-    end
-
-    def [](k)
-      @_options[k]
-    end
+  class HashBuilder < ActiveSupport::HashWithIndifferentAccess
 
     def method_missing(method_sym, *arguments, &block)
-      method_sym = method_sym.to_s.camelize
+      method_sym = method_sym.to_s.camelize.to_sym
       if block
-        @_options[method_sym] = Cfer::build HashBuilder, &block
+        self[method_sym] = Cfer::build HashBuilder.new, &block
       else
         case arguments.size
         when 0
-          @_options[method_sym] ||= HashWithIndifferentAccess.new
+          self[method_sym] ||= HashWithIndifferentAccess.new
         when 1
-          @_options[method_sym] = arguments.first
+          self[method_sym] = arguments.first
         else
-          @_options[method_sym] = arguments
+          self[method_sym] = arguments
         end
       end
     end
 
+    def responds_to?(method_sym)
+      true
+    end
+
     def set(options = {})
       options.each do |k, v|
-        @_options[k] = v
+        self[k] = v
       end
     end
 
@@ -38,8 +33,5 @@ module Cfer
     def post_block
     end
 
-    def initialize
-      @_options = HashWithIndifferentAccess.new
-    end
   end
 end

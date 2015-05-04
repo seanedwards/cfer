@@ -1,23 +1,20 @@
+
+require 'active_support/all'
 require "cfer/version"
 require 'cfer/hasher'
 require 'cfer/stack'
 require 'cfer/resource'
-require 'active_support/all'
 require 'json'
+require 'configliere'
 
 module Cfer
 
-  def self.build(clazz = Cfer::HashBuilder,  &block)
-    h = clazz.new
+  def self.build(h = Cfer::HashBuilder.new, *arguments, &block)
     h.pre_block
-    h.instance_eval(&block)
+    #Docile.dsl_eval(h, *arguments, &block)
+    h.instance_exec(*arguments, &block)
     h.post_block
-    h._options
-  end
-
-
-  def self.stack(&block)
-    Cfer::build(Cfer::Stack, &block)
+    h.to_h
   end
 
   # Wrap CFN intrinsic functions
@@ -31,5 +28,9 @@ module Cfer
 
   def self.get_att(r, att)
     {"Fn::GetAtt" => [r.to_s.camelize, att]}
+  end
+
+  def self.select(i, o)
+    {"Fn::Select" => [i, o]}
   end
 end

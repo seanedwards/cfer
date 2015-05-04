@@ -25,7 +25,9 @@ describe Cfer do
     h = Cfer::build do
       a "b"
     end
-    expect(h).to have_key :A
+    puts h
+
+    expect(h).to have_key "A"
   end
 
   it 'builds recursive hashes' do
@@ -34,32 +36,39 @@ describe Cfer do
         b "c"
       end
     end
-    expect(h).to have_key :A
-    expect(h[:A]).to have_key :B
+    puts h
+    expect(h).to have_key "A"
+    expect(h["A"]).to have_key "B"
   end
 
   it 'builds stacks' do
-    h = Cfer::stack do
+    h = Cfer::build Cfer::Stack.new do
       version 'v'
-      resource :r, "A::B" do
+      resource :R, "A::B" do
         c "e"
         tag "x", "y"
       end
     end
 
-    expect(h).to have_key :Resources
-    expect(h[:Resources]).to have_key :R
-    expect(h[:Resources][:R]).to have_key :D
-    expect(h[:Resources][:R][:D]).to eq("e")
+    puts h
 
-    expect(h[:Resources][:R]).to have_key :I
-    expect(h[:Resources][:R][:I]).to eq("j")
+    expect(h).to have_key "Resources"
+    expect(h["Resources"]).to have_key "R"
 
-    expect(h[:Resources][:R]).to have_key :K
-    expect(h[:Resources][:R][:K]).to eq("l")
+    expect(h["Resources"]["R"]).to have_key "Type"
+    expect(h["Resources"]["R"]["Type"]).to eq "A::B"
 
-    expect(h[:Resources][:R]).to have_key :Properties
-    expect(h[:Resources][:R][:Properties]).to have_key :Tags
+    expect(h["Resources"]["R"]).to have_key "Properties"
+    expect(h["Resources"]["R"]["Properties"]["D"]).to eq("e")
+
+    expect(h["Resources"]["R"]["Properties"]).to have_key "I"
+    expect(h["Resources"]["R"]["Properties"]["I"]).to eq("j")
+
+    expect(h["Resources"]["R"]["Properties"]).to have_key "K"
+    expect(h["Resources"]["R"]["Properties"]["K"]).to eq("l")
+
+    expect(h["Resources"]["R"]).to have_key "Properties"
+    expect(h["Resources"]["R"]["Properties"]).to have_key "Tags"
 
   end
 

@@ -1,0 +1,30 @@
+!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
+Cfer	/Users/sedwards/Projects/cfer/lib/cfer/cli.rb	/^module Cfer$/;"	m	language:Ruby
+Cfer	/Users/sedwards/Projects/cfer/lib/cfer/hasher.rb	/^module Cfer$/;"	m	language:Ruby
+Cfer	/Users/sedwards/Projects/cfer/lib/cfer/resource.rb	/^module Cfer$/;"	m	language:Ruby
+Cfer	/Users/sedwards/Projects/cfer/lib/cfer/stack.rb	/^module Cfer$/;"	m	language:Ruby
+Cli	/Users/sedwards/Projects/cfer/lib/cfer/cli.rb	/^  module Cli$/;"	m	language:Ruby	class:Cfer
+description	/Users/sedwards/Projects/cfer/lib/cfer/stack.rb	/^    def description(d)$/;"	f	language:Ruby	class:Cfer.Stack
+GlobalOptions	/Users/sedwards/Projects/cfer/lib/cfer/cli.rb	/^    module GlobalOptions$/;"	m	language:Ruby	class:Cfer.Cli
+HashBuilder	/Users/sedwards/Projects/cfer/lib/cfer/hasher.rb	/^  class HashBuilder < ActiveSupport::HashWithIndifferentAccess$/;"	c	language:Ruby	class:Cfer
+initialize	/Users/sedwards/Projects/cfer/lib/cfer/resource.rb	/^    def initialize(type)$/;"	f	language:Ruby	class:Cfer.Resource
+main	/Users/sedwards/Projects/cfer/lib/cfer/cli.rb	/^    def self.main(args)$/;"	F	language:Ruby	class:Cfer.Cli
+method_missing	/Users/sedwards/Projects/cfer/lib/cfer/hasher.rb	/^    def method_missing(method_sym, *arguments, &block)$/;"	f	language:Ruby	class:Cfer.HashBuilder
+method_missing	/Users/sedwards/Projects/cfer/lib/cfer/resource.rb	/^    def method_missing(method_sym, *arguments, &block)$/;"	f	language:Ruby	class:Cfer.Resource
+output	/Users/sedwards/Projects/cfer/lib/cfer/stack.rb	/^    def output(name, value)$/;"	f	language:Ruby	class:Cfer.Stack
+parameter	/Users/sedwards/Projects/cfer/lib/cfer/stack.rb	/^    def parameter(name, options = {}, d=nil)$/;"	f	language:Ruby	class:Cfer.Stack
+post_block	/Users/sedwards/Projects/cfer/lib/cfer/hasher.rb	/^    def post_block$/;"	f	language:Ruby	class:Cfer.HashBuilder
+post_block	/Users/sedwards/Projects/cfer/lib/cfer/resource.rb	/^    def post_block$/;"	f	language:Ruby	class:Cfer.Resource
+post_block	/Users/sedwards/Projects/cfer/lib/cfer/stack.rb	/^    def post_block$/;"	f	language:Ruby	class:Cfer.Stack
+pre_block	/Users/sedwards/Projects/cfer/lib/cfer/hasher.rb	/^    def pre_block$/;"	f	language:Ruby	class:Cfer.HashBuilder
+pre_block	/Users/sedwards/Projects/cfer/lib/cfer/resource.rb	/^    def pre_block$/;"	f	language:Ruby	class:Cfer.Resource
+pre_block	/Users/sedwards/Projects/cfer/lib/cfer/stack.rb	/^    def pre_block$/;"	f	language:Ruby	class:Cfer.Stack
+Resource	/Users/sedwards/Projects/cfer/lib/cfer/resource.rb	/^  class Resource < HashBuilder$/;"	c	language:Ruby	class:Cfer
+resource	/Users/sedwards/Projects/cfer/lib/cfer/stack.rb	/^    def resource(name, type, *args, &block)$/;"	f	language:Ruby	class:Cfer.Stack
+responds_to?	/Users/sedwards/Projects/cfer/lib/cfer/hasher.rb	/^    def responds_to?(method_sym)$/;"	f	language:Ruby	class:Cfer.HashBuilder
+set	/Users/sedwards/Projects/cfer/lib/cfer/hasher.rb	/^    def set(options = {})$/;"	f	language:Ruby	class:Cfer.HashBuilder
+Stack	/Users/sedwards/Projects/cfer/lib/cfer/stack.rb	/^  class Stack < Cfer::HashBuilder$/;"	c	language:Ruby	class:Cfer
+stack_options	/Users/sedwards/Projects/cfer/lib/cfer/cli.rb	/^      def stack_options$/;"	f	language:Ruby	class:Cfer.Cli.GlobalOptions
+tag	/Users/sedwards/Projects/cfer/lib/cfer/resource.rb	/^    def tag(k, v, options = {})$/;"	f	language:Ruby	class:Cfer.Resource
+template_options	/Users/sedwards/Projects/cfer/lib/cfer/cli.rb	/^      def template_options$/;"	f	language:Ruby	class:Cfer.Cli.GlobalOptions
+version	/Users/sedwards/Projects/cfer/lib/cfer/stack.rb	/^    def version(v)$/;"	f	language:Ruby	class:Cfer.Stack
