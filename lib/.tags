@@ -1,7 +1,0 @@
-!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
-build	/Users/sedwards/Projects/cfer/lib/cfer.rb	/^  def self.build(h = Cfer::HashBuilder.new, *arguments, &block)$/;"	F	language:Ruby	class:Cfer
-Cfer	/Users/sedwards/Projects/cfer/lib/cfer.rb	/^module Cfer$/;"	m	language:Ruby
-get_att	/Users/sedwards/Projects/cfer/lib/cfer.rb	/^  def self.get_att(r, att)$/;"	F	language:Ruby	class:Cfer
-join	/Users/sedwards/Projects/cfer/lib/cfer.rb	/^  def self.join(delim, args)$/;"	F	language:Ruby	class:Cfer
-ref	/Users/sedwards/Projects/cfer/lib/cfer.rb	/^  def self.ref(r)$/;"	F	language:Ruby	class:Cfer
-select	/Users/sedwards/Projects/cfer/lib/cfer.rb	/^  def self.select(i, o)$/;"	F	language:Ruby	class:Cfer

@@ -1,170 +1,80 @@
-require 'cri'
+require 'thor'
 
 module Cfer
-  module Cli
-    module GlobalOptions
-      def template_options
-        # Options for the template generation phase
-        required :f,  :"cfer-file", "Cfer template to evaluate." do |value, cmd|
-          Settings.finally do |c|
-            c[:cfer][:file] = value
-          end
-        end
+  class Cli < Thor
 
-        optional :o,  :"output-file", "Path to Cloudformation template output file", default: nil do |value, cmd|
-          Settings.finally do |c|
-            c[:cfer][:output] = value
-          end
-        end
+    class_option :verbose, type: :boolean, default: false
+    class_option :debug,   type: :boolean, default: false
 
-        flag    nil, :"pretty-print", "Format human-friendly JSON output"
-      end
+    def self.template_options
+      method_option :output_file,
+        type: :string,
+        aliases: :o,
+        desc: 'The file that will contain the rendered CloudFormation template (may be an s3:// URL)'
 
-      def stack_options
-        # Options for phases that involve querying AWS
-        optional :n, :"stack-name", "CloudFormation stack name", argument: :optional do |value, cmd|
-          Settings.finally do |c|
-            c[:cloudformation][:stack_name] = value
-          end
-        end
+      method_option :pretty_print,
+        type: :boolean,
+        default: :true,
+        desc: 'Render JSON in a more human-friendly format'
+    end
 
-        optional :p, :profile, "Use a specific profile from your AWS credential file", argument: :optional do |value, cmd|
-          Settings.finally do |c|
-            c[:aws][:profile] = value
-          end
-        end
+    def self.stack_options
+      method_option :profile,
+        type: :string,
+        aliases: :p,
+        desc: 'The AWS profile to use from your credentials file'
 
-        flag  nil, :"disable-rollback", "Disables stack rollback", default: false do |value, cmd|
-          Settings.finally do |c|
-            c[:cloudformation][:disable_rollback] = true
-          end
-        end
+      method_option :parameters,
+        type: :hash,
+        desc: 'The CloudFormation parameters to pass to the stack'
+    end
 
-        optional nil, :parameter, "Sets a CloudFormation stack parameter", multiple: true do |value, cmd|
-          Settings.finally do |c|
-            value.each do |kv|
-              k, v = kv.split('=', 2)
-              c[:cloudformation][:params][k.to_sym] = v
-            end
-          end
-        end
+    desc 'converge [OPTIONS] <stack-name> <template.rb>', 'Converges a cloudformation stack according to the template'
+    method_option :git_lock,
+      type: :boolean,
+      default: true,
+      desc: 'When enabled, Cfer will not converge a stack in a dirty git tree'
+
+    method_option :disable_rollback,
+      type: :boolean,
+      default: false,
+      desc: 'If enabled, the stack will not automatically roll back to its previous working state'
+
+    method_option :async,
+      type: :boolean,
+      default: false,
+      desc: 'Invoke the stack update and quit immediately'
+    template_options
+    stack_options
+    def converge(stack, tmpl)
+      s = Cfer::stack_from_file(tmpl)
+    end
+
+    desc 'plan [OPTIONS] <template.rb>', 'Describes the changes that will be made to the CloudFormation stack'
+    method_option :stack_name, type: :string, aliases: :n
+    template_options
+    stack_options
+    def plan(tmpl)
+      s = Cfer::stack_from_file(tmpl)
+    end
+
+    desc 'generate [OPTIONS] <template.rb>', 'Generates a CloudFormation template by evaluating a Cfer template'
+    long_desc <<-LONGDESC
+      Generates a CloudFormation template by evaluating a Cfer template.
+    LONGDESC
+    template_options
+    def generate(tmpl)
+      s = Cfer::stack_from_file(tmpl).to_h
+
+      if options[:pretty_print]
+        puts JSON.pretty_generate(s)
+      else
+        puts s.to_json
       end
     end
 
     def self.main(args)
-      Settings.use :config_block, :env_var, :prompt
-
-      Settings({
-      })
-
-      Settings.read '~/.cfer.yml'
-      Settings.read './cfer.yml'
-
-      commands = [
-        Cri::Command.define do
-          extend GlobalOptions
-          name 'converge'
-          summary 'Converge a Cloudformation stack according to the Cfer template'
-
-          template_options
-          stack_options
-
-          flag  nil, :async, "Execute the CloudFormation stack update and quit immediately", default: false
-
-          run do |opts, args, cmd|
-            Settings.resolve!
-          end
-        end,
-
-        Cri::Command.define do
-          extend GlobalOptions
-
-          name 'plan'
-          summary 'Describe the action plan that CloudFormation will take'
-
-          template_options
-          stack_options
-
-          run do |opts, args, cmd|
-            Settings.resolve!
-          end
-        end,
-
-        Cri::Command.define do
-          extend GlobalOptions
-
-          name 'generate'
-          summary 'Generates a CloudFormation template from the specified Cfer template'
-
-          template_options
-
-          run do |opts, args, cmd|
-            Settings.resolve!
-            s = Cfer::build Cfer::Stack.new do
-              instance_eval File.read(opts[:file]), opts[:file]
-            end
-            if opts[:"pretty-print"]
-              puts JSON.pretty_generate(s)
-            else
-              puts s.to_json
-            end
-          end
-        end
-      ]
-
-      root = Cri::Command.define do
-        extend GlobalOptions
-
-        name 'cfer'
-        summary 'Evaluates a Cfer script'
-        usage 'cfer [--setting=value ...] <command> [OPTIONS ...]'
-
-        flag nil, :debug, "Enables debug mode", hidden: true
-        flag :v,  :verbose, "Run verbosely"
-        flag :h,  :help, 'Show help for this command.' do |value, cmd|
-          puts cmd.help
-          exit 0
-        end
-
-        optional :s, :setting, "Overrides a Cfer setting", multiple: true do |value, cmd|
-          Settings.finally do |c|
-            value.each do |kv|
-              k, v = kv.split('=', 2)
-              Settings[k.to_sym] = v
-            end
-          end
-        end
-
-        flag nil, :version, "Show version" do |value, cmd|
-          puts "Cfer #{Cfer::VERSION}"
-          puts "Copyright (C) 2015 Sean Edwards <stedwards87+git@gmail.com>."
-          puts "On Github at: https://github.com/seanedwards/cfer"
-          exit
-        end
-
-        flag nil, :"version-json", "Shows the current application version in machine-readable JSON." do
-          puts JSON.pretty_generate({
-            :application => "cfer",
-            :version => Cfer::VERSION,
-            :email => "stedwards87+git@gmail.com",
-            :homepage => "https://github.com/seanedwards/cfer",
-            :license => "http://www.apache.org/licenses/LICENSE-2.0"
-          })
-
-          exit
-        end
-
-        run do |opts, args, cmd|
-          Settings.resolve!
-          puts cmd.help
-        end
-      end
-
-      commands.each do |c|
-        root.add_command c
-      end
-
-      root.run(args)
+      Cli.start(args)
     end
   end
 end

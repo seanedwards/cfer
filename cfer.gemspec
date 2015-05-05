@@ -25,12 +25,20 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'activesupport'
   spec.add_runtime_dependency 'docile'
-  spec.add_runtime_dependency 'cri',                '~> 2.7.0'
-  spec.add_runtime_dependency 'configliere',        '~> 0.4.22'
   spec.add_runtime_dependency 'thor'
+  spec.add_runtime_dependency 'activesupport'
+  spec.add_runtime_dependency 'aws-sdk'
+  spec.add_runtime_dependency 'aws-sdk-resources'
+  spec.add_runtime_dependency 'preconditions'
+  spec.add_runtime_dependency 'semantic'
+  spec.add_runtime_dependency 'rainbow'
 
-  spec.add_development_dependency "bundler", "~> 1.8"
-  spec.add_development_dependency "rake", "~> 10.0"
+  spec.add_development_dependency "bundler"
+  spec.add_development_dependency "rake"
   spec.add_development_dependency 'pry'
+  spec.add_development_dependency 'pry-byebug'
+  spec.add_development_dependency 'pry-rescue'
+  spec.add_development_dependency 'pry-stack_explorer'
   spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'guard-rspec'
 end
