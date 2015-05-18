@@ -1,9 +1,6 @@
 require 'active_support/all'
 require 'aws-sdk'
 require 'json'
-require "cfer/version"
-require 'cfer/block'
-require 'cfer/provisioning/provisioner.rb'
 
 module CferExt
   module AWS
@@ -24,6 +21,6 @@ module Cfer
   end
 end
 
-Dir["#{File.dirname(__FILE__)}/cfer/cfn/**/*.rb"].each { |f| load(f) }
+Dir["#{File.dirname(__FILE__)}/cfer/**/*.rb"].each { |f| load(f) }
 Dir["#{File.dirname(__FILE__)}/cferext/**/*.rb"].each { |f| load(f) }
 

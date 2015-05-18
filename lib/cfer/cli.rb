@@ -5,7 +5,6 @@ module Cfer
   class Cli < Thor
 
     class_option :verbose, type: :boolean, default: false
-    class_option :debug,   type: :boolean, default: false
 
     def self.template_options
       method_option :output_file,
