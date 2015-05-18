@@ -1,25 +1,21 @@
+require 'docile'
+
 module Cfer
   class Block < ActiveSupport::HashWithIndifferentAccess
 
 
-    def build_from_block(&block)
+    def build_from_block(*args, &block)
       pre_block
-      instance_exec(&block) if block
+      Docile.dsl_eval(self, *args, &block)
       post_block
       self
     end
 
-    def build_from_file(file)
-      pre_block
-      instance_eval File.read(file), file if file
-      post_block
-      self
-    end
-
-    def set(keyvals = {})
-      keyvals.each do |k, v|
-        self[k] = v
+    def build_from_file(*args, file)
+      build_from_block(*args) do
+        instance_eval File.read(file), file
       end
+      self
     end
 
     def pre_block

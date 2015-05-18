@@ -32,6 +32,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'preconditions'
   spec.add_runtime_dependency 'semantic'
   spec.add_runtime_dependency 'rainbow'
+  spec.add_runtime_dependency 'highline'
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"

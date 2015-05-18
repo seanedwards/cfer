@@ -15,5 +15,9 @@ module Cfer::Cfn
     def self.select(i, o)
       {"Fn::Select" => [i, o]}
     end
+
+    def self.base64(v)
+      {"Fn::Base64" => v}
+    end
   end
 end
