@@ -123,9 +123,13 @@ module Cfer
       begin
         Cli.start(args)
       rescue Aws::Errors::NoSuchProfileError => e
-        puts "ERROR: #{e.message}. Specify a valid profile with the --profile option."
+        Cfer::LOGGER.error "#{e.message}. Specify a valid profile with the --profile option."
       rescue Interrupt
-        puts 'Caught interrupt. Goodbye.'
+        Cfer::LOGGER.info 'Caught interrupt. Goodbye.'
+      rescue  StandardError => e
+        Cfer::LOGGER.fatal "#{$!}\n#{$@.join("\n")}"
+        # Do bug reports here?
+        Pry::rescued(e) if Cfer::DEBUG
       end
     end
 

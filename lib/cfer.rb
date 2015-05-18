@@ -1,5 +1,6 @@
 require 'active_support/all'
 require 'aws-sdk'
+require 'logger'
 require 'json'
 
 module CferExt
@@ -8,6 +9,8 @@ module CferExt
 end
 
 module Cfer
+  LOGGER = Logger.new(STDOUT)
+
   def self.stack(parameters = {}, &block)
     stack = Cfer::Cfn::Stack.new(parameters)
     stack.build_from_block &block

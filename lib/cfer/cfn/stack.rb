@@ -16,7 +16,7 @@ module Cfer::Cfn
       self[:Description] = desc
     end
 
-    def parameter(name, options = {}, d=nil)
+    def parameter(name, **options)
       self[:Parameters] ||= {}
 
       options[:type] ||= 'String'
@@ -27,13 +27,14 @@ module Cfer::Cfn
       self[:Parameters][name] = param
     end
 
-    def resource(name, type, options = {}, &block)
+    def resource(name, type, **options, &block)
       self[:Resources] ||= {}
 
       clazz = "CferExt::#{type}".split('::').inject(Object) { |o, c| o.const_get c if o && o.const_defined?(c) } || Cfer::Cfn::Resource
-      rc = clazz.new(type, options, &block)
+      rc = clazz.new(name, type, options, &block)
 
       self[:Resources][name] = rc
+      rc
     end
 
     def output(name, value)
@@ -46,12 +47,13 @@ module Cfer::Cfn
   class CfnStack
     attr_reader :stack
     attr_reader :name
+
     def initialize(name, stack = nil)
       @stack = stack
       @name = name
     end
 
-    def converge(options)
+    def converge(options = {})
       @cfn ||= Aws::CloudFormation::Client.new
 
       response = @cfn.validate_template(template_body: to_cfn)
