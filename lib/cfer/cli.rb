@@ -3,7 +3,7 @@ require 'rainbow'
 
 module Cfer
   class Cli < Thor
-
+    namespace 'cfer'
     class_option :verbose, type: :boolean, default: false
 
     def self.template_options
@@ -127,7 +127,7 @@ module Cfer
       rescue Interrupt
         Cfer::LOGGER.info 'Caught interrupt. Goodbye.'
       rescue  StandardError => e
-        Cfer::LOGGER.fatal "#{$!}\n#{$@.join("\n")}"
+        Cfer::LOGGER.fatal "#{e.class.name}: #{e.message}\n#{e.backtrace.reverse.join("\n")}"
         # Do bug reports here?
         Pry::rescued(e) if Cfer::DEBUG
       end
