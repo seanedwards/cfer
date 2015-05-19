@@ -11,19 +11,25 @@ end
 module Cfer
   LOGGER = Logger.new(STDOUT)
 
-  def self.stack(parameters = {}, &block)
-    stack = Cfer::Cfn::Stack.new(parameters)
-    stack.build_from_block &block
-    stack
-  end
+  class << self
+    def stack(parameters = {}, &block)
+      s = Cfer::Cfn::Stack.new(parameters)
+      s.build_from_block &block
+      s
+    end
 
-  def self.stack_from_file(file, parameters = {})
-    stack = Cfer::Cfn::Stack.new(parameters)
-    stack.build_from_file file
-    stack
+    def stack_from_file(file, parameters = {})
+      s = Cfer::Cfn::Stack.new(parameters)
+      s.build_from_file file
+      s
+    end
+
+    def converge(stack_name, template_file, **options)
+      Cfer::Cli.new([], options, {}).invoke(:converge, stack_name, template_file)
+    end
   end
 end
 
-Dir["#{File.dirname(__FILE__)}/cfer/**/*.rb"].each { |f| load(f) }
-Dir["#{File.dirname(__FILE__)}/cferext/**/*.rb"].each { |f| load(f) }
+Dir["#{File.dirname(__FILE__)}/cfer/**/*.rb"].each { |f| require(f) }
+Dir["#{File.dirname(__FILE__)}/cferext/**/*.rb"].each { |f| require(f) }
 
