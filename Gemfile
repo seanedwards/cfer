@@ -6,7 +6,7 @@ gemspec
 group :test do
   gem 'rspec'
   gem 'guard-rspec'
-  gem 'coveralls'
+  gem 'coveralls', require: false
 end
 
 group :debug do
