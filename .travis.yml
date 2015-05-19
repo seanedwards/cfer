@@ -5,3 +5,4 @@ rvm:
   - 2.1.3
   - ruby-head
   - jruby-19mode
+script: bundle exec rspec
