@@ -6,3 +6,5 @@ rvm:
   - ruby-head
   - jruby-19mode
 script: bundle exec rspec
+after_success:
+  - coveralls
