@@ -3,9 +3,14 @@ module Cfer::Cfn
     include Cfer::Cfn
 
     attr_reader :parameters
+    attr_reader :git
 
     def initialize(parameters = {})
       @parameters = parameters
+      @git = Rugged::Repository.discover('.')
+
+      clean_working_dir = false #@git_status.changed.empty? && @git_status.deleted.empty? && @git_status.added.empty?
+      self[:Metadata] = { :Git => { :Rev => @git.head.target_id, :Clean => clean_working_dir } }
     end
 
     def version(v)
@@ -54,6 +59,8 @@ module Cfer::Cfn
     end
 
     def converge(options = {})
+      Preconditions.check(@stack) { is_not_nil and has_type(Cfer::Cfn::Stack) }
+
       @cfn ||= Aws::CloudFormation::Client.new
 
       response = @cfn.validate_template(template_body: to_cfn)

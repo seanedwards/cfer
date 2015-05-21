@@ -13,7 +13,11 @@ module Cfer
 
     def build_from_file(*args, file)
       build_from_block(*args) do
-        instance_eval File.read(file), file
+        begin
+          instance_eval File.read(file), file
+        rescue SyntaxError => e
+          Cfer::LOGGER.error e.message
+        end
       end
       self
     end

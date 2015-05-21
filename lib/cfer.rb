@@ -2,6 +2,7 @@ require 'active_support/all'
 require 'aws-sdk'
 require 'logger'
 require 'json'
+require 'rugged'
 
 module CferExt
   module AWS
@@ -14,7 +15,7 @@ module Cfer
   class << self
     def stack(parameters = {}, &block)
       s = Cfer::Cfn::Stack.new(parameters)
-      s.build_from_block &block
+      s.build_from_block(&block)
       s
     end
 

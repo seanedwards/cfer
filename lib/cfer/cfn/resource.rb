@@ -30,17 +30,13 @@ module Cfer::Cfn
 
     def method_missing(method_sym, *arguments, &block)
       key = camelize_property(method_sym)
-      if block
-        properties key => Cfer::Block.new(&block)
+      case arguments.size
+      when 0
+        self[:Properties][key]
+      when 1
+        properties key => arguments.first
       else
-        case arguments.size
-        when 0
-          self[:Properties][key]
-        when 1
-          properties key => arguments.first
-        else
-          properties key => arguments
-        end
+        properties key => arguments
       end
     end
 
