@@ -7,32 +7,6 @@ def create_stack(&block)
 end
 
 describe Cfer do
-  it 'builds stacks' do
-    h = create_stack do
-      version 'v'
-      parameter :A
-      parameter :B, Type: :number
-      resource :R, "A::B" do
-        c "e"
-        tag "x", "y"
-      end
-    end
-    h = h.to_h
-
-    puts h
-
-    expect(h).to have_key "Resources"
-    expect(h["Resources"]).to have_key "R"
-
-    expect(h["Resources"]["R"]).to have_key "Type"
-    expect(h["Resources"]["R"]["Type"]).to eq "A::B"
-
-    expect(h["Resources"]["R"]).to have_key "Properties"
-    expect(h["Resources"]["R"]["Properties"]["C"]).to eq("e")
-    expect(h["Resources"]["R"]["Properties"]).to have_key "Tags"
-
-  end
-
   it 'sets descriptions' do
     stack = create_stack do
       description 'test stack'
@@ -79,6 +53,16 @@ describe Cfer do
 
     expect(stack[:Resources][:test_resource].property).to eq 'value'
     expect(stack[:Resources][:test_resource].property2).to eq ['value1', 'value2']
+  end
+
+  it 'creates resources with tags' do
+    stack = create_stack do
+      resource :test_resource, 'Cfer::TestResource' do
+        tag 'a', 'b', xyz: 'abc'
+      end
+    end
+
+    expect(stack[:Resources][:test_resource][:Properties][:Tags]).to contain_exactly 'Key' => 'a', 'Value' => 'b', :xyz => 'abc'
   end
 
 end
