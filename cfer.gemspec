@@ -6,7 +6,7 @@ require 'cfer/version'
 Gem::Specification.new do |spec|
   spec.name          = "cfer"
   spec.version       = Cfer::VERSION
-  spec.version       = "#{s.version}-build-#{ENV['TRAVIS_BUILD_NUMBER']}" if ENV['TRAVIS']
+  spec.version       = "#{spec.version}-build-#{ENV['TRAVIS_BUILD_NUMBER']}" if ENV['TRAVIS']
   spec.authors       = ["Sean Edwards"]
   spec.email         = ["stedwards87+git@gmail.com"]
 
