@@ -1,8 +1,14 @@
 language: ruby
 install: bundle install --without debug --jobs=3 --retry=3
 rvm:
-  #- 1.9.3
-  - 2.1.3
-  - ruby-head
-  #- jruby-19mode
+- 2.1.3
+- ruby-head
 script: bundle exec rspec
+deploy:
+  provider: rubygems
+  api_key:
+    secure: fRNGY3f12rlSg2x+1cM6JD1gCiZWZFnndj9wk25QVlt3YpRv8/M6XY40kePp3OFKnRRfRmqdBeAlc5Is4stTbK/RoqDAaggI2vtGbCUBIDmnMV32Mi/CsJYE5K/elDQITocjDMJfGEN4p0PuEkYWLehJkkPYfB/EgkMFZI8q/jd9dgaeDiDr5FW0Rmil1iLJNWXDjXr3PZOwlvtXWr2AyrwCWRm1q0sIl2Ov9sGtmZP7E6SR7Gd5cx/1EZrqFRL7ekJ8wlFuljRpbRC0DCbxMAQEj55/FaOUhhSlbXlymScHNTJJYVL0/eOFvOJEfVNIapJSNSOfMc2biAvLcS7WTi23XcWfb4hOcp9bfG/sxK6fNULZGuE3QVlz0XPmj+u2lRnDG51KHkE0DOMDxpyNWkVmqS9LbfG61CD6MUl/AN8a5O6wGbyTAVBEacul/sIhjVPOj4pq56w7qnjXsETqgx0Gs2VrS1oybPwqjkG7ucnBXUmvrdXUqbrJ8STAq9GSBGEdDJgWpfJlTgfwvWVilNIfrcVz0DiPJNxUHsj4mCeSpT4BjOd1k9w3IHs77VBcRyhnKDYNRAxxYbXdsvTlvdsTU5eo7rT3X62E+r3ZPrbAxqOA+F6fe5NgVvlzvKiw5P123OcQi+QPhQzRr3zBI70HLpMspKjG5ULOWmOQiKY=
+  gem: cfer
+  on:
+    tags: true
+    repo: seanedwards/cfer
