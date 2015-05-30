@@ -36,6 +36,10 @@ describe Cfer do
         property 'value'
         property_2 'value1', 'value2'
       end
+
+      resource :test_resource_2, 'Cfer::TestResource' do
+        other_resource test_resource
+      end
     end
 
     expect(stack[:Resources]).to have_key :test_resource
@@ -44,6 +48,8 @@ describe Cfer do
 
     expect(stack[:Resources][:test_resource][:Properties][:Property]).to eq 'value'
     expect(stack[:Resources][:test_resource][:Properties][:Property2]).to eq ['value1', 'value2']
+
+    expect(stack[:Resources][:test_resource_2][:Properties][:OtherResource]).to eq 'Ref' => :test_resource
   end
 
   it 'creates resources with tags' do

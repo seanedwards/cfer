@@ -24,10 +24,6 @@ module Cfer::Cfn
       !NON_PROXIED_METHODS.include?(method_sym)
     end
 
-    def get_att(attribute)
-      Fn::get_att(name, attribute)
-    end
-
     def method_missing(method_sym, *arguments, &block)
       key = camelize_property(method_sym)
       case arguments.size
