@@ -36,6 +36,12 @@ module Cfer
   }
 
   class << self
+
+    # Builds a Cfer::Cfn::Stack from a Ruby block
+    #
+    # @param parameters [Hash] The Cloudformation parameter values that this stack will be converged with
+    # @param block The block containing the Cfn DSL
+    # @return [Cfer::Cfn::Stack] The assembled stack object
     def stack_from_block(parameters = {}, &block)
       s = Cfer::Cfn::Stack.new(parameters)
       templatize_errors('block') do
@@ -44,6 +50,11 @@ module Cfer
       s
     end
 
+    # Builds a Cfer::Cfn::Stack from a ruby script
+    #
+    # @param file [String] The file containing the Cfn DSL
+    # @param parameters [Hash] (see #stack_from_block)
+    # @return [Cfer::Cfn::Stack] The assembled stack object
     def stack_from_file(file, parameters = {})
       s = Cfer::Cfn::Stack.new(parameters)
       templatize_errors(file) do
@@ -51,11 +62,6 @@ module Cfer
       end
       s
     end
-
-    def converge(stack_name, template_file, **options)
-      Cfer::Cli.new([], options, {}).invoke(:converge, stack_name, template_file)
-    end
-
 
     private
     def templatize_errors(base_loc)

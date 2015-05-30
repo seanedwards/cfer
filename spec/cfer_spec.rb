@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+
 describe Cfer do
   it 'sets descriptions' do
     stack = create_stack do
@@ -12,13 +13,19 @@ describe Cfer do
 
   it 'creates parameters' do
     stack = create_stack do
-      parameter :test, Default: 'abc'
+      parameter :test, Default: 'abc', Description: 'A test parameter'
+      parameter :regex, AllowedPattern: /[abc]+123/
+      parameter :list, AllowedValues: ['a', 'b', 'c']
     end
 
     expect(stack[:Parameters]).to have_key :test
     expect(stack[:Parameters][:test]).to have_key :Default
     expect(stack[:Parameters][:test][:Default]).to eq 'abc'
+    expect(stack[:Parameters][:test][:Description]).to eq 'A test parameter'
     expect(stack[:Parameters][:test][:Type]).to eq 'String'
+
+    expect(stack[:Parameters][:regex][:AllowedPattern]).to eq '[abc]+123'
+    expect(stack[:Parameters][:list][:AllowedValues]).to eq 'a,b,c'
   end
 
   it 'creates outputs' do
@@ -60,6 +67,35 @@ describe Cfer do
     end
 
     expect(stack[:Resources][:test_resource][:Properties][:Tags]).to contain_exactly 'Key' => 'a', 'Value' => 'b', :xyz => 'abc'
+  end
+
+  it 'creates resources with special classes' do
+
+    module ::CferExt::Cfer
+      class TestCustomResource < Cfer::Cfn::Resource
+        def property(value)
+          actual_value value
+          other_property 'abc'
+          other_property_2 123
+        end
+      end
+    end
+
+    stack = create_stack do
+      resource :test_resource, 'Cfer::TestCustomResource' do
+        property 'xyz'
+      end
+    end
+
+    expect(stack[:Resources][:test_resource]).to have_type CferExt::Cfer::TestCustomResource
+
+    expect(stack[:Resources][:test_resource][:Properties]).to have_key :ActualValue
+    expect(stack[:Resources][:test_resource][:Properties]).to have_key :OtherProperty
+    expect(stack[:Resources][:test_resource][:Properties]).to have_key :OtherProperty2
+
+    expect(stack[:Resources][:test_resource][:Properties][:ActualValue]).to eq 'xyz'
+    expect(stack[:Resources][:test_resource][:Properties][:OtherProperty]).to eq 'abc'
+    expect(stack[:Resources][:test_resource][:Properties][:OtherProperty2]).to eq 123
   end
 
 end
