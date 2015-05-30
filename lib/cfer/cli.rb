@@ -3,6 +3,7 @@ require 'rainbow'
 
 module Cfer
   class Cli < Thor
+
     namespace 'cfer'
     class_option :verbose, type: :boolean, default: false
 
@@ -38,41 +39,45 @@ module Cfer
 
 
     desc 'converge [OPTIONS] <stack-name> <template.rb>', 'Converges a cloudformation stack according to the template'
-    method_option :git_lock,
-      type: :boolean,
-      default: true,
-      desc: 'When enabled, Cfer will not converge a stack in a dirty git tree'
+    #method_option :git_lock,
+    #  type: :boolean,
+    #  default: true,
+    #  desc: 'When enabled, Cfer will not converge a stack in a dirty git tree'
 
     method_option :on_failure,
       type: :string,
       default: 'DELETE',
       desc: 'The action to take if the stack creation fails'
-
-    method_option :async,
-      type: :boolean,
-      default: false,
-      desc: 'Invoke the stack update and quit immediately'
-
     method_option :follow,
       aliases: :f,
       type: :boolean,
       default: true,
       desc: 'Follow stack events on standard output while the changes are made.'
     method_option :number,
-      aliases: :n,
       type: :numeric,
       default: 1,
       desc: 'Prints the last (n) events.'
+    method_option :stack_file,
+      aliases: :n,
+      type: :string,
+      desc: 'Override the stack filename (defaults to <stack-name>.rb)'
     template_options
     stack_options
-    def converge(stack, tmpl)
-      config(options)
-      s = Cfer::stack_from_file(tmpl, options[:parameters])
+    def converge(stack_name)
+      tmpl = options[:stack_file] || "#{stack_name}.rb"
 
-      cfn_stack = Cfer::Cfn::CfnStack.new(stack, s)
-      cfn_stack.converge(options)
-      if options[:follow]
-        tail stack
+      config(options)
+      stack = Cfer::stack_from_file(tmpl, options[:parameters])
+
+      cfn_stack = Cfer::Cfn::CfnStack.new(stack_name, cfn)
+      begin
+        cfn_stack.converge(stack, options)
+        if options[:follow]
+          tail stack_name
+        end
+      rescue Aws::CloudFormation::Errors::ValidationError => e
+        Cfer::LOGGER.info "CFN validation error: #{e.message}"
+        exit 1
       end
     end
 
@@ -90,8 +95,8 @@ module Cfer
     stack_options
     def tail(stack)
       config(options)
-      Cfer::Cfn::CfnStack.new(stack).tail(options.merge(done_states: ['UPDATE_COMPLETE', 'CREATE_FAILED', 'ROLLBACK_COMPLETE'])) do |event|
-        puts "%s %-30s %-30s %-10s %s" % [event.timestamp, color_map(event.resource_status), event.resource_type, event.logical_resource_id, event.resource_status_reason]
+      Cfer::Cfn::CfnStack.new(stack, cfn).tail(options) do |event|
+        Cfer::LOGGER.info "%s %-30s %-40s %-20s %s" % [event.timestamp, color_map(event.resource_status), event.resource_type, event.logical_resource_id, event.resource_status_reason]
       end
     end
 
@@ -110,12 +115,12 @@ module Cfer
     LONGDESC
     template_options
     def generate(tmpl)
-      s = Cfer::stack_from_file(tmpl, options[:parameters]).to_h
+      stack = Cfer::stack_from_file(tmpl, options[:parameters]).to_h
 
       if options[:pretty_print]
-        puts JSON.pretty_generate(s)
+        puts JSON.pretty_generate(stack)
       else
-        puts s.to_json
+        puts stack.to_json
       end
     end
 
@@ -124,12 +129,26 @@ module Cfer
         Cli.start(args)
       rescue Aws::Errors::NoSuchProfileError => e
         Cfer::LOGGER.error "#{e.message}. Specify a valid profile with the --profile option."
+        exit 1
       rescue Interrupt
         Cfer::LOGGER.info 'Caught interrupt. Goodbye.'
+      rescue Cfer::Util::TemplateError => e
+        Cfer::LOGGER.fatal "Template error: #{e.message}"
+        Cfer::LOGGER.fatal Cfer::Cli.format_backtrace(e.template_backtrace) unless e.template_backtrace.empty?
+        exit 1
+      rescue Cfer::Util::CferError => e
+        Cfer::LOGGER.error "#{e.message}"
+        exit 1
       rescue  StandardError => e
-        Cfer::LOGGER.fatal "#{e.class.name}: #{e.message}\n#{e.backtrace.reverse.join("\n")}"
-        # Do bug reports here?
-        Pry::rescued(e) if Cfer::DEBUG
+        Cfer::LOGGER.fatal "#{e.class.name}: #{e.message}"
+        Cfer::LOGGER.fatal Cfer::Cli.format_backtrace(e.backtrace) unless e.backtrace.empty?
+
+        if Cfer::DEBUG
+          Pry::rescued(e)
+        else
+          Cfer::Util.bug_report(e)
+        end
+        exit 1
       end
     end
 
@@ -140,34 +159,84 @@ module Cfer
         Aws.config.update region: options[:region],
           credentials: Aws::SharedCredentials.new(profile_name: options[:profile])
       end
+
+      cfn options[:aws_options] if options[:aws_options]
+    end
+
+    def cfn(options = {})
+      @cfn ||= Aws::CloudFormation::Client.new(options)
+    end
+
+    def self.format_backtrace(bt)
+      "Backtrace: #{bt.join("\n   from ")}"
     end
 
     COLORS_MAP = {
-      'CREATE_IN_PROGRESS' => :yellow,
-      'DELETE_IN_PROGRESS' => :yellow,
-      'UPDATE_IN_PROGRESS' => :green,
+      'CREATE_IN_PROGRESS' => {
+        color: :yellow
+      },
+      'DELETE_IN_PROGRESS' => {
+        color: :yellow
+      },
+      'UPDATE_IN_PROGRESS' => {
+        color: :green
+      },
 
-      'CREATE_FAILED' => :red,
-      'DELETE_FAILED' => :red,
-      'UPDATE_FAILED' => :red,
+      'CREATE_FAILED' => {
+        color: :red,
+        finished: true
+      },
+      'DELETE_FAILED' => {
+        color: :red,
+        finished: true
+      },
+      'UPDATE_FAILED' => {
+        color: :red,
+        finished: true
+      },
 
-      'CREATE_COMPLETE' => :green,
-      'DELETE_COMPLETE' => :green,
-      'UPDATE_COMPLETE' => :green,
+      'CREATE_COMPLETE' => {
+        color: :green,
+        finished: true
+      },
+      'DELETE_COMPLETE' => {
+        color: :green,
+        finished: true
+      },
+      'UPDATE_COMPLETE' => {
+        color: :green,
+        finished: true
+      },
 
-      'DELETE_SKIPPED' => :yellow,
+      'DELETE_SKIPPED' => {
+        color: :yellow
+      },
 
-      'ROLLBACK_IN_PROGRESS' => :red,
-      'ROLLBACK_COMPLETE' => :red
+      'ROLLBACK_IN_PROGRESS' => {
+        color: :red
+      },
+      'ROLLBACK_COMPLETE' => {
+        color: :red,
+        finished: true
+      }
     }
 
     def color_map(str)
       if COLORS_MAP.include?(str)
-        Rainbow(str).send(COLORS_MAP[str])
+        Rainbow(str).send(COLORS_MAP[str][:color])
       else
         str
       end
     end
+
+    def stopped_state?(str)
+      COLORS_MAP[str][:finished] || false
+    end
+  end
+
+
+  def self.exit_on_failure?
+    true
   end
 end
 

@@ -5,6 +5,7 @@ gemspec
 
 group :test do
   gem 'rspec'
+  gem 'rspec-mocks'
   gem 'guard-rspec'
   gem 'coveralls', require: false
 end

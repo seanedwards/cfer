@@ -32,7 +32,7 @@ module Cfer::Cfn
       key = camelize_property(method_sym)
       case arguments.size
       when 0
-        self[:Properties][key]
+        Fn::ref(method_sym)
       when 1
         properties key => arguments.first
       else

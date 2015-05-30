@@ -6,18 +6,14 @@ module Cfer
 
     def build_from_block(*args, &block)
       pre_block
-      Docile.dsl_eval(self, *args, &block)
+      Docile.dsl_eval(self, *args, &block) if block
       post_block
       self
     end
 
     def build_from_file(*args, file)
       build_from_block(*args) do
-        begin
-          instance_eval File.read(file), file
-        rescue SyntaxError => e
-          Cfer::LOGGER.error e.message
-        end
+        instance_eval File.read(file), file
       end
       self
     end
@@ -27,6 +23,5 @@ module Cfer
 
     def post_block
     end
-
   end
 end

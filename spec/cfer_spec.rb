@@ -1,11 +1,5 @@
 require 'spec_helper'
 
-def create_stack(&block)
-  s = Cfer.stack(&block)
-  pp s.to_h
-  s
-end
-
 describe Cfer do
   it 'sets descriptions' do
     stack = create_stack do
@@ -50,9 +44,6 @@ describe Cfer do
 
     expect(stack[:Resources][:test_resource][:Properties][:Property]).to eq 'value'
     expect(stack[:Resources][:test_resource][:Properties][:Property2]).to eq ['value1', 'value2']
-
-    expect(stack[:Resources][:test_resource].property).to eq 'value'
-    expect(stack[:Resources][:test_resource].property2).to eq ['value1', 'value2']
   end
 
   it 'creates resources with tags' do
