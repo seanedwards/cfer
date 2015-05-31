@@ -32,14 +32,13 @@ describe Cfer::Cfn::CfnStack do
 
   it 'follows logs' do
     cfn = double("cfn")
-    yielder = double('yield receiver')
 
     event_list = [
       double('event 1', event_id: 1, timestamp: DateTime.now, resource_status: 'TEST', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
       double('event 2', event_id: 2, timestamp: DateTime.now, resource_status: 'TEST2', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'efgh'),
-      double('event 3', event_id: 3, timestamp: DateTime.now, resource_status: 'TEST', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
-      double('event 4', event_id: 4, timestamp: DateTime.now, resource_status: 'TEST2', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'efgh'),
-      double('event 5', event_id: 5, timestamp: DateTime.now, resource_status: 'TEST', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
+      double('event 3', event_id: 3, timestamp: DateTime.now, resource_status: 'TEST3', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
+      double('event 4', event_id: 4, timestamp: DateTime.now, resource_status: 'TEST4', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'efgh'),
+      double('event 5', event_id: 5, timestamp: DateTime.now, resource_status: 'TEST5', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
       double('event 6', event_id: 6, timestamp: DateTime.now, resource_status: 'TEST_COMPLETE', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'efgh')
     ]
 
@@ -60,11 +59,12 @@ describe Cfer::Cfn::CfnStack do
         double(stacks: [ double(stack_status: 'TEST_COMPLETE')])
       )
 
+    yielder = double('yield receiver')
     event_list.drop(1).each do |event|
       expect(yielder).to receive(:yielded).with(event)
     end
 
-    Cfer::Cfn::CfnStack.new('test', cfn).tail(number: 1, follow: true) do |event|
+    Cfer::Cfn::CfnStack.new('test', cfn).tail(number: 1, follow: true, no_sleep: true) do |event|
       yielder.yielded event
     end
 

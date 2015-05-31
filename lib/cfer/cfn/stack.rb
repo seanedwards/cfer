@@ -192,7 +192,7 @@ module Cfer::Cfn
             event_id_highwater = event.event_id
           end
 
-          sleep 1 if running
+          sleep 1 if running unless options[:no_sleep]
         end
       end
     end
