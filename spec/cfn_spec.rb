@@ -1,37 +1,107 @@
 require 'spec_helper'
 
-describe Cfer::Cfn::CfnStack do
-  it 'validates parameters' do
-    cfn = double("cfn")
+describe Cfer::Cfn::Client do
+  cfn = Cfer::Cfn::Client.new stack_name: 'test', region: 'us-east-1'
 
-    stack = create_stack key: 'value' do
+  it 'creates stacks' do
+    stack = create_stack key: 'value', remote_key: '@other_stack.value' do
       parameter :key
+      parameter :remote_key
+      parameter :remote_default, Default: '@other_stack.value'
     end
 
-    expect(cfn).to receive(:validate_template).with(template_body: stack.to_cfn) {
+    expect(cfn).to receive(:validate_template)
+      .exactly(1).times
+      .with(template_body: stack.to_cfn) {
       double(
         capabilities: [],
         parameters: [
-          double(parameter_key: 'key', no_echo: false)
+          double(parameter_key: 'key', no_echo: false),
+          double(parameter_key: 'remote_key', no_echo: false),
+          double(parameter_key: 'remote_default', no_echo: false, default_value: '@other_stack.value')
         ]
       )
     }
 
-    expect(cfn).to receive(:create_stack).with(
+    expect(cfn).to receive(:describe_stacks)
+      .exactly(1).times
+      .with(stack_name: 'other_stack')
+      .and_return(
+        double(stacks: double(first: double(outputs: [
+          double(output_key: 'value', output_value: 'remote_value')
+        ])))
+      )
+
+    expect(cfn).to receive(:create_stack)
+      .exactly(1).times
+      .with(
+        stack_name: 'test',
+        template_body: stack.to_cfn,
+        parameters: [
+          { :ParameterKey => 'key', :ParameterValue => 'value', :UsePreviousValue => false },
+          { :ParameterKey => 'remote_key', :ParameterValue => 'remote_value', :UsePreviousValue => false },
+          { :ParameterKey => 'remote_default', :ParameterValue => 'remote_value', :UsePreviousValue => false }
+        ],
+        capabilities: []
+      )
+
+    cfn.converge stack
+  end
+
+  it 'updates stacks' do
+    stack = create_stack do
+      parameter :key
+      parameter :remote_key
+      parameter :remote_default, Default: '@other_stack.value'
+    end
+
+    expect(cfn).to receive(:validate_template)
+      .exactly(1).times
+      .with(template_body: stack.to_cfn) {
+        double(
+          capabilities: [],
+          parameters: [
+            double(parameter_key: 'key', no_echo: false, default_value: nil),
+            double(parameter_key: 'remote_key', no_echo: false, default_value: nil),
+            double(parameter_key: 'remote_default', no_echo: false, default_value: '@other_stack.value')
+          ]
+        )
+      }
+
+    expect(cfn).to receive(:describe_stacks)
+      .exactly(1).times
+      .with(stack_name: 'other_stack')
+      .and_return(
+        double(stacks: double(first: double(outputs: [
+          double(output_key: 'value', output_value: 'new_remote_value')
+        ])))
+      )
+
+    stack_options = {
       stack_name: 'test',
       template_body: stack.to_cfn,
       parameters: [
-        { :ParameterKey => 'key', :ParameterValue => 'value', :UsePreviousValue => false }
+        { :ParameterKey => 'key', :UsePreviousValue => true },
+        { :ParameterKey => 'remote_key', :UsePreviousValue => true },
+        { :ParameterKey => 'remote_default', :ParameterValue => 'new_remote_value', :UsePreviousValue => false }
       ],
       capabilities: []
-    )
+    }
+    
+    expect(cfn).to receive(:create_stack)
+      .exactly(1).times
+      .with(stack_options)
+      .and_raise(Cfer::Util::StackExistsError)
 
-    Cfer::Cfn::CfnStack.new('test', cfn).converge stack
+    expect(cfn).to receive(:update_stack)
+      .exactly(1).times
+      .with(stack_options)
+
+    cfn.converge stack
   end
 
-
   it 'follows logs' do
-    cfn = double("cfn")
+    cfn = Cfer::Cfn::Client.new stack_name: 'test', region: 'us-east-1'
 
     event_list = [
       double('event 1', event_id: 1, timestamp: DateTime.now, resource_status: 'TEST', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
@@ -64,7 +134,7 @@ describe Cfer::Cfn::CfnStack do
       expect(yielder).to receive(:yielded).with(event)
     end
 
-    Cfer::Cfn::CfnStack.new('test', cfn).tail(number: 1, follow: true, no_sleep: true) do |event|
+    cfn.tail(number: 1, follow: true, no_sleep: true) do |event|
       yielder.yielded event
     end
 

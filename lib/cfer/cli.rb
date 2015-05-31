@@ -69,7 +69,7 @@ module Cfer
       config(options)
       stack = Cfer::stack_from_file(tmpl, options[:parameters])
 
-      cfn_stack = Cfer::Cfn::CfnStack.new(stack_name, cfn)
+      cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
       begin
         cfn_stack.converge(stack, options)
         if options[:follow]
@@ -95,7 +95,7 @@ module Cfer
     stack_options
     def tail(stack)
       config(options)
-      Cfer::Cfn::CfnStack.new(stack, cfn).tail(options) do |event|
+      Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name)).tail(options) do |event|
         Cfer::LOGGER.info "%s %-30s %-40s %-20s %s" % [event.timestamp, color_map(event.resource_status), event.resource_type, event.logical_resource_id, event.resource_status_reason]
       end
     end
@@ -125,6 +125,7 @@ module Cfer
     end
 
     def self.main(args)
+      Cfer::LOGGER.debug "Cfer version #{Cfer::VERSION}"
       begin
         Cli.start(args)
       rescue Aws::Errors::NoSuchProfileError => e
@@ -164,7 +165,7 @@ module Cfer
     end
 
     def cfn(options = {})
-      @cfn ||= Aws::CloudFormation::Client.new(options)
+      @cfn ||= options
     end
 
     def self.format_backtrace(bt)

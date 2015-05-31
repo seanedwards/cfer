@@ -10,3 +10,5 @@ end
 Coveralls.wear!
 require 'cfer'
 
+Cfer::LOGGER.level = Logger::DEBUG
+
