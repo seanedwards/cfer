@@ -3,6 +3,9 @@ module Cfer::Util
   class CferError < StandardError
   end
 
+  class StackExistsError < CferError
+  end
+
   class TemplateError < CferError
     attr_reader :template_backtrace
 
