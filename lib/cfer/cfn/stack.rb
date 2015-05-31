@@ -207,10 +207,8 @@ module Cfer::Cfn
     private
 
     def for_each_event(stack_name)
-      @cfn.describe_stack_events(stack_name: stack_name).each do |event_page|
-        event_page.stack_events.each do |event|
-          yield event
-        end
+      @cfn.describe_stack_events(stack_name: stack_name).stack_events.each do |event|
+        yield event
       end
     end
   end

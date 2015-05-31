@@ -35,27 +35,21 @@ describe Cfer::Cfn::CfnStack do
     yielder = double('yield receiver')
 
     event_list = [
-      double(event_id: 1234, timestamp: DateTime.now, resource_status: 'TEST', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
-      double(event_id: 5678, timestamp: DateTime.now, resource_status: 'TEST2', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'efgh'),
-    ]
-
-    event_list_2 = [
-      double(event_id: 1234, timestamp: DateTime.now, resource_status: 'TEST', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
-      double(event_id: 5678, timestamp: DateTime.now, resource_status: 'TEST2', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'efgh'),
-    ]
-
-    event_list_3 = [
-      double(event_id: 1234, timestamp: DateTime.now, resource_status: 'TEST', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
-      double(event_id: 5678, timestamp: DateTime.now, resource_status: 'TEST_COMPLETE', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'efgh'),
+      double('event 1', event_id: 1, timestamp: DateTime.now, resource_status: 'TEST', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
+      double('event 2', event_id: 2, timestamp: DateTime.now, resource_status: 'TEST2', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'efgh'),
+      double('event 3', event_id: 3, timestamp: DateTime.now, resource_status: 'TEST', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
+      double('event 4', event_id: 4, timestamp: DateTime.now, resource_status: 'TEST2', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'efgh'),
+      double('event 5', event_id: 5, timestamp: DateTime.now, resource_status: 'TEST', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
+      double('event 6', event_id: 6, timestamp: DateTime.now, resource_status: 'TEST_COMPLETE', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'efgh')
     ]
 
     expect(cfn).to receive(:describe_stack_events)
       .exactly(3).times
       .with(stack_name: 'test')
       .and_return(
-        [ double(stack_events: event_list) ],
-        [ double(stack_events: event_list_2) ],
-        [ double(stack_events: event_list_3) ]
+        double(stack_events: event_list.take(2).reverse),
+        double(stack_events: event_list.take(4).reverse),
+        double(stack_events: event_list.take(6).reverse)
       )
 
     expect(cfn).to receive(:describe_stacks)
@@ -66,7 +60,9 @@ describe Cfer::Cfn::CfnStack do
         double(stacks: [ double(stack_status: 'TEST_COMPLETE')])
       )
 
-    expect(yielder).to receive(:yielded).with(event_list.first)
+    event_list.drop(1).each do |event|
+      expect(yielder).to receive(:yielded).with(event)
+    end
 
     Cfer::Cfn::CfnStack.new('test', cfn).tail(number: 1, follow: true) do |event|
       yielder.yielded event
