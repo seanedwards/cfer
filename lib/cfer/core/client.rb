@@ -7,5 +7,9 @@ module Cfer::Core
     def tail(options = {}, &block)
       raise Cfer::Util::CferError, 'tail not implemented on this client'
     end
+
+    def resolve(param)
+      Cfer::Cfn::ParameterValue.new(param).evaluate(self)
+    end
   end
 end

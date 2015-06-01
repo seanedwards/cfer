@@ -6,13 +6,10 @@ module Cfer
 
     namespace 'cfer'
     class_option :verbose, type: :boolean, default: false
+    class_option :profile, type: :string, aliases: :p, desc: 'The AWS profile to use from your credentials file'
+    class_option :region, type: :string, aliases: :r, desc: 'The AWS region to use'
 
     def self.template_options
-      method_option :output_file,
-        type: :string,
-        aliases: :o,
-        desc: 'The file that will contain the rendered CloudFormation template (may be an s3:// URL)'
-
       method_option :pretty_print,
         type: :boolean,
         default: :true,
@@ -25,19 +22,9 @@ module Cfer
     end
 
     def self.stack_options
-      method_option :profile,
-        type: :string,
-        aliases: :p,
-        desc: 'The AWS profile to use from your credentials file'
-
-      method_option :region,
-        type: :string,
-        aliases: :r,
-        desc: 'The AWS region to use',
-        default: 'us-east-1'
     end
 
-    desc 'converge [OPTIONS] <stack-name> <template.rb>', 'Converges a cloudformation stack according to the template'
+    desc 'converge [OPTIONS] <stack-name>', 'Converges a cloudformation stack according to the template'
     #method_option :git_lock,
     #  type: :boolean,
     #  default: true,
@@ -55,7 +42,7 @@ module Cfer
     method_option :number,
       type: :numeric,
       default: 1,
-      desc: 'Prints the last (n) events.'
+      desc: 'Prints the last (n) stack events.'
     method_option :stack_file,
       aliases: :n,
       type: :string,
@@ -66,9 +53,10 @@ module Cfer
       tmpl = options[:stack_file] || "#{stack_name}.rb"
 
       config(options)
-      stack = Cfer::stack_from_file(tmpl, options)
 
       cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
+      stack = Cfer::stack_from_file(tmpl, options.merge(client: cfn_stack))
+
       begin
         cfn_stack.converge(stack, options)
         if options[:follow]
@@ -90,7 +78,7 @@ module Cfer
       aliases: :n,
       type: :numeric,
       default: 10,
-      desc: 'Prints the last (n) events.'
+      desc: 'Prints the last (n) stack events.'
     stack_options
     def tail(stack_name)
       config(options)
@@ -105,7 +93,9 @@ module Cfer
     LONGDESC
     template_options
     def generate(tmpl)
-      stack = Cfer::stack_from_file(tmpl, options).to_h
+      config(options)
+      cfn_stack = Cfer::Cfn::Client.new(cfn)
+      stack = Cfer::stack_from_file(tmpl, options.merge(client: cfn_stack)).to_h
 
       if options[:pretty_print]
         puts JSON.pretty_generate(stack)
@@ -120,6 +110,9 @@ module Cfer
         Cli.start(args)
       rescue Aws::Errors::NoSuchProfileError => e
         Cfer::LOGGER.error "#{e.message}. Specify a valid profile with the --profile option."
+        exit 1
+      rescue Aws::Errors::MissingRegionError => e
+        Cfer::LOGGER.error "#{e.message}. Specify a valid AWS region with the --region option."
         exit 1
       rescue Interrupt
         Cfer::LOGGER.info 'Caught interrupt. Goodbye.'

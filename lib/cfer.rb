@@ -44,8 +44,9 @@ module Cfer
 
     # Builds a Cfer::Core::Stack from a Ruby block
     #
-    # @param parameters [Hash] The Cloudformation parameter values that this stack will be converged with
+    # @param options [Hash] The stack options
     # @param block The block containing the Cfn DSL
+    # @option options [Hash] :parameters The CloudFormation stack parameters
     # @return [Cfer::Core::Stack] The assembled stack object
     def stack_from_block(options = {}, &block)
       s = Cfer::Core::Stack.new(options)
@@ -58,7 +59,7 @@ module Cfer
     # Builds a Cfer::Core::Stack from a ruby script
     #
     # @param file [String] The file containing the Cfn DSL
-    # @param parameters [Hash] (see #stack_from_block)
+    # @param options [Hash] (see #stack_from_block)
     # @return [Cfer::Core::Stack] The assembled stack object
     def stack_from_file(file, options = {})
       s = Cfer::Core::Stack.new(options)

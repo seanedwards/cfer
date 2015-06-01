@@ -1,6 +1,6 @@
 module Cfer::Cfn::AWS
   class << self
-    include Cfer::Cfn
+    include Cfer::Core
     def account_id
       Fn::ref 'AWS::AccountId'
     end

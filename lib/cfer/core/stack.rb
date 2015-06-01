@@ -9,21 +9,33 @@ module Cfer::Core
     attr_reader :options
     attr_reader :git
 
+    def resolve(val)
+      @options[:client] ? @options[:client].resolve(val) : val
+    end
+
     def initialize(options = {})
       self[:AWSTemplateFormatVersion] = '2010-09-09'
       self[:Description] = ''
 
-      @parameters = options[:parameters] || {}
       @options = options
       @git = Rugged::Repository.discover('.')
-
-      self[:Metadata] = { :Git => { :Rev => @git.head.target_id } }
 
       self[:Parameters] = {}
       self[:Mappings] = {}
       self[:Conditions] = {}
       self[:Resources] = {}
       self[:Outputs] = {}
+
+      @parameters = {}
+
+      if options[:parameters]
+        options[:parameters].each do |key, val|
+            @parameters[key] = resolve(val)
+        end
+      end
+    end
+
+    def pre_block
     end
 
     # Sets the description for this CloudFormation stack
@@ -71,24 +83,22 @@ module Cfer::Core
               v
             end
           when :MaxLength
-            Preconditions.check_type(v, Fixnum, "#{key} must be a string value")
-            verify_param(name, "Parameter #{name} must have length <= #{v}") { |input_val| input_val.length <= v }
+            verify_param(name, "Parameter #{name} must have length <= #{v}") { |input_val| input_val.length <= v.to_i }
             v
           when :MinLength
-            Preconditions.check_type(v, Fixnum, "#{key} must be a string value")
-            verify_param(name, "Parameter #{name} must have length >= #{v}") { |input_val| input_val.length >= v }
+            verify_param(name, "Parameter #{name} must have length >= #{v}") { |input_val| input_val.length >= v.to_i }
             v
           when :MaxValue
-            Preconditions.check_type(v, Fixnum, "#{key} must be a numeric value")
-            verify_param(name, "Parameter #{name} must be <= #{v}") { |input_val| input_val.to_i <= v }
+            verify_param(name, "Parameter #{name} must be <= #{v}") { |input_val| input_val.to_i <= v.to_i }
             v
           when :MinValue
-            Preconditions.check_type(v, Fixnum, "#{key} must be a numeric value")
-            verify_param(name, "Parameter #{name} must be >= #{v}") { |input_val| input_val.to_i >= v }
+            verify_param(name, "Parameter #{name} must be >= #{v}") { |input_val| input_val.to_i >= v.to_i }
             v
           when :Description
             Preconditions.check_argument(v.length <= 4000, "#{key} must be <= 4000 characters")
             v
+          when :Default
+            resolve(v)
           end
         param[k] ||= v
       end

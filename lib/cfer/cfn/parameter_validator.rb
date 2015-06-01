@@ -22,7 +22,7 @@ module Cfer::Cfn
       m = /^@(.+?)\.(.+)$/.match(@val)
 
       if m
-        @remote_val ||= fetch_output(cfn_client, m[1], m[2])
+        fetch_output(cfn_client, m[1], m[2])
       else
         @val
       end

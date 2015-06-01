@@ -31,16 +31,103 @@ Or install it yourself as:
       cfer help [COMMAND]                                 # Describe available commands or one specific command
       cfer tail <stack>                                   # Follows stack events on standard output as they occur
 
-    Options:
-      [--verbose], [--no-verbose]  
+#### Global options
 
-#### `converge`
+* `--profile`: The AWS profile to use (from your `~/.aws/credentials` file)
+* `--region`: The AWS region to use
+* `--verbose`: Also print debugging messages
 
-Describe converging a template from the command line
+#### `generate <template.rb>`
 
-#### `tail`
+The `generate` subcommand evaluates the given Ruby script and prints the CloudFormation stack JSON to standard output.
 
-Describe following stack updates from the command line
+The following options may be used with the `generate` command:
+
+* `--no-pretty-print`: Print minified JSON
+
+#### `converge <stack-name>`
+
+Creates or updates a CloudFormation stack according to the specified template.
+
+The following options may be used with the `converge` command:
+
+* `--follow` (`-f`): Follows stack events on standard output as the create/update process takes place. 
+* `--stack-file`: Reads this file from the filesystem, rather than the default `<stack-name>.rb`
+* `--parameters <Key1>:<Value1> <Key2>:<Value2> ...`: Specifies input parameters, which will be available to Ruby in the `parameters` hash, or to CloudFormation by using the `Fn::ref` function
+* `--on-failure <DELETE|ROLLBACK|DO_NOTHING>`: Specifies the action to take when a stack creation fails. Has no effect if the stack already exists and is being updated.
+
+#### `tail <stack-name>`
+
+Prints the latest `n` stack events, and optionally follows events while a stack is converging.
+
+The following options may be used with the `tail` command:
+
+* `--follow` (`-f`): Follows stack events on standard output as the create/update process takes place. 
+* `--number` (`-n`): Print the last `n` stack events.
+
+### Template Anatomy
+
+#### Parameters
+
+Parameters may be defined using the `parameter` function:
+
+```ruby
+parameter :ParameterName,
+  type: 'String',
+  default: 'ParameterValue'
+```
+
+As with command-line input parameters, a parameter's default value may have the form `@stack.output` to look up output values from other stacks in the same account and region.
+
+Any parameter can be referenced either in Ruby by using the `parameters` hash:
+
+```ruby
+parameters[:ParameterName]
+```
+
+
+
+Parameters can also be used in a CloudFormation reference by using the `Fn::ref` function:
+
+```ruby
+Fn::ref(:ParameterName)
+```
+
+#### Resources
+
+Resources may be defined using the `resource` function:
+
+```ruby
+resource :ResourceName, 'AWS::CloudFormation::CustomResource', AttributeName: {:attribute_key => 'attribute_value'} do
+  property_name 'property_value'
+end
+```
+
+Gets transformed into the corresponding CloudFormation block:
+
+```json
+"ResourceName": {
+  "Type": "AWS::CloudFormation::CustomResource",
+  "AttributeName": {
+    "attribute_key": "attribute_value"
+  },
+  "Properties": {
+    "PropertyName": "property_value"
+  }
+}
+```
+
+#### Outputs
+
+Outputs may be defined using the `output` function:
+
+```ruby
+output :OutputName, Fn::ref(:ResourceName)
+```
+
+## SDK
+
+Describe how to use Cfer as a gem embedded in something else
 
 ### Cfer SDK
 

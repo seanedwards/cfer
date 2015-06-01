@@ -9,6 +9,7 @@ module Cfer::Cfn
       @name = options[:stack_name]
       options.delete :stack_name
       @cfn = Aws::CloudFormation::Client.new(options)
+      flush_cache
     end
 
     def create_stack(*args)
@@ -27,9 +28,17 @@ module Cfer::Cfn
       @cfn.send(method, *args, &block)
     end
 
-    def converge(stack, options = {})
-      @stack_cache = {}
+    def resolve(param)
+      Cfer::Cfn::ParameterValue.new(param).evaluate(self)
+    end
 
+    def flush_cache
+      @stack_cache = {}
+    end
+
+    def converge(stack, options = {})
+
+      Preconditions.check(@name).is_not_nil
       Preconditions.check(stack) { is_not_nil and has_type(Cfer::Core::Stack) }
 
       response = validate_template(template_body: stack.to_cfn)
@@ -70,6 +79,7 @@ module Cfer::Cfn
           update_stack options
         end
 
+      flush_cache
       cfn_stack
     end
 

@@ -4,10 +4,20 @@ describe Cfer::Cfn::Client do
   cfn = Cfer::Cfn::Client.new stack_name: 'test', region: 'us-east-1'
 
   it 'creates stacks' do
-    stack = create_stack parameters: {:key => 'value', :remote_key => '@other_stack.value'} do
+    expect(cfn).to receive(:describe_stacks)
+      .exactly(1).times
+      .with(stack_name: 'other_stack')
+      .and_return(
+        double(stacks: double(first: double(outputs: [
+          double(output_key: 'value', output_value: 'remote_value')
+        ])))
+      )
+
+    stack = create_stack parameters: {:key => 'value', :remote_key => '@other_stack.value'}, client: cfn do
       parameter :key
       parameter :remote_key
-      parameter :remote_default, Default: '@other_stack.value'
+      parameter :remote_default, default: '@other_stack.value'
+      parameter :retrieved_value, default: parameters[:remote_key]
     end
 
     expect(cfn).to receive(:validate_template)
@@ -18,19 +28,11 @@ describe Cfer::Cfn::Client do
         parameters: [
           double(parameter_key: 'key', no_echo: false),
           double(parameter_key: 'remote_key', no_echo: false),
-          double(parameter_key: 'remote_default', no_echo: false, default_value: '@other_stack.value')
+          double(parameter_key: 'remote_default', no_echo: false, default_value: 'remote_value'),
+          double(parameter_key: 'retrieved_value', no_echo: false, default_value: 'remote_value')
         ]
       )
     }
-
-    expect(cfn).to receive(:describe_stacks)
-      .exactly(1).times
-      .with(stack_name: 'other_stack')
-      .and_return(
-        double(stacks: double(first: double(outputs: [
-          double(output_key: 'value', output_value: 'remote_value')
-        ])))
-      )
 
     expect(cfn).to receive(:create_stack)
       .exactly(1).times
@@ -40,7 +42,8 @@ describe Cfer::Cfn::Client do
         parameters: [
           { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false },
           { :parameter_key => 'remote_key', :parameter_value => 'remote_value', :use_previous_value => false },
-          { :parameter_key => 'remote_default', :parameter_value => 'remote_value', :use_previous_value => false }
+          { :parameter_key => 'remote_default', :parameter_value => 'remote_value', :use_previous_value => false },
+          { :parameter_key => 'retrieved_value', :parameter_value => 'remote_value', :use_previous_value => false }
         ],
         capabilities: []
       )
@@ -49,7 +52,16 @@ describe Cfer::Cfn::Client do
   end
 
   it 'updates stacks' do
-    stack = create_stack do
+    expect(cfn).to receive(:describe_stacks)
+      .exactly(1).times
+      .with(stack_name: 'other_stack')
+      .and_return(
+        double(stacks: double(first: double(outputs: [
+          double(output_key: 'value', output_value: 'new_remote_value')
+        ])))
+      )
+
+    stack = create_stack client: cfn do
       parameter :key
       parameter :remote_key
       parameter :remote_default, Default: '@other_stack.value'
@@ -67,15 +79,6 @@ describe Cfer::Cfn::Client do
           ]
         )
       }
-
-    expect(cfn).to receive(:describe_stacks)
-      .exactly(1).times
-      .with(stack_name: 'other_stack')
-      .and_return(
-        double(stacks: double(first: double(outputs: [
-          double(output_key: 'value', output_value: 'new_remote_value')
-        ])))
-      )
 
     stack_options = {
       stack_name: 'test',
@@ -101,8 +104,6 @@ describe Cfer::Cfn::Client do
   end
 
   it 'follows logs' do
-    cfn = Cfer::Cfn::Client.new stack_name: 'test', region: 'us-east-1'
-
     event_list = [
       double('event 1', event_id: 1, timestamp: DateTime.now, resource_status: 'TEST', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
       double('event 2', event_id: 2, timestamp: DateTime.now, resource_status: 'TEST2', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'efgh'),
