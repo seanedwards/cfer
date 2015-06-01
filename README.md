@@ -67,6 +67,8 @@ The following options may be used with the `tail` command:
 
 ### Template Anatomy
 
+See the `examples` directory for some examples of complete templates.
+
 #### Parameters
 
 Parameters may be defined using the `parameter` function:
@@ -77,15 +79,13 @@ parameter :ParameterName,
   default: 'ParameterValue'
 ```
 
-As with command-line input parameters, a parameter's default value may have the form `@stack.output` to look up output values from other stacks in the same account and region.
+A parameter's value may have the form `@stack.output` to look up output values from other stacks in the same account and region. This works anywhere a parameter value is specified, including defaults and inputs. (See the SDK section on [Cfer Stacks][] for caveats.)
 
 Any parameter can be referenced either in Ruby by using the `parameters` hash:
 
 ```ruby
 parameters[:ParameterName]
 ```
-
-
 
 Parameters can also be used in a CloudFormation reference by using the `Fn::ref` function:
 
