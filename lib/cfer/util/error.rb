@@ -9,9 +9,9 @@ module Cfer::Util
   class TemplateError < CferError
     attr_reader :template_backtrace
 
-    def initialize(message, template_backtrace)
+    def initialize(template_backtrace)
       @template_backtrace = template_backtrace
-      super(message)
+      super
     end
   end
 

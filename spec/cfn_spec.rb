@@ -4,7 +4,7 @@ describe Cfer::Cfn::Client do
   cfn = Cfer::Cfn::Client.new stack_name: 'test', region: 'us-east-1'
 
   it 'creates stacks' do
-    stack = create_stack key: 'value', remote_key: '@other_stack.value' do
+    stack = create_stack parameters: {:key => 'value', :remote_key => '@other_stack.value'} do
       parameter :key
       parameter :remote_key
       parameter :remote_default, Default: '@other_stack.value'
@@ -38,9 +38,9 @@ describe Cfer::Cfn::Client do
         stack_name: 'test',
         template_body: stack.to_cfn,
         parameters: [
-          { :ParameterKey => 'key', :ParameterValue => 'value', :UsePreviousValue => false },
-          { :ParameterKey => 'remote_key', :ParameterValue => 'remote_value', :UsePreviousValue => false },
-          { :ParameterKey => 'remote_default', :ParameterValue => 'remote_value', :UsePreviousValue => false }
+          { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false },
+          { :parameter_key => 'remote_key', :parameter_value => 'remote_value', :use_previous_value => false },
+          { :parameter_key => 'remote_default', :parameter_value => 'remote_value', :use_previous_value => false }
         ],
         capabilities: []
       )
@@ -81,9 +81,9 @@ describe Cfer::Cfn::Client do
       stack_name: 'test',
       template_body: stack.to_cfn,
       parameters: [
-        { :ParameterKey => 'key', :UsePreviousValue => true },
-        { :ParameterKey => 'remote_key', :UsePreviousValue => true },
-        { :ParameterKey => 'remote_default', :ParameterValue => 'new_remote_value', :UsePreviousValue => false }
+        { :parameter_key => 'key', :use_previous_value => true },
+        { :parameter_key => 'remote_key', :use_previous_value => true },
+        { :parameter_key => 'remote_default', :parameter_value => 'new_remote_value', :use_previous_value => false }
       ],
       capabilities: []
     }

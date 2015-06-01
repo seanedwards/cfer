@@ -1,18 +1,23 @@
-module Cfer::Cfn
+module Cfer::Core
+
+  # Defines the structure of a CloudFormation stack
   class Stack < Cfer::Block
+    include Cfer::Core
     include Cfer::Cfn
 
     attr_reader :parameters
+    attr_reader :options
     attr_reader :git
 
-    def initialize(parameters = {})
+    def initialize(options = {})
       self[:AWSTemplateFormatVersion] = '2010-09-09'
       self[:Description] = ''
-      @parameters = Cfer::Util::ParameterValidator.new(parameters)
+
+      @parameters = options[:parameters] || {}
+      @options = options
       @git = Rugged::Repository.discover('.')
 
-      clean_working_dir = false #@git_status.changed.empty? && @git_status.deleted.empty? && @git_status.added.empty?
-      self[:Metadata] = { :Git => { :Rev => @git.head.target_id, :Clean => clean_working_dir } }
+      self[:Metadata] = { :Git => { :Rev => @git.head.target_id } }
 
       self[:Parameters] = {}
       self[:Mappings] = {}
@@ -54,15 +59,32 @@ module Cfer::Cfn
         param[k] =
           case k
           when :AllowedValues
-            v.join(',')
+            str_list = v.join(',')
+            verify_param(name, "Parameter #{name} must be one of: #{str_list}") { |input_val| str_list.include?(input_val) }
+            str_list
           when :AllowedPattern
             if v.class == Regexp
+              verify_param(name, "Parameter #{name} must match /#{v.source}/") { |input_val| v =~ input_val }
               v.source
             else
+              verify_param(name, "Parameter #{name} must match /#{v}/") { |input_val| Regexp.new(v) =~ input_val }
               v
             end
-          when :MaxLength, :MinLength, :MaxValue, :MinValue
+          when :MaxLength
+            Preconditions.check_type(v, Fixnum, "#{key} must be a string value")
+            verify_param(name, "Parameter #{name} must have length <= #{v}") { |input_val| input_val.length <= v }
+            v
+          when :MinLength
+            Preconditions.check_type(v, Fixnum, "#{key} must be a string value")
+            verify_param(name, "Parameter #{name} must have length >= #{v}") { |input_val| input_val.length >= v }
+            v
+          when :MaxValue
             Preconditions.check_type(v, Fixnum, "#{key} must be a numeric value")
+            verify_param(name, "Parameter #{name} must be <= #{v}") { |input_val| input_val.to_i <= v }
+            v
+          when :MinValue
+            Preconditions.check_type(v, Fixnum, "#{key} must be a numeric value")
+            verify_param(name, "Parameter #{name} must be >= #{v}") { |input_val| input_val.to_i >= v }
             v
           when :Description
             Preconditions.check_argument(v.length <= 4000, "#{key} must be <= 4000 characters")
@@ -74,10 +96,14 @@ module Cfer::Cfn
       self[:Parameters][name] = param
     end
 
+    # Sets the mappings block for this stack. See [The CloudFormation Documentation](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html) for more details
     def mappings(mappings)
       self[:Mappings] = mappings
     end
 
+    # Adds a condition to the template.
+    # @param name [String] The name of the condition.
+    # @param expr [Hash] The CloudFormation condition to add. See [The Cloudformation Documentation](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html) for more details
     def condition(name, expr)
       self[:Conditions][name] = expr
     end
@@ -98,12 +124,24 @@ module Cfer::Cfn
       rc
     end
 
-    def output(name, value)
-      self[:Outputs][name] = {'Value' => value}
+    # Adds an output to the CloudFormation stack.
+    # @param name [String] The Logical ID of the output parameter
+    # @param value [String] Value to return
+    # @param options [Hash] Extra options for this output parameter
+    # @option options [String] :Description Informationa bout the value
+    def output(name, value, options = {})
+      self[:Outputs][name] = options.merge('Value' => value)
     end
 
+    # Renders the stack into a CloudFormation template.
+    # @return [String] The final template
     def to_cfn
       to_h.to_json
+    end
+
+    private
+    def verify_param(param_name, err_msg)
+      raise Cfer::Util::CferError, err_msg if (@parameters[param_name] && !yield(@parameters[param_name].to_s))
     end
   end
 

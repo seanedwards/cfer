@@ -1,4 +1,4 @@
-module Cfer::Cfn::Fn
+module Cfer::Core::Fn
   class << self
     def join(sep, args)
       {"Fn::Join" => [sep, args]}

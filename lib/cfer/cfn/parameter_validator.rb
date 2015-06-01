@@ -1,4 +1,4 @@
-module Cfer::Util
+module Cfer::Cfn
   class ParameterValue
 
     def initialize(val)
@@ -39,7 +39,7 @@ module Cfer::Util
       if output
         output.output_value
       else
-        raise CferError.new("Stack #{stack_name} has no output value named `#{output_name}`")
+        raise CferError, "Stack #{stack_name} has no output value named `#{output_name}`"
       end
     end
   end

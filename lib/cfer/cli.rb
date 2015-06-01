@@ -37,7 +37,6 @@ module Cfer
         default: 'us-east-1'
     end
 
-
     desc 'converge [OPTIONS] <stack-name> <template.rb>', 'Converges a cloudformation stack according to the template'
     #method_option :git_lock,
     #  type: :boolean,
@@ -67,7 +66,7 @@ module Cfer
       tmpl = options[:stack_file] || "#{stack_name}.rb"
 
       config(options)
-      stack = Cfer::stack_from_file(tmpl, options[:parameters])
+      stack = Cfer::stack_from_file(tmpl, options)
 
       cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
       begin
@@ -93,20 +92,11 @@ module Cfer
       default: 10,
       desc: 'Prints the last (n) events.'
     stack_options
-    def tail(stack)
+    def tail(stack_name)
       config(options)
       Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name)).tail(options) do |event|
         Cfer::LOGGER.info "%s %-30s %-40s %-20s %s" % [event.timestamp, color_map(event.resource_status), event.resource_type, event.logical_resource_id, event.resource_status_reason]
       end
-    end
-
-    desc 'plan [OPTIONS] <template.rb>', 'Describes the changes that will be made to the CloudFormation stack'
-    method_option :stack_name, type: :string, aliases: :n
-    template_options
-    stack_options
-    def plan(tmpl)
-      config(options)
-      raise "Not yet implemented"
     end
 
     desc 'generate [OPTIONS] <template.rb>', 'Generates a CloudFormation template by evaluating a Cfer template'
@@ -115,7 +105,7 @@ module Cfer
     LONGDESC
     template_options
     def generate(tmpl)
-      stack = Cfer::stack_from_file(tmpl, options[:parameters]).to_h
+      stack = Cfer::stack_from_file(tmpl, options).to_h
 
       if options[:pretty_print]
         puts JSON.pretty_generate(stack)
@@ -156,16 +146,16 @@ module Cfer
     private
 
     def config(options)
-      if options[:region] || options[:profile]
-        Aws.config.update region: options[:region],
-          credentials: Aws::SharedCredentials.new(profile_name: options[:profile])
-      end
+      Cfer::LOGGER.level = Logger::DEBUG if options[:verbose]
+
+      Aws.config.update region: options[:region] if options[:region]
+      Aws.config.update credentials: Aws::SharedCredentials.new(profile_name: options[:profile]) if options[:profile]
 
       cfn options[:aws_options] if options[:aws_options]
     end
 
-    def cfn(options = {})
-      @cfn ||= options
+    def cfn(opts = {})
+      @cfn ||= opts
     end
 
     def self.format_backtrace(bt)

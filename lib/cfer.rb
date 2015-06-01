@@ -6,57 +6,62 @@ require 'rugged'
 require 'preconditions'
 require 'rainbow'
 
+
+# Contains extensions that Cfer will dynamically use
 module CferExt
   module AWS
   end
 end
 
+# Contains the core Cfer logic
 module Cfer
   module Cfn
   end
 
+  module Core
+  end
+
+  # The Cfer logger
   LOGGER = Logger.new(STDERR)
   LOGGER.formatter = proc { |severity, datetime, progname, msg|
-    color = case severity
+    msg = case severity
     when 'FATAL'
-      :red
+      Rainbow(msg).red.bright
     when 'ERROR'
-      :red
+      Rainbow(msg).red
     when 'WARN'
-      :yellow
+      Rainbow(msg).yellow
+    when 'DEBUG'
+      Rainbow(msg).black.bright
     else
-      nil
+      msg
     end
 
-    if color
-      "#{Rainbow(msg).send(color)}\n"
-    else
-      "#{msg}\n"
-    end
+    "#{msg}\n"
   }
 
   class << self
 
-    # Builds a Cfer::Cfn::Stack from a Ruby block
+    # Builds a Cfer::Core::Stack from a Ruby block
     #
     # @param parameters [Hash] The Cloudformation parameter values that this stack will be converged with
     # @param block The block containing the Cfn DSL
-    # @return [Cfer::Cfn::Stack] The assembled stack object
-    def stack_from_block(parameters = {}, &block)
-      s = Cfer::Cfn::Stack.new(parameters)
+    # @return [Cfer::Core::Stack] The assembled stack object
+    def stack_from_block(options = {}, &block)
+      s = Cfer::Core::Stack.new(options)
       templatize_errors('block') do
         s.build_from_block(&block)
       end
       s
     end
 
-    # Builds a Cfer::Cfn::Stack from a ruby script
+    # Builds a Cfer::Core::Stack from a ruby script
     #
     # @param file [String] The file containing the Cfn DSL
     # @param parameters [Hash] (see #stack_from_block)
-    # @return [Cfer::Cfn::Stack] The assembled stack object
-    def stack_from_file(file, parameters = {})
-      s = Cfer::Cfn::Stack.new(parameters)
+    # @return [Cfer::Core::Stack] The assembled stack object
+    def stack_from_file(file, options = {})
+      s = Cfer::Core::Stack.new(options)
       templatize_errors(file) do
         s.build_from_file file
       end
@@ -65,13 +70,11 @@ module Cfer
 
     private
     def templatize_errors(base_loc)
-      begin
-        yield
-      rescue SyntaxError => e
-        raise Cfer::Util::TemplateError.new(e.message, [])
-      rescue StandardError => e
-        raise Cfer::Util::TemplateError.new(e.message, convert_backtrace(base_loc, e))
-      end
+      yield
+    rescue SyntaxError => e
+      raise Cfer::Util::TemplateError.new([]), e.message
+    rescue StandardError => e
+      raise Cfer::Util::TemplateError.new(convert_backtrace(base_loc, e)), e.message
     end
 
     def convert_backtrace(base_loc, exception)

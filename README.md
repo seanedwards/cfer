@@ -3,10 +3,7 @@
 [![Build Status](https://travis-ci.org/seanedwards/cfer.svg?branch=master)](https://travis-ci.org/seanedwards/cfer)
 [![Coverage Status](https://coveralls.io/repos/seanedwards/cfer/badge.svg)](https://coveralls.io/r/seanedwards/cfer)
 
-
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/cfer`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Cfer is a lightweight toolkit for managing CloudFormation templates.
 
 ## Installation
 
@@ -26,7 +23,44 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Command line
+
+    Commands:
+      cfer converge [OPTIONS] <stack-name> <template.rb>  # Converges a cloudformation stack according to the template
+      cfer generate [OPTIONS] <template.rb>               # Generates a CloudFormation template by evaluating a Cfer template
+      cfer help [COMMAND]                                 # Describe available commands or one specific command
+      cfer tail <stack>                                   # Follows stack events on standard output as they occur
+
+    Options:
+      [--verbose], [--no-verbose]  
+
+#### `converge`
+
+Describe converging a template from the command line
+
+#### `tail`
+
+Describe following stack updates from the command line
+
+### Cfer SDK
+
+#### `stack_from_file`
+
+Describe reading a stack from a Ruby template
+
+#### `stack_from_block`
+
+Describe building a stack from an inline Ruby block
+
+### Cfn Client
+
+#### `converge`
+
+Describe programatically converging a stack
+
+#### `tail`
+
+Describe programatically following the Cfn log
 
 ## Development
 

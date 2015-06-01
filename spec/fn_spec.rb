@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Cfer::Cfn::Fn do
+describe Cfer::Core::Fn do
 
   it 'has a working ref function' do
-    expect(Cfer::Cfn::Fn::ref(:abc)).to eq 'Ref' => :abc
+    expect(Cfer::Core::Fn::ref(:abc)).to eq 'Ref' => :abc
   end
 
 end
