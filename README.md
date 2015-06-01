@@ -79,7 +79,7 @@ parameter :ParameterName,
   default: 'ParameterValue'
 ```
 
-A parameter's value may have the form `@stack.output` to look up output values from other stacks in the same account and region. This works anywhere a parameter value is specified, including defaults and inputs. (See the SDK section on [Cfer Stacks][#cfer-stacks] for caveats.)
+A parameter's value may have the form `@stack.output` to look up output values from other stacks in the same account and region. This works anywhere a parameter value is specified, including defaults and inputs. (See the SDK section on [Cfer Stacks](#cfer-stacks) for caveats.)
 
 Any parameter can be referenced either in Ruby by using the `parameters` hash:
 
