@@ -26,15 +26,15 @@ Or install it yourself as:
 ### Command line
 
     Commands:
-      cfer converge [OPTIONS] <stack-name> <template.rb>  # Converges a cloudformation stack according to the template
-      cfer generate [OPTIONS] <template.rb>               # Generates a CloudFormation template by evaluating a Cfer template
-      cfer help [COMMAND]                                 # Describe available commands or one specific command
-      cfer tail <stack>                                   # Follows stack events on standard output as they occur
+      cfer converge [OPTIONS] <stack-name>   # Converges a cloudformation stack according to the template
+      cfer generate [OPTIONS] <template.rb>  # Generates a CloudFormation template by evaluating a Cfer template
+      cfer help [COMMAND]                    # Describe available commands or one specific command
+      cfer tail <stack-name>                 # Follows stack events on standard output as they occur
 
 #### Global options
 
-* `--profile`: The AWS profile to use (from your `~/.aws/credentials` file)
-* `--region`: The AWS region to use
+* `--profile <profile>`: The AWS profile to use (from your `~/.aws/credentials` file)
+* `--region <region>`: The AWS region to use
 * `--verbose`: Also print debugging messages
 
 #### `generate <template.rb>`
@@ -52,7 +52,7 @@ Creates or updates a CloudFormation stack according to the specified template.
 The following options may be used with the `converge` command:
 
 * `--follow` (`-f`): Follows stack events on standard output as the create/update process takes place. 
-* `--stack-file`: Reads this file from the filesystem, rather than the default `<stack-name>.rb`
+* `--stack-file <template.rb>`: Reads this file from the filesystem, rather than the default `<stack-name>.rb`
 * `--parameters <Key1>:<Value1> <Key2>:<Value2> ...`: Specifies input parameters, which will be available to Ruby in the `parameters` hash, or to CloudFormation by using the `Fn::ref` function
 * `--on-failure <DELETE|ROLLBACK|DO_NOTHING>`: Specifies the action to take when a stack creation fails. Has no effect if the stack already exists and is being updated.
 
