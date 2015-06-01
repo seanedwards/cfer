@@ -127,27 +127,56 @@ output :OutputName, Fn::ref(:ResourceName)
 
 ## SDK
 
-Describe how to use Cfer as a gem embedded in something else
-
-### Cfer SDK
-
-#### `stack_from_file`
-
-Describe reading a stack from a Ruby template
-
-#### `stack_from_block`
-
-Describe building a stack from an inline Ruby block
+Embedding the Cfer SDK involves interacting with two components: The `Client` and the `Stack`.
+The Cfer `Client` is the interface with the Cloud provider.
 
 ### Cfn Client
 
-#### `converge`
+Create a new client:
 
-Describe programatically converging a stack
+```ruby
+Cfer::Cfn::Client.new(stack_name: <stack_name>)
+```
 
-#### `tail`
+`Cfer::Cfn::Client` also accepts options to be passed into the internal `Aws::CloudFormation::Client` constructor.
 
-Describe programatically following the Cfn log
+#### `converge(stack)`
+
+Creates or updates the CloudFormation stack to match the input `stack` object. See below for how to create Cfer stack objects.
+
+```ruby
+client.converge(<stack>)
+```
+
+#### `tail(options = {})`
+
+Yields to the specified block for each CloudFormation event that qualifies given the specified options.
+
+```ruby
+client.tail number: 1, follow: true do |event|
+  # Called for each CloudFormation event, as they occur, until the stack enters a COMPLETE or FAILED state.
+end
+```
+
+### Cfer Stacks
+
+Create a new stack:
+
+#### `stack_from_file`
+
+```ruby
+stack = Cfer::stack_from_file(<file>, client: <client>)
+```
+
+#### `stack_from_block`
+
+```ruby
+stack = Cfer::stack_from_block(client: <client>) do
+  # Stack definition goes here
+end
+```
+
+Note: Specifying a client is optional, but if no client is specified, parameter mappings will not occur.
 
 ## Contributing
 

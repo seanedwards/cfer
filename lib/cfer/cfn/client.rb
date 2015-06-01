@@ -83,12 +83,17 @@ module Cfer::Cfn
       cfn_stack
     end
 
+    # Yields to the given block for each CloudFormation event that qualifies, given the specified options.
+    # @param options [Hash] The options hash
+    # @option options [Fixnum] :number The maximum number of already-existing CloudFormation events to yield.
+    # @option options [Boolean] :follow Set to true to wait until the stack enters a `COMPLETE` or `FAILED` state, yielding events as they occur.
     def tail(options = {}, &block)
       q = []
       event_id_highwater = nil
       counter = 0
+      number = options[:number] || 0
       for_each_event name do |event|
-        q.unshift event if counter < options[:number]
+        q.unshift event if counter < number
         counter = counter + 1
       end
 
