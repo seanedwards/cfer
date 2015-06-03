@@ -1,4 +1,4 @@
-description 'Stack template for VPC'
+description 'Example stack template for a small EC2 instance'
 
 # NOTE: This template depends on vpc.rb
 
