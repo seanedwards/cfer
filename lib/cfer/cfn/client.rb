@@ -60,7 +60,7 @@ module Cfer::Cfn
         end
 
         output_val = tmpl_param.no_echo ? '*****' : p[:parameter_value]
-        Cfer::LOGGER.info "Parameter #{p[:parameter_key]}=#{output_val}"
+        Cfer::LOGGER.debug "Parameter #{p[:parameter_key]}=#{output_val}"
         p
       end
 
