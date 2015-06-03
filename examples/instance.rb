@@ -24,12 +24,6 @@ resource :instance, "AWS::EC2::Instance" do
   instance_type 't2.medium'
   key_name Fn::ref(:KeyName)
   security_group_ids [ Fn::ref(:instancesg) ]
-
-  #provision do
-  #  in_dir '/opt' do
-  #    git 'git@github.com:eropple/asger.git'
-  #  end
-  #end
 end
 
 output :instance, Fn::ref(:instance)
