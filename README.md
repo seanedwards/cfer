@@ -23,6 +23,17 @@ Or install it yourself as:
 
 ## Usage
 
+To quickly see Cfer in action, try converging the example stacks:
+
+```bash
+cfer converge vpc -t examples/vpc.rb --profile [YOUR-PROFILE] --region [YOUR_REGION]
+cfer converge instance -t examples/instance.rb --profile [YOUR-PROFILE] --region [YOUR_REGION]
+```
+
+You should see something like this:
+
+![Demo](cfer-demo.gif)
+
 ### Command line
 
     Commands:
