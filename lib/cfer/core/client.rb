@@ -9,7 +9,7 @@ module Cfer::Core
     end
 
     def resolve(param)
-      Cfer::Cfn::ParameterValue.new(param).evaluate(self)
+      param
     end
   end
 end

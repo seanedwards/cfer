@@ -26,7 +26,7 @@ module Cfer::Core
       self[:Resources] = {}
       self[:Outputs] = {}
 
-      @parameters = {}
+      @parameters = HashWithIndifferentAccess.new
 
       if options[:parameters]
         options[:parameters].each do |key, val|

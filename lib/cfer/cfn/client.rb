@@ -3,7 +3,6 @@ module Cfer::Cfn
 
   class Client < Cfer::Core::Client
     attr_reader :name
-    attr_reader :stack_cache
 
     def initialize(options)
       @name = options[:stack_name]
@@ -29,7 +28,14 @@ module Cfer::Cfn
     end
 
     def resolve(param)
-      Cfer::Cfn::ParameterValue.new(param).evaluate(self)
+      # See if the value follows the form @<stack>.<output>
+      m = /^@(.+?)\.(.+)$/.match(param)
+
+      if m
+        fetch_output(m[1], m[2])
+      else
+        param
+      end
     end
 
     def flush_cache
@@ -37,31 +43,23 @@ module Cfer::Cfn
     end
 
     def converge(stack, options = {})
-
       Preconditions.check(@name).is_not_nil
       Preconditions.check(stack) { is_not_nil and has_type(Cfer::Core::Stack) }
 
       response = validate_template(template_body: stack.to_cfn)
+
       parameters = response.parameters.map do |tmpl_param|
-        input_param = ParameterValidator.new(stack.parameters)[tmpl_param.parameter_key]
-        cfn_param = input_param || (Cfer::Cfn::ParameterValue.new(tmpl_param.default_value) if tmpl_param.default_value)
+        cfn_param = stack.parameters[tmpl_param.parameter_key] || raise(Cfer::Util::CferError, "Parameter #{tmpl_param.parameter_key} was required, but not specified")
+        cfn_param = resolve(cfn_param)
 
-        p = if cfn_param
-          {
-            parameter_key: tmpl_param.parameter_key,
-            parameter_value: cfn_param.evaluate(self),
-            use_previous_value: false
-          }
-        else
-          {
-            parameter_key: tmpl_param.parameter_key,
-            use_previous_value: true
-          }
-        end
+        output_val = tmpl_param.no_echo ? '*****' : cfn_param
+        Cfer::LOGGER.debug "Parameter #{tmpl_param.parameter_key}=#{output_val}"
 
-        output_val = tmpl_param.no_echo ? '*****' : p[:parameter_value]
-        Cfer::LOGGER.debug "Parameter #{p[:parameter_key]}=#{output_val}"
-        p
+        {
+          parameter_key: tmpl_param.parameter_key,
+          parameter_value: cfn_param,
+          use_previous_value: false
+        }
       end
 
       options = {
@@ -139,6 +137,20 @@ module Cfer::Cfn
     end
 
     private
+
+    def fetch_output(stack_name, output_name)
+      @stack_cache[stack_name] ||= describe_stacks(stack_name: stack_name)
+
+      output = @stack_cache[stack_name].stacks.first.outputs.find do |o|
+        o.output_key == output_name
+      end
+
+      if output
+        output.output_value
+      else
+        raise CferError, "Stack #{stack_name} has no output value named `#{output_name}`"
+      end
+    end
 
     def for_each_event(stack_name)
       describe_stack_events(stack_name: stack_name).stack_events.each do |event|

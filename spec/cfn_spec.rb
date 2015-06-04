@@ -61,7 +61,7 @@ describe Cfer::Cfn::Client do
         ])))
       )
 
-    stack = create_stack client: cfn do
+    stack = create_stack client: cfn, parameters: { :key => 'value', :remote_key => '@other_stack.value' } do
       parameter :key
       parameter :remote_key
       parameter :remote_default, Default: '@other_stack.value'
@@ -84,13 +84,13 @@ describe Cfer::Cfn::Client do
       stack_name: 'test',
       template_body: stack.to_cfn,
       parameters: [
-        { :parameter_key => 'key', :use_previous_value => true },
-        { :parameter_key => 'remote_key', :use_previous_value => true },
+        { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false },
+        { :parameter_key => 'remote_key', :parameter_value => 'new_remote_value', :use_previous_value => false },
         { :parameter_key => 'remote_default', :parameter_value => 'new_remote_value', :use_previous_value => false }
       ],
       capabilities: []
     }
-    
+
     expect(cfn).to receive(:create_stack)
       .exactly(1).times
       .with(stack_options)
