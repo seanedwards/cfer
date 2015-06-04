@@ -30,7 +30,7 @@ module Cfer::Core
 
       if options[:parameters]
         options[:parameters].each do |key, val|
-            @parameters[key] = resolve(val)
+          @parameters[key] = resolve(val)
         end
       end
     end
@@ -98,7 +98,7 @@ module Cfer::Core
             Preconditions.check_argument(v.length <= 4000, "#{key} must be <= 4000 characters")
             v
           when :Default
-            resolve(v)
+            @parameters[name] ||= resolve(v)
           end
         param[k] ||= v
       end

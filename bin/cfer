@@ -8,5 +8,7 @@ end
 
 require 'cfer'
 
+Cfer::LOGGER.level = Logger::INFO
+
 Cfer::Cli::main(ARGV)
 

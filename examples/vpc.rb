@@ -10,7 +10,7 @@ description 'Stack template for a simple example VPC'
 # 6) Associated plumbing resources to link it all together
 
 # Parameters may be defined using the `parameter` function
-parameter :VpcName, Default: 'Example VPC'
+parameter :VpcName, default: 'Example VPC'
 
 # Resources are created using the `resource` function, accepting the following arguments:
 # 1) The resource name (string or symbol)

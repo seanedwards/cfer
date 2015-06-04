@@ -11,6 +11,14 @@ describe Cfer do
     expect(stack[:Description]).to eq('test stack')
   end
 
+  it 'reads templates from files' do
+    stack = Cfer::stack_from_file('spec/support/simple_stack.rb')
+
+    expect(stack[:Parameters]).to have_key :test
+    expect(stack[:Resources]).to have_key :abc
+    expect(stack[:Resources][:abc][:Type]).to eq 'Cfer::TestResource'
+  end
+
   it 'passes parameters and options' do
     stack = create_stack parameters: {:param => 'value'}, option: 'value' do
       parameter :param_value, default: parameters[:param]

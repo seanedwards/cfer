@@ -43,14 +43,14 @@ module Cfer
       type: :numeric,
       default: 1,
       desc: 'Prints the last (n) stack events.'
-    method_option :stack_file,
-      aliases: :n,
+    method_option :template,
+      aliases: :t,
       type: :string,
       desc: 'Override the stack filename (defaults to <stack-name>.rb)'
     template_options
     stack_options
     def converge(stack_name)
-      tmpl = options[:stack_file] || "#{stack_name}.rb"
+      tmpl = options[:template] || "#{stack_name}.rb"
 
       config(options)
 

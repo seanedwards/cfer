@@ -12,6 +12,10 @@ module Cfer::Core::Fn
       {"Fn::GetAtt" => [r, att]}
     end
 
+    def find_in_map(map_name, key1, key2)
+      {"Fn::FindInMap" => [map_name, key1, key2]}
+    end
+
     def select(i, o)
       {"Fn::Select" => [i, o]}
     end
