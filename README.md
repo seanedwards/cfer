@@ -155,6 +155,9 @@ See the Rakefile in this repository for how this might look.
 
 ### Cfn Client
 
+The Client is a wrapper around Amazon's CloudFormation client from the AWS Ruby SDK.
+Its purpose is to interact with the CloudFormation API.
+
 Create a new client:
 
 ```ruby
@@ -182,6 +185,8 @@ end
 ```
 
 ### Cfer Stacks
+
+A Cfer stack represents a baked CloudFormation template, which is ready to be converted to JSON.
 
 Create a new stack:
 
