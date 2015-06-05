@@ -1,4 +1,4 @@
-module Cfer::Cfn::Fn
+module Cfer::Core::Fn
   class << self
     def join(sep, args)
       {"Fn::Join" => [sep, args]}
@@ -10,6 +10,10 @@ module Cfer::Cfn::Fn
 
     def get_att(r, att)
       {"Fn::GetAtt" => [r, att]}
+    end
+
+    def find_in_map(map_name, key1, key2)
+      {"Fn::FindInMap" => [map_name, key1, key2]}
     end
 
     def select(i, o)

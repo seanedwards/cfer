@@ -1,6 +1,6 @@
 module Cfer::Cfn
   class Resource < Cfer::Block
-    NON_PROXIED_METHODS = [:parameters]
+    NON_PROXIED_METHODS = [:parameters, :options]
 
     def initialize(name, type, **options, &block)
       @name = name
@@ -28,7 +28,7 @@ module Cfer::Cfn
       key = camelize_property(method_sym)
       case arguments.size
       when 0
-        Fn::ref(method_sym)
+        Cfer::Core::Fn::ref(method_sym)
       when 1
         properties key => arguments.first
       else

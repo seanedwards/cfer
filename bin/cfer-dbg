@@ -11,6 +11,14 @@ end
 
 require 'cfer'
 
+Cfer::LOGGER.level = Logger::DEBUG
+
+Cfer::LOGGER.fatal "Showing FATAL logs"
+Cfer::LOGGER.error "Showing ERROR logs"
+Cfer::LOGGER.warn "Showing WARN logs"
+Cfer::LOGGER.info "Showing INFO logs"
+Cfer::LOGGER.debug "Showing DEBUG logs"
+
 Pry::rescue {
   Cfer::Cli::main(ARGV)
 }

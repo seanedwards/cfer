@@ -1,22 +1,17 @@
 require 'thor'
 require 'rainbow'
+require 'table_print'
 
 module Cfer
   class Cli < Thor
 
     namespace 'cfer'
     class_option :verbose, type: :boolean, default: false
+    class_option :profile, type: :string, aliases: :p, desc: 'The AWS profile to use from your credentials file'
+    class_option :region, type: :string, aliases: :r, desc: 'The AWS region to use'
+    class_option :pretty_print, type: :boolean, default: :true, desc: 'Render JSON in a more human-friendly format'
 
     def self.template_options
-      method_option :output_file,
-        type: :string,
-        aliases: :o,
-        desc: 'The file that will contain the rendered CloudFormation template (may be an s3:// URL)'
-
-      method_option :pretty_print,
-        type: :boolean,
-        default: :true,
-        desc: 'Render JSON in a more human-friendly format'
 
       method_option :parameters,
         type: :hash,
@@ -25,20 +20,13 @@ module Cfer
     end
 
     def self.stack_options
-      method_option :profile,
+      method_option :output_format,
         type: :string,
-        aliases: :p,
-        desc: 'The AWS profile to use from your credentials file'
-
-      method_option :region,
-        type: :string,
-        aliases: :r,
-        desc: 'The AWS region to use',
-        default: 'us-east-1'
+        desc: 'The output format of the stack [table|json]',
+        default: 'table'
     end
 
-
-    desc 'converge [OPTIONS] <stack-name> <template.rb>', 'Converges a cloudformation stack according to the template'
+    desc 'converge [OPTIONS] <stack-name>', 'Converges a cloudformation stack according to the template'
     #method_option :git_lock,
     #  type: :boolean,
     #  default: true,
@@ -56,29 +44,21 @@ module Cfer
     method_option :number,
       type: :numeric,
       default: 1,
-      desc: 'Prints the last (n) events.'
-    method_option :stack_file,
-      aliases: :n,
+      desc: 'Prints the last (n) stack events.'
+    method_option :template,
+      aliases: :t,
       type: :string,
       desc: 'Override the stack filename (defaults to <stack-name>.rb)'
     template_options
     stack_options
     def converge(stack_name)
-      tmpl = options[:stack_file] || "#{stack_name}.rb"
+      Cfer.converge! stack_name, options
+    end
 
-      config(options)
-      stack = Cfer::stack_from_file(tmpl, options[:parameters])
-
-      cfn_stack = Cfer::Cfn::CfnStack.new(stack_name, cfn)
-      begin
-        cfn_stack.converge(stack, options)
-        if options[:follow]
-          tail stack_name
-        end
-      rescue Aws::CloudFormation::Errors::ValidationError => e
-        Cfer::LOGGER.info "CFN validation error: #{e.message}"
-        exit 1
-      end
+    desc 'describe <stack>', 'Fetches and prints information about a CloudFormation'
+    stack_options
+    def describe(stack_name)
+      Cfer.describe! stack_name, options
     end
 
     desc 'tail <stack>', 'Follows stack events on standard output as they occur'
@@ -91,22 +71,10 @@ module Cfer
       aliases: :n,
       type: :numeric,
       default: 10,
-      desc: 'Prints the last (n) events.'
+      desc: 'Prints the last (n) stack events.'
     stack_options
-    def tail(stack)
-      config(options)
-      Cfer::Cfn::CfnStack.new(stack, cfn).tail(options) do |event|
-        Cfer::LOGGER.info "%s %-30s %-40s %-20s %s" % [event.timestamp, color_map(event.resource_status), event.resource_type, event.logical_resource_id, event.resource_status_reason]
-      end
-    end
-
-    desc 'plan [OPTIONS] <template.rb>', 'Describes the changes that will be made to the CloudFormation stack'
-    method_option :stack_name, type: :string, aliases: :n
-    template_options
-    stack_options
-    def plan(tmpl)
-      config(options)
-      raise "Not yet implemented"
+    def tail(stack_name)
+      Cfer.tail! stack_name, options
     end
 
     desc 'generate [OPTIONS] <template.rb>', 'Generates a CloudFormation template by evaluating a Cfer template'
@@ -115,20 +83,18 @@ module Cfer
     LONGDESC
     template_options
     def generate(tmpl)
-      stack = Cfer::stack_from_file(tmpl, options[:parameters]).to_h
-
-      if options[:pretty_print]
-        puts JSON.pretty_generate(stack)
-      else
-        puts stack.to_json
-      end
+      Cfer.generate! tmpl, options
     end
 
     def self.main(args)
+      Cfer::LOGGER.debug "Cfer version #{Cfer::VERSION}"
       begin
         Cli.start(args)
       rescue Aws::Errors::NoSuchProfileError => e
         Cfer::LOGGER.error "#{e.message}. Specify a valid profile with the --profile option."
+        exit 1
+      rescue Aws::Errors::MissingRegionError => e
+        Cfer::LOGGER.error "Missing region. Specify a valid AWS region with the --region option, or use the AWS_REGION environment variable."
         exit 1
       rescue Interrupt
         Cfer::LOGGER.info 'Caught interrupt. Goodbye.'
@@ -154,89 +120,19 @@ module Cfer
 
     private
 
-    def config(options)
-      if options[:region] || options[:profile]
-        Aws.config.update region: options[:region],
-          credentials: Aws::SharedCredentials.new(profile_name: options[:profile])
-      end
-
-      cfn options[:aws_options] if options[:aws_options]
+    def cfn(opts = {})
+      @cfn ||= opts
     end
-
-    def cfn(options = {})
-      @cfn ||= Aws::CloudFormation::Client.new(options)
-    end
-
+    private
     def self.format_backtrace(bt)
       "Backtrace: #{bt.join("\n   from ")}"
     end
-
-    COLORS_MAP = {
-      'CREATE_IN_PROGRESS' => {
-        color: :yellow
-      },
-      'DELETE_IN_PROGRESS' => {
-        color: :yellow
-      },
-      'UPDATE_IN_PROGRESS' => {
-        color: :green
-      },
-
-      'CREATE_FAILED' => {
-        color: :red,
-        finished: true
-      },
-      'DELETE_FAILED' => {
-        color: :red,
-        finished: true
-      },
-      'UPDATE_FAILED' => {
-        color: :red,
-        finished: true
-      },
-
-      'CREATE_COMPLETE' => {
-        color: :green,
-        finished: true
-      },
-      'DELETE_COMPLETE' => {
-        color: :green,
-        finished: true
-      },
-      'UPDATE_COMPLETE' => {
-        color: :green,
-        finished: true
-      },
-
-      'DELETE_SKIPPED' => {
-        color: :yellow
-      },
-
-      'ROLLBACK_IN_PROGRESS' => {
-        color: :red
-      },
-      'ROLLBACK_COMPLETE' => {
-        color: :red,
-        finished: true
-      }
-    }
-
-    def color_map(str)
-      if COLORS_MAP.include?(str)
-        Rainbow(str).send(COLORS_MAP[str][:color])
-      else
-        str
-      end
+    def self.exit_on_failure?
+      true
     end
 
-    def stopped_state?(str)
-      COLORS_MAP[str][:finished] || false
-    end
   end
 
 
-  def self.exit_on_failure?
-    true
-  end
 end
 
