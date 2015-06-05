@@ -34,8 +34,10 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'rainbow'
   spec.add_runtime_dependency 'highline'
   spec.add_runtime_dependency 'rugged'
+  spec.add_runtime_dependency 'table_print'
+  spec.add_runtime_dependency "rake"
+  spec.add_runtime_dependency "highline"
 
   spec.add_development_dependency "bundler"
-  spec.add_development_dependency "rake"
   spec.add_development_dependency "yard"
 end

@@ -8,9 +8,13 @@ describe Cfer::Cfn::Client do
       .exactly(1).times
       .with(stack_name: 'other_stack')
       .and_return(
-        double(stacks: double(first: double(outputs: [
-          double(output_key: 'value', output_value: 'remote_value')
-        ])))
+        double(stacks: double(first: double(
+          to_h: {
+            :outputs => [
+              {:output_key => 'value', :output_value => 'remote_value'}
+            ]
+          }
+        )))
       )
 
     stack = create_stack parameters: {:key => 'value', :remote_key => '@other_stack.value'}, client: cfn do
@@ -56,9 +60,20 @@ describe Cfer::Cfn::Client do
       .exactly(1).times
       .with(stack_name: 'other_stack')
       .and_return(
-        double(stacks: double(first: double(outputs: [
-          double(output_key: 'value', output_value: 'new_remote_value')
-        ])))
+        double(
+          stacks: double(
+            first: double(
+              to_h: {
+                :outputs => [
+                  {
+                    :output_key => 'value',
+                    :output_value => 'new_remote_value'
+                  }
+                ]
+              }
+            )
+          )
+        )
       )
 
     stack = create_stack client: cfn, parameters: { :key => 'value', :remote_key => '@other_stack.value' } do
@@ -126,8 +141,8 @@ describe Cfer::Cfn::Client do
       .exactly(2).times
       .with(stack_name: 'test')
       .and_return(
-        double(stacks: [ double(stack_status: 'a status') ]),
-        double(stacks: [ double(stack_status: 'TEST_COMPLETE')])
+        double(stacks: [ double(:stack_status => 'a status') ]),
+        double(stacks: [ double(:stack_status => 'TEST_COMPLETE')])
       )
 
     yielder = double('yield receiver')

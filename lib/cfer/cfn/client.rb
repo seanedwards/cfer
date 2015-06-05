@@ -38,9 +38,6 @@ module Cfer::Cfn
       end
     end
 
-    def flush_cache
-      @stack_cache = {}
-    end
 
     def converge(stack, options = {})
       Preconditions.check(@name).is_not_nil
@@ -129,7 +126,8 @@ module Cfer::Cfn
       end
     end
 
-    def fetch_cfn!
+    def fetch_stack(stack_name = @name)
+      @stack_cache[stack_name] ||= describe_stacks(stack_name: stack_name).stacks.first.to_h
     end
 
     def to_h
@@ -138,15 +136,19 @@ module Cfer::Cfn
 
     private
 
-    def fetch_output(stack_name, output_name)
-      @stack_cache[stack_name] ||= describe_stacks(stack_name: stack_name)
+    def flush_cache
+      @stack_cache = {}
+    end
 
-      output = @stack_cache[stack_name].stacks.first.outputs.find do |o|
-        o.output_key == output_name
+    def fetch_output(stack_name, output_name)
+      stack = fetch_stack(stack_name)
+
+      output = stack[:outputs].find do |o|
+        o[:output_key] == output_name
       end
 
       if output
-        output.output_value
+        output[:output_value]
       else
         raise CferError, "Stack #{stack_name} has no output value named `#{output_name}`"
       end

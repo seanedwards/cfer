@@ -9,6 +9,18 @@ module Cfer::Core
     attr_reader :options
     attr_reader :git
 
+    def converge!
+      if @options[:client]
+        @options[:client].converge self
+      end
+    end
+
+    def tail!(&block)
+      if @options[:client]
+        @options[:client].tail self, &block
+      end
+    end
+
     def resolve(val)
       @options[:client] ? @options[:client].resolve(val) : val
     end
