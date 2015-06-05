@@ -142,6 +142,17 @@ output :OutputName, Fn::ref(:ResourceName)
 Embedding the Cfer SDK involves interacting with two components: The `Client` and the `Stack`.
 The Cfer `Client` is the interface with the Cloud provider.
 
+### Basic API
+
+The simplest way to use Cfer from Ruby looks similar to the CLI:
+
+```ruby
+  Cfer.converge! '<stack-name>', template: '<template-file>'
+```
+
+This is identical to running `cfer converge <stack-name> --template <template-file>`, but is better suited to embedding in Rakefiles, chef recipes, or your own Ruby scripts.
+See the Rakefile in this repository for how this might look.
+
 ### Cfn Client
 
 Create a new client:
