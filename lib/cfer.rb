@@ -2,7 +2,6 @@ require 'active_support/all'
 require 'aws-sdk'
 require 'logger'
 require 'json'
-require 'rugged'
 require 'preconditions'
 require 'rainbow'
 
