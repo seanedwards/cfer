@@ -7,7 +7,6 @@ module Cfer::Core
 
     attr_reader :parameters
     attr_reader :options
-    attr_reader :git
 
     def converge!
       if @options[:client]
@@ -30,7 +29,6 @@ module Cfer::Core
       self[:Description] = ''
 
       @options = options
-      @git = Rugged::Repository.discover('.')
 
       self[:Parameters] = {}
       self[:Mappings] = {}

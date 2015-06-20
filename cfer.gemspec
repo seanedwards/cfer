@@ -28,7 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'semantic'
   spec.add_runtime_dependency 'rainbow'
   spec.add_runtime_dependency 'highline'
-  spec.add_runtime_dependency 'rugged'
   spec.add_runtime_dependency 'table_print'
   spec.add_runtime_dependency "rake"
 
