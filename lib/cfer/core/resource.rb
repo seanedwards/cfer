@@ -1,6 +1,6 @@
 module Cfer::Cfn
   class Resource < Cfer::Block
-    NON_PROXIED_METHODS = [:parameters, :options]
+    NON_PROXIED_METHODS = [:parameters, :options, :resolve]
 
     def initialize(name, type, **options, &block)
       @name = name

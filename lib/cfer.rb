@@ -230,6 +230,7 @@ module Cfer
   end
 end
 
+Dir["#{File.dirname(__FILE__)}/cfer/*.rb"].each { |f| require(f) }
 Dir["#{File.dirname(__FILE__)}/cfer/**/*.rb"].each { |f| require(f) }
 Dir["#{File.dirname(__FILE__)}/cferext/**/*.rb"].each { |f| require(f) }
 
