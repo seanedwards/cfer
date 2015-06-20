@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/seanedwards/cfer.svg?branch=master)](https://travis-ci.org/seanedwards/cfer)
 [![Coverage Status](https://coveralls.io/repos/seanedwards/cfer/badge.svg)](https://coveralls.io/r/seanedwards/cfer)
+[![Gem Version](https://badge.fury.io/rb/cfer.svg)](http://badge.fury.io/rb/cfer)
 
 Cfer is a lightweight toolkit for managing CloudFormation templates.
 
@@ -141,7 +142,21 @@ output :OutputName, Fn::ref(:ResourceName)
 Embedding the Cfer SDK involves interacting with two components: The `Client` and the `Stack`.
 The Cfer `Client` is the interface with the Cloud provider.
 
+### Basic API
+
+The simplest way to use Cfer from Ruby looks similar to the CLI:
+
+```ruby
+  Cfer.converge! '<stack-name>', template: '<template-file>'
+```
+
+This is identical to running `cfer converge <stack-name> --template <template-file>`, but is better suited to embedding in Rakefiles, chef recipes, or your own Ruby scripts.
+See the Rakefile in this repository for how this might look.
+
 ### Cfn Client
+
+The Client is a wrapper around Amazon's CloudFormation client from the AWS Ruby SDK.
+Its purpose is to interact with the CloudFormation API.
 
 Create a new client:
 
@@ -170,6 +185,8 @@ end
 ```
 
 ### Cfer Stacks
+
+A Cfer stack represents a baked CloudFormation template, which is ready to be converted to JSON.
 
 Create a new stack:
 
