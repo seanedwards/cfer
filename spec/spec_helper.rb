@@ -1,5 +1,6 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'coveralls'
+require 'pp'
 
 def create_stack(options = {}, &block)
   s = Cfer.stack_from_block(options, &block)
