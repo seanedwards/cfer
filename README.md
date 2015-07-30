@@ -6,6 +6,8 @@
 
 Cfer is a lightweight toolkit for managing CloudFormation templates.
 
+Read about Cfer [here](http://tilmonedwards.com/2015/07/28/cfer.html).
+
 ## Installation
 
 Add this line to your application's Gemfile:
