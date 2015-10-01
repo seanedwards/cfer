@@ -214,6 +214,8 @@ This project uses [git-flow](http://nvie.com/posts/a-successful-git-branching-mo
 
 Always use `--no-ff` when merging into `develop` or `master`.
 
+This project also contains a [Code of Conduct](CODE_OF_CONDUCT.md), which should be followed when submitting feedback or contributions to this project.
+
 ### New features
 
 * Branch from `develop`
