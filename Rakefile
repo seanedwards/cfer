@@ -1,4 +1,4 @@
-require "bundler/gem_tasks"
+#require "bundler/gem_tasks"
 gem 'cfer'
 require 'cfer'
 require 'highline'
@@ -50,9 +50,8 @@ task :converge => [:vpc, :instance]
 task :release do
   require_relative 'lib/cfer/version.rb'
 
-  `git checkout origin master`
+  `git checkout master`
   `git merge develop --no-ff -m 'Merge from develop for release v#{Cfer::VERSION}'`
   `git tag -m "Release v#{Cfer::VERSION}" #{Cfer::VERSION}`
-  `git push --tags origin master`
 end
 
