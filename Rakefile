@@ -39,3 +39,20 @@ end
 
 task :converge => [:vpc, :instance]
 
+
+########################
+##### END OF DEMO ######
+########################
+
+
+# This task isn't really part of Cfer.
+# It just makes it easier for me to release new versions.
+task :release do
+  require_relative 'lib/cfer/version.rb'
+
+  `git checkout origin master`
+  `git merge develop --no-ff -m 'Merge from develop for release v#{Cfer::VERSION}'`
+  `git tag -m "Release v#{Cfer::VERSION}" #{Cfer::VERSION}`
+  `git push --tags origin master`
+end
+
