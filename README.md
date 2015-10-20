@@ -139,6 +139,29 @@ Outputs may be defined using the `output` function:
 output :OutputName, Fn::ref(:ResourceName)
 ```
 
+#### Including code from multiple files
+
+Templates can get pretty large, and splitting template code into multiple
+files can help keep things more manageable. The `include_template`
+function works in a similar way to ruby's `require_relative`, but
+within the context of the CloudFormation stack:
+
+```ruby
+include_template 'ec2.rb'
+```
+
+You can also include multiple files in a single call:
+
+```ruby
+include_template(
+  'stack/ec2.rb',
+  'stack/elb.rb'
+)
+```
+
+The path to included files is relative to the base template file
+(e.g. the `converge` command `-t` option).
+
 ## SDK
 
 Embedding the Cfer SDK involves interacting with two components: The `Client` and the `Stack`.

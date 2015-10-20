@@ -19,6 +19,14 @@ describe Cfer do
     expect(stack[:Resources][:abc][:Type]).to eq 'Cfer::TestResource'
   end
 
+  it 'includes templates from files' do
+    stack = Cfer::stack_from_file('spec/support/includes_stack.rb')
+
+    expect(stack[:Resources]).to have_key :abc
+    expect(stack[:Resources][:abc][:Type]).to eq 'Cfer::TestResource'
+    expect(stack[:Resources][:abc][:Properties][:Tags]).to contain_exactly 'Key' => :Name, 'Value' => 'foo'
+  end
+
   it 'passes parameters and options' do
     stack = create_stack parameters: {:param => 'value'}, option: 'value' do
       parameter :param_value, default: parameters[:param]

@@ -159,6 +159,17 @@ module Cfer::Core
       to_h.to_json
     end
 
+    # Includes template code from one or more files, and evals it in the context of this stack.
+    # Filenames are relative to the file containing the invocation of this method.
+    def include_template(*files)
+      calling_file = caller.first.split(/:\d/,2).first
+      dirname = File.dirname(calling_file)
+      files.each do |file|
+        path = File.join(dirname, file)
+        instance_eval(File.read(path), path)
+      end
+    end
+
     private
     def verify_param(param_name, err_msg)
       raise Cfer::Util::CferError, err_msg if (@parameters[param_name] && !yield(@parameters[param_name].to_s))
