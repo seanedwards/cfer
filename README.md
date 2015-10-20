@@ -6,6 +6,8 @@
 
 Cfer is a lightweight toolkit for managing CloudFormation templates.
 
+Read about Cfer [here](http://tilmonedwards.com/2015/07/28/cfer.html).
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -137,6 +139,29 @@ Outputs may be defined using the `output` function:
 output :OutputName, Fn::ref(:ResourceName)
 ```
 
+#### Including code from multiple files
+
+Templates can get pretty large, and splitting template code into multiple
+files can help keep things more manageable. The `include_template`
+function works in a similar way to ruby's `require_relative`, but
+within the context of the CloudFormation stack:
+
+```ruby
+include_template 'ec2.rb'
+```
+
+You can also include multiple files in a single call:
+
+```ruby
+include_template(
+  'stack/ec2.rb',
+  'stack/elb.rb'
+)
+```
+
+The path to included files is relative to the base template file
+(e.g. the `converge` command `-t` option).
+
 ## SDK
 
 Embedding the Cfer SDK involves interacting with two components: The `Client` and the `Stack`.
@@ -211,6 +236,8 @@ Note: Specifying a client is optional, but if no client is specified, parameter 
 This project uses [git-flow](http://nvie.com/posts/a-successful-git-branching-model/). Please name branches and pull requests according to that convention.
 
 Always use `--no-ff` when merging into `develop` or `master`.
+
+This project also contains a [Code of Conduct](CODE_OF_CONDUCT.md), which should be followed when submitting feedback or contributions to this project.
 
 ### New features
 
