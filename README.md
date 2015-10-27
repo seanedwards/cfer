@@ -8,6 +8,8 @@ Cfer is a lightweight toolkit for managing CloudFormation templates.
 
 Read about Cfer [here](http://tilmonedwards.com/2015/07/28/cfer.html).
 
+If you're interested in hearing more about Cfer, and other DevOps automation projects I'm working on, sign up for the [Impose Mailing List](https://impose.sh/).
+
 ## Installation
 
 Add this line to your application's Gemfile:
