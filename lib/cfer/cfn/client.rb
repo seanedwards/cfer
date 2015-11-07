@@ -59,19 +59,25 @@ module Cfer::Cfn
         }
       end
 
-      options = {
+      ## arguments to be passed to {create,update}_stack
+      stack_options = {
         stack_name: name,
         template_body: stack.to_cfn,
         parameters: parameters,
         capabilities: response.capabilities
       }
 
+      ## optional policy can be applied to both create and update
+      stack_options.merge!(parse_stack_policy(:stack_policy, options[:stack_policy]))
+
       created = false
       cfn_stack = begin
           created = true
-          create_stack options
+          create_stack(stack_options)
         rescue Cfer::Util::StackExistsError
-          update_stack options
+          ## temporary policy during update only
+          stack_options.merge!(parse_stack_policy(:stack_policy_during_update, options[:stack_policy_during_update]))
+          update_stack(stack_options)
         end
 
       flush_cache
@@ -159,6 +165,34 @@ module Cfer::Cfn
         yield event
       end
     end
+
+    # Validates a string as json
+    #
+    # @param string [String]
+    def is_json?(string)
+      JSON.parse(string)
+      true
+    rescue JSON::ParserError
+      false
+    end
+
+    # Parses stack-policy-* options as an S3 URL, file to read, or JSON string
+    #
+    # @param name [String] Name of option: 'stack_policy' or 'stack_policy_during_update'
+    # @param value [String] String containing URL, filename or JSON string
+    # @return [Hash] Hash suitable for merging into options for create_stack or update_stack
+    def parse_stack_policy(name, value)
+      if value.nil?
+        {}
+      elsif value.match(/\A#{URI::regexp(%w[http https])}\z/) # looks like a URL
+        {"#{name}_url".to_sym => value}
+      elsif File.exists?(value)                               # looks like a file to read
+        {"#{name}_body".to_sym => File.read(value)}
+      elsif is_json?(value)                                   # looks like a JSON string
+        {"#{name}_body".to_sym => value}
+      else                                                    # none of the above
+        raise Cfer::Util::CferError, "Stack policy must be an S3 url, a filename, or a valid json string"
+      end
+    end
   end
 end
-
