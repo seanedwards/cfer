@@ -61,6 +61,12 @@ module Cfer
       Cfer.describe! stack_name, options
     end
 
+    desc 'remove <stack>', 'Remove a CloudFormation stack'
+    stack_options
+    def remove(stack_name)
+      Cfer.remove! stack_name, options
+    end
+
     desc 'tail <stack>', 'Follows stack events on standard output as they occur'
     method_option :follow,
       aliases: :f,

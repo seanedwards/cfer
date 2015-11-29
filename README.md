@@ -81,6 +81,19 @@ The following options may be used with the `tail` command:
 * `--follow` (`-f`): Follows stack events on standard output as the create/update process takes place. 
 * `--number` (`-n`): Print the last `n` stack events.
 
+#### `remove <stack-name>`
+
+Removes or deletes an existing CloudFormation stack. 
+
+```bash
+cfer remove vpc --profile [YOUR-PROFILE] --region [YOUR-REGION]
+```
+
+This can also be done in the following way with the awscli tools, but now eliminates the need to install that package.
+```bash
+aws cloudformation delete-stack --stack-name vpc
+```
+
 ### Template Anatomy
 
 See the `examples` directory for some examples of complete templates.
