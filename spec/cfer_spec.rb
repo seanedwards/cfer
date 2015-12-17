@@ -51,7 +51,7 @@ describe Cfer do
     expect(stack[:Parameters][:test][:Type]).to eq 'String'
 
     expect(stack[:Parameters][:regex][:AllowedPattern]).to eq '[abc]+123'
-    expect(stack[:Parameters][:list][:AllowedValues]).to eq 'a,b,c'
+    expect(stack[:Parameters][:list][:AllowedValues]).to eq ['a', 'b', 'c']
   end
 
   it 'fails parameter validations' do

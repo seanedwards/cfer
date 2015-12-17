@@ -81,9 +81,8 @@ module Cfer::Core
         param[k] =
           case k
           when :AllowedValues
-            str_list = v.join(',')
-            verify_param(name, "Parameter #{name} must be one of: #{str_list}") { |input_val| str_list.include?(input_val) }
-            str_list
+            verify_param(name, "Parameter #{name} must be one of: #{v.join(',')}") { |input_val| v.include?(input_val) }
+            v
           when :AllowedPattern
             if v.class == Regexp
               verify_param(name, "Parameter #{name} must match /#{v.source}/") { |input_val| v =~ input_val }
