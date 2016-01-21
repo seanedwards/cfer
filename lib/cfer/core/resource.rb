@@ -2,9 +2,8 @@ module Cfer::Cfn
   class Resource < Cfer::Block
     NON_PROXIED_METHODS = [:parameters, :options, :lookup_output]
 
-    def initialize(name, type, stack, **options, &block)
+    def initialize(name, type, **options, &block)
       @name = name
-      @stack = stack
 
       self[:Type] = type
       self.merge!(options)

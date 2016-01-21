@@ -136,7 +136,7 @@ module Cfer::Core
       clazz = "CferExt::#{type}".split('::').inject(Object) { |o, c| o.const_get c if o && o.const_defined?(c) } || Cfer::Cfn::Resource
       Preconditions.check_argument clazz <= Cfer::Cfn::Resource, "#{type} is not a valid resource type because CferExt::#{type} does not inherit from `Cfer::Cfn::Resource`"
 
-      rc = clazz.new(name, type, self, options, &block)
+      rc = clazz.new(name, type, options, &block)
 
       self[:Resources][name] = rc
       rc
