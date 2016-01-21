@@ -95,8 +95,6 @@ parameter :ParameterName,
   default: 'ParameterValue'
 ```
 
-A parameter's value may have the form `@stack.output` to look up output values from other stacks in the same account and region. This works anywhere a parameter value is specified, including defaults and inputs. (See the SDK section on [Cfer Stacks](#cfer-stacks) for caveats.)
-
 Any parameter can be referenced either in Ruby by using the `parameters` hash:
 
 ```ruby
@@ -139,6 +137,12 @@ Outputs may be defined using the `output` function:
 
 ```ruby
 output :OutputName, Fn::ref(:ResourceName)
+```
+
+Outputs may be retireved from other stacks anywhere in a template by using the `lookup_output` function.
+
+```ruby
+lookup_output('stack_name', 'output_name')
 ```
 
 #### Including code from multiple files
@@ -231,8 +235,6 @@ stack = Cfer::stack_from_block(client: <client>) do
 end
 ```
 
-Note: Specifying a client is optional, but if no client is specified, parameter mappings will not occur.
-
 ## Contributing
 
 This project uses [git-flow](http://nvie.com/posts/a-successful-git-branching-model/). Please name branches and pull requests according to that convention.
@@ -265,3 +267,8 @@ This project also contains a [Code of Conduct](CODE_OF_CONDUCT.md), which should
 * Merge into `develop` and `master`
 * Name branch `release/<major.minor>`
 
+# Release Notes
+
+## 0.3.0
+
+* Removes automatic parameter mapping in favor of an explicit function available to resources. (Fixes Issue #8)

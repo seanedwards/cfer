@@ -3,6 +3,7 @@ module Cfer::Cfn
 
   class Client < Cfer::Core::Client
     attr_reader :name
+    attr_reader :stack
 
     def initialize(options)
       @name = options[:stack_name]
@@ -27,51 +28,49 @@ module Cfer::Cfn
       @cfn.send(method, *args, &block)
     end
 
-    def resolve(param)
-      # See if the value follows the form @<stack>.<output>
-      m = /^@(.+?)\.(.+)$/.match(param)
-
-      if m
-        fetch_output(m[1], m[2])
-      else
-        param
-      end
-    end
-
-
     def converge(stack, options = {})
       Preconditions.check(@name).is_not_nil
       Preconditions.check(stack) { is_not_nil and has_type(Cfer::Core::Stack) }
 
+      @stack = fetch_stack(@name)
+
       response = validate_template(template_body: stack.to_cfn)
 
       parameters = response.parameters.map do |tmpl_param|
-        cfn_param = stack.parameters[tmpl_param.parameter_key] || raise(Cfer::Util::CferError, "Parameter #{tmpl_param.parameter_key} was required, but not specified")
-        cfn_param = resolve(cfn_param)
+        cfn_param = stack.parameters[tmpl_param.parameter_key] ||
+         stack[:Parameters][tmpl_param.parameter_key][:Default] ||
+         raise(Cfer::Util::CferError, "Parameter #{tmpl_param.parameter_key} was required, but not specified")
 
         output_val = tmpl_param.no_echo ? '*****' : cfn_param
         Cfer::LOGGER.debug "Parameter #{tmpl_param.parameter_key}=#{output_val}"
 
-        {
-          parameter_key: tmpl_param.parameter_key,
-          parameter_value: cfn_param,
-          use_previous_value: false
-        }
+        if cfn_param
+          {
+            parameter_key: tmpl_param.parameter_key,
+            parameter_value: cfn_param,
+            use_previous_value: false
+          }
+        else
+          {
+            parameter_key: tmpl_param.parameter_key,
+            use_previous_value: true
+          }
+        end
       end
 
-      options = {
-        stack_name: name,
-        template_body: stack.to_cfn,
-        parameters: parameters,
-        capabilities: response.capabilities
-      }
-
       created = false
-      cfn_stack = begin
+      cfn_stack =
+        begin
+          create_stack stack_name: name,
+            template_body: stack.to_cfn,
+            parameters: parameters,
+            capabilities: response.capabilities
           created = true
-          create_stack options
         rescue Cfer::Util::StackExistsError
-          update_stack options
+          update_stack stack_name: name,
+            template_body: stack.to_cfn,
+            parameters: parameters,
+            capabilities: response.capabilities
         end
 
       flush_cache
@@ -130,16 +129,6 @@ module Cfer::Cfn
       @stack_cache[stack_name] ||= describe_stacks(stack_name: stack_name).stacks.first.to_h
     end
 
-    def to_h
-      @stack.to_h
-    end
-
-    private
-
-    def flush_cache
-      @stack_cache = {}
-    end
-
     def fetch_output(stack_name, output_name)
       stack = fetch_stack(stack_name)
 
@@ -152,6 +141,16 @@ module Cfer::Cfn
       else
         raise CferError, "Stack #{stack_name} has no output value named `#{output_name}`"
       end
+    end
+
+    def to_h
+      @stack.to_h
+    end
+
+    private
+
+    def flush_cache
+      @stack_cache = {}
     end
 
     def for_each_event(stack_name)

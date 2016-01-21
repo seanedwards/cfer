@@ -8,14 +8,13 @@ description 'Example stack template for a small EC2 instance'
 parameter :KeyName
 
 # We define some more parameters the same way we did in the VPC template.
-# Cfer will interpret the default value by looking up the stack output named `vpcid`
-# on the stack named `vpc`.
+# Cfer will fetch the output values from the `vpc` stack we created earlier.
 #
 # If you created the VPC stack with a different name, you can overwrite these default values
-# by adding `VpcId:@<vpc-stack-name>.vpcid SubnetId:@<vpc-stack-name>.subnetid1`
-# to your `--parameters` option
-parameter :VpcId, default: '@vpc.vpcid'
-parameter :SubnetId, default: '@vpc.subnetid1'
+# by adding `Vpc:<vpc_stack_name> to your `--parameters` option
+parameter :Vpc, default: 'vpc'
+parameter :VpcId, default: lookup_output(parameters[:Vpc], 'vpcid')
+parameter :SubnetId, default: lookup_output(parameters[:Vpc], 'subnetid1')
 
 # This is the Ubuntu 14.04 LTS HVM AMI provided by Amazon.
 parameter :ImageId, default: 'ami-d05e75b8'

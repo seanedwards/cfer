@@ -4,24 +4,8 @@ describe Cfer::Cfn::Client do
   cfn = Cfer::Cfn::Client.new stack_name: 'test', region: 'us-east-1'
 
   it 'creates stacks' do
-    expect(cfn).to receive(:describe_stacks)
-      .exactly(1).times
-      .with(stack_name: 'other_stack')
-      .and_return(
-        double(stacks: double(first: double(
-          to_h: {
-            :outputs => [
-              {:output_key => 'value', :output_value => 'remote_value'}
-            ]
-          }
-        )))
-      )
-
-    stack = create_stack parameters: {:key => 'value', :remote_key => '@other_stack.value'}, client: cfn do
+    stack = create_stack parameters: {:key => 'value'}, client: cfn, mock_describe: true do
       parameter :key
-      parameter :remote_key
-      parameter :remote_default, default: '@other_stack.value'
-      parameter :retrieved_value, default: parameters[:remote_key]
     end
 
     expect(cfn).to receive(:validate_template)
@@ -30,10 +14,7 @@ describe Cfer::Cfn::Client do
       double(
         capabilities: [],
         parameters: [
-          double(parameter_key: 'key', no_echo: false),
-          double(parameter_key: 'remote_key', no_echo: false),
-          double(parameter_key: 'remote_default', no_echo: false, default_value: 'remote_value'),
-          double(parameter_key: 'retrieved_value', no_echo: false, default_value: 'remote_value')
+          double(parameter_key: 'key', no_echo: false)
         ]
       )
     }
@@ -44,10 +25,7 @@ describe Cfer::Cfn::Client do
         stack_name: 'test',
         template_body: stack.to_cfn,
         parameters: [
-          { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false },
-          { :parameter_key => 'remote_key', :parameter_value => 'remote_value', :use_previous_value => false },
-          { :parameter_key => 'remote_default', :parameter_value => 'remote_value', :use_previous_value => false },
-          { :parameter_key => 'retrieved_value', :parameter_value => 'remote_value', :use_previous_value => false }
+          { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false }
         ],
         capabilities: []
       )
@@ -56,30 +34,8 @@ describe Cfer::Cfn::Client do
   end
 
   it 'updates stacks' do
-    expect(cfn).to receive(:describe_stacks)
-      .exactly(1).times
-      .with(stack_name: 'other_stack')
-      .and_return(
-        double(
-          stacks: double(
-            first: double(
-              to_h: {
-                :outputs => [
-                  {
-                    :output_key => 'value',
-                    :output_value => 'new_remote_value'
-                  }
-                ]
-              }
-            )
-          )
-        )
-      )
-
-    stack = create_stack client: cfn, parameters: { :key => 'value', :remote_key => '@other_stack.value' } do
+    stack = create_stack client: cfn, parameters: { :key => 'value' }, mock_describe: true do
       parameter :key
-      parameter :remote_key
-      parameter :remote_default, Default: '@other_stack.value'
     end
 
     expect(cfn).to receive(:validate_template)
@@ -88,9 +44,7 @@ describe Cfer::Cfn::Client do
         double(
           capabilities: [],
           parameters: [
-            double(parameter_key: 'key', no_echo: false, default_value: nil),
-            double(parameter_key: 'remote_key', no_echo: false, default_value: nil),
-            double(parameter_key: 'remote_default', no_echo: false, default_value: '@other_stack.value')
+            double(parameter_key: 'key', no_echo: false, default_value: nil)
           ]
         )
       }
@@ -99,9 +53,7 @@ describe Cfer::Cfn::Client do
       stack_name: 'test',
       template_body: stack.to_cfn,
       parameters: [
-        { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false },
-        { :parameter_key => 'remote_key', :parameter_value => 'new_remote_value', :use_previous_value => false },
-        { :parameter_key => 'remote_default', :parameter_value => 'new_remote_value', :use_previous_value => false }
+        { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false }
       ],
       capabilities: []
     }

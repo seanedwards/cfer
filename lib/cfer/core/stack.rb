@@ -20,8 +20,9 @@ module Cfer::Core
       end
     end
 
-    def resolve(val)
-      @options[:client] ? @options[:client].resolve(val) : val
+    def lookup_output(stack, out)
+      client = @options[:client] || raise(Cfer::Util::CferError, "Can not fetch stack outputs without a client")
+      client.fetch_output(stack, out)
     end
 
     def initialize(options = {})
@@ -40,7 +41,7 @@ module Cfer::Core
 
       if options[:parameters]
         options[:parameters].each do |key, val|
-          @parameters[key] = resolve(val)
+          @parameters[key] = val
         end
       end
     end
@@ -106,8 +107,6 @@ module Cfer::Core
           when :Description
             Preconditions.check_argument(v.length <= 4000, "#{key} must be <= 4000 characters")
             v
-          when :Default
-            @parameters[name] ||= resolve(v)
           end
         param[k] ||= v
       end
@@ -118,6 +117,10 @@ module Cfer::Core
     # Sets the mappings block for this stack. See [The CloudFormation Documentation](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html) for more details
     def mappings(mappings)
       self[:Mappings] = mappings
+    end
+
+    def mapping(name)
+      self[:Mappings][name] ||= {}
     end
 
     # Adds a condition to the template.
@@ -137,7 +140,7 @@ module Cfer::Core
       clazz = "CferExt::#{type}".split('::').inject(Object) { |o, c| o.const_get c if o && o.const_defined?(c) } || Cfer::Cfn::Resource
       Preconditions.check_argument clazz <= Cfer::Cfn::Resource, "#{type} is not a valid resource type because CferExt::#{type} does not inherit from `Cfer::Cfn::Resource`"
 
-      rc = clazz.new(name, type, options, &block)
+      rc = clazz.new(name, type, self, options, &block)
 
       self[:Resources][name] = rc
       rc
