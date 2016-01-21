@@ -38,8 +38,7 @@ module Cfer::Cfn
 
       parameters = response.parameters.map do |tmpl_param|
         cfn_param = stack.parameters[tmpl_param.parameter_key] ||
-         stack[:Parameters][tmpl_param.parameter_key][:Default] ||
-         raise(Cfer::Util::CferError, "Parameter #{tmpl_param.parameter_key} was required, but not specified")
+         stack[:Parameters][tmpl_param.parameter_key][:Default]
 
         output_val = tmpl_param.no_echo ? '*****' : cfn_param
         Cfer::LOGGER.debug "Parameter #{tmpl_param.parameter_key}=#{output_val}"

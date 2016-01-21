@@ -119,10 +119,6 @@ module Cfer::Core
       self[:Mappings] = mappings
     end
 
-    def mapping(name)
-      self[:Mappings][name] ||= {}
-    end
-
     # Adds a condition to the template.
     # @param name [String] The name of the condition.
     # @param expr [Hash] The CloudFormation condition to add. See [The Cloudformation Documentation](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html) for more details

@@ -36,6 +36,7 @@ describe Cfer::Cfn::Client do
   it 'updates stacks' do
     stack = create_stack client: cfn, parameters: { :key => 'value' }, mock_describe: true do
       parameter :key
+      parameter :unchanged_key
     end
 
     expect(cfn).to receive(:validate_template)
@@ -44,7 +45,8 @@ describe Cfer::Cfn::Client do
         double(
           capabilities: [],
           parameters: [
-            double(parameter_key: 'key', no_echo: false, default_value: nil)
+            double(parameter_key: 'key', no_echo: false, default_value: nil),
+            double(parameter_key: 'unchanged_key', no_echo: false, default_value: nil)
           ]
         )
       }
@@ -53,7 +55,8 @@ describe Cfer::Cfn::Client do
       stack_name: 'test',
       template_body: stack.to_cfn,
       parameters: [
-        { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false }
+        { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false },
+        { :parameter_key => 'unchanged_key', :use_previous_value => true }
       ],
       capabilities: []
     }
