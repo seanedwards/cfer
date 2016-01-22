@@ -54,6 +54,30 @@ describe Cfer::Core::Fn do
     expect(Cfer::Core::Fn::get_azs(:region)).to eq 'Fn::GetAZs' => :region
   end
 
+  it 'has a working AccountID intrinsic' do
+    expect(Cfer::Cfn::AWS::account_id).to eq 'Ref' => 'AWS::AccountId'
+  end
+
+  it 'has a working NotificationARNs intrinsic' do
+    expect(Cfer::Cfn::AWS::notification_arns).to eq 'Ref' => 'AWS::NotificationARNs'
+  end
+
+  it 'has a working NoValue intrinsic' do
+    expect(Cfer::Cfn::AWS::no_value).to eq 'Ref' => 'AWS::NoValue'
+  end
+
+  it 'has a working Region intrinsic' do
+    expect(Cfer::Cfn::AWS::region).to eq 'Ref' => 'AWS::Region'
+  end
+
+  it 'has a working StackId intrinsic' do
+    expect(Cfer::Cfn::AWS::stack_id).to eq 'Ref' => 'AWS::StackId'
+  end
+
+  it 'has a working StackName intrinsic' do
+    expect(Cfer::Cfn::AWS::stack_name).to eq 'Ref' => 'AWS::StackName'
+  end
+
   it 'has a working lookup function' do
     cfn = Cfer::Cfn::Client.new(stack_name: 'test', region: 'us-east-1')
     setup_describe_stacks cfn, 'other_stack'
