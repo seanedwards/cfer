@@ -8,14 +8,18 @@ rvm:
 - ruby-head
 matrix:
   allow_failures:
-    - rvm: ruby-head
+  - rvm: ruby-head
 branches:
   only:
-    - master
-    - develop
+  - master
+  - develop
 script:
 - bundle exec rspec
 - bundle exec yard
+addons:
+  code_climate:
+    repo_token:
+      secure: yokaltZRMTADMBq/htRjXYxchq4e7e66Zlvv0DrLs3yppy3bpCKbXkmtZdUm4XoxOA8fcoeFB0/VVuijmkdpJd2fAj1dc8RDb5uEdwA6ifI2ni1wKZHg15YheL4VwvDK1Nhb9Gr06uXReQ1Fy6jYcXDktyirbX7/AN/csD83IEQ29U58DVCwPxtG1k3h8ji6r/BMayzAd3T/bAeNkLd6t7YIdUAQHqIQsHsER/wQEYRTBVrx+D9b5rj2UluctfJDmpM61lvQnMt6VfgewzGXZCKNdY2DAvySaNg4+9/saZt3Ygpnt7Ef7uBMqgWTayNQ0Wk2VZSUvvLDRAKg+3WLBXTUnbFKK4/GT2T/37Rw9KQGDBJATjDLvNkS1V6Ikzg/4eNtni9RsV/bIwEaYg4CjhVEccj9fa1iPl+2Nzyw7q15UUT89TYJR3L00MQ+M7j5BDgg48kmg2tXBL62kIj/mFzEGuwNLn5nuVkwlnciQ5KCNDrQmN7XL3sPSDyIQ1dAezuj/CAqrRu43KukNZPn9TK9z/NPLUfHvco2E10Mlsw4gXiSp8j1WOmgcenivAoP2x4z5isZ2FShXkxLGq/sT0R4Ko+oGTnD/ghIHuhY3dUDfBhpOkq1wrFB73GjnUh5cYetlS3MvOj0dxT0iUK4oNp1/ds2Bn8in6juiOkN/Zc=
 deploy:
   provider: rubygems
   api_key:
