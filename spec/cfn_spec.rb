@@ -27,10 +27,11 @@ describe Cfer::Cfn::Client do
         parameters: [
           { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false }
         ],
-        capabilities: []
+        capabilities: [],
+        stack_policy_body: File.read('spec/support/stack_policy.json')
       )
 
-    cfn.converge stack
+    cfn.converge stack, stack_policy: 'spec/support/stack_policy.json'
   end
 
   it 'updates stacks' do
@@ -64,7 +65,8 @@ describe Cfer::Cfn::Client do
         { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false },
         { :parameter_key => 'unchanged_key', :use_previous_value => true }
       ],
-      capabilities: []
+      capabilities: [],
+      stack_policy_during_update_body: File.read('spec/support/stack_policy_during_update.json')
     }
 
     expect(cfn).to receive(:create_stack)
@@ -77,7 +79,7 @@ describe Cfer::Cfn::Client do
 
     expect(stack_cfn["Resources"]["abc"]["Properties"]["TestParam"]).to eq("unchanged_value")
 
-    cfn.converge stack
+    cfn.converge stack, stack_policy_during_update: 'spec/support/stack_policy_during_update.json'
   end
 
   it 'follows logs' do

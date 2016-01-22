@@ -60,27 +60,20 @@ module Cfer::Cfn
         end
       end
 
-      policy_options = parse_stack_policy(:stack_policy, options[:stack_policy])
-
-      create_options = {
+      stack_options = {
         stack_name: name,
         template_body: stack.to_cfn,
-        parameters: create_params,
         capabilities: response.capabilities
       }
 
-      update_options = {
-        stack_name: name,
-        template_body: stack.to_cfn,
-        parameters: update_params,
-        capabilities: response.capabilities
-      }
+      stack_options.merge! parse_stack_policy(:stack_policy, options[:stack_policy])
+      stack_options.merge! parse_stack_policy(:stack_policy_during_update, options[:stack_policy_during_update])
 
       cfn_stack =
         begin
-          create_stack create_options.merge(policy_options)
+          create_stack stack_options.merge parameters: create_params
         rescue Cfer::Util::StackExistsError
-          update_stack update_options.merge(policy_options)
+          update_stack stack_options.merge parameters: update_params
         end
 
       flush_cache
@@ -201,6 +194,7 @@ module Cfer::Cfn
     # @param value [String] String containing URL, filename or JSON string
     # @return [Hash] Hash suitable for merging into options for create_stack or update_stack
     def parse_stack_policy(name, value)
+      Cfer::LOGGER.debug "Using #{name} from: #{value}"
       if value.nil?
         {}
       elsif value.match(/\A#{URI::regexp(%w[http https s3])}\z/) # looks like a URL
