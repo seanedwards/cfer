@@ -107,7 +107,7 @@ module Cfer::Core
           when :MinValue
             verify_param(name, "Parameter #{name} must be >= #{v}") { |input_val| input_val.to_i >= v.to_i }
           when :Description
-            verify_param(name, "Description must be <= 4000 characters") { |input_val| v.length <= 4000 }
+            verify_param(name, "Description must be <= 4000 characters") { |input_val| input_val.length <= 4000 }
           when :Default
             @parameters[name] ||= v
           end
@@ -182,7 +182,7 @@ module Cfer::Core
 
     private
     def verify_param(param_name, err_msg)
-      raise Cfer::Util::CferError, err_msg if (@parameters[param_name] && !yield(@parameters[param_name].to_s))
+      raise Cfer::Util::CferError, err_msg if (@input_parameters[param_name] && !yield(@input_parameters[param_name].to_s))
     end
   end
 
