@@ -49,7 +49,7 @@ You should see something like this:
 ### Command line
 
     Commands:
-      cfer converge [OPTIONS] <stack-name>   # Converges a cloudformation stack according to the template
+      cfer converge [OPTIONS] <stack-name>   # Creates or updates a cloudformation stack according to the template
       cfer generate [OPTIONS] <template.rb>  # Generates a CloudFormation template by evaluating a Cfer template
       cfer help [COMMAND]                    # Describe available commands or one specific command
       cfer tail <stack-name>                 # Follows stack events on standard output as they occur
