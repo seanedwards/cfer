@@ -128,7 +128,7 @@ module Cfer::Cfn
     end
 
     def fetch_stack(stack_name = @name)
-      raise Cfer::Util::StackDoesNotExistError, 'Client does not have a stack name' if stack_name == nil
+      raise Cfer::Util::StackDoesNotExistError, 'Stack name must be specified' if stack_name == nil
       begin
         @stack_cache[stack_name] ||= describe_stacks(stack_name: stack_name).stacks.first.to_h
       rescue Aws::CloudFormation::Errors::ValidationError => e

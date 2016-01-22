@@ -8,7 +8,11 @@ Cfer is a lightweight toolkit for managing CloudFormation templates.
 
 Read about Cfer [here](http://tilmonedwards.com/2015/07/28/cfer.html).
 
-If you're interested in hearing more about Cfer, and other DevOps automation projects I'm working on, sign up for the [Impose Mailing List](https://impose.sh/).
+## Production Usage
+
+Cfer is pre-1.0 software. Please see the [license](LICENSE.txt) for disclaimers.
+
+If you would like support or guidance on Cfer, or CloudFormation in general, I offer DevOps consulting services. Please contact me at stedwards+cfer@gmail.com and I will be happy to discuss how I can help.
 
 ## Installation
 
