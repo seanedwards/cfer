@@ -10,7 +10,7 @@ Read about Cfer [here](http://tilmonedwards.com/2015/07/28/cfer.html).
 
 ## Support
 
-Cfer is pre-1.0 software, and may contain bugs or incomplete features. Please see the [license](LICENSE.txt) for disclaimers.
+Cfer is pre-1.0 software, and may contain bugs or incomplete features. Please see the [license](https://github.com/seanedwards/cfer/blob/master/LICENSE.txt) for disclaimers.
 
 If you would like support or guidance on Cfer, or CloudFormation in general, I offer DevOps consulting services. Please [Contact BitLancer](http://www.bitlancer.com/contact-us/) and we'll be happy to discuss your needs.
 
@@ -41,7 +41,7 @@ cfer converge instance -t examples/instance.rb --profile [YOUR-PROFILE] --region
 
 You should see something like this:
 
-![Demo](doc/cfer-demo.gif)
+![Demo](https://raw.githubusercontent.com/seanedwards/cfer/master/doc/cfer-demo.gif)
 
 ### Command line
 
@@ -245,7 +245,7 @@ This project uses [git-flow](http://nvie.com/posts/a-successful-git-branching-mo
 
 Always use `--no-ff` when merging into `develop` or `master`.
 
-This project also contains a [Code of Conduct](CODE_OF_CONDUCT.md), which should be followed when submitting feedback or contributions to this project.
+This project also contains a [Code of Conduct](https://github.com/seanedwards/cfer/blob/master/CODE_OF_CONDUCT.md), which should be followed when submitting feedback or contributions to this project.
 
 ### New features
 
