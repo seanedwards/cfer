@@ -23,19 +23,20 @@ module Cfer
   # The Cfer logger
   LOGGER = Logger.new(STDERR)
   LOGGER.level = Logger::INFO
-  LOGGER.formatter = proc { |severity, datetime, progname, msg|
-    msg = case severity
-    when 'FATAL'
-      Rainbow(msg).red.bright
-    when 'ERROR'
-      Rainbow(msg).red
-    when 'WARN'
-      Rainbow(msg).yellow
-    when 'DEBUG'
-      Rainbow(msg).black.bright
-    else
-      msg
-    end
+  LOGGER.formatter = proc { |severity, _datetime, _progname, msg|
+    msg =
+      case severity
+      when 'FATAL'
+        Rainbow(msg).red.bright
+      when 'ERROR'
+        Rainbow(msg).red
+      when 'WARN'
+        Rainbow(msg).yellow
+      when 'DEBUG'
+        Rainbow(msg).black.bright
+      else
+        msg
+      end
 
     "#{msg}\n"
   }
@@ -68,15 +69,25 @@ module Cfer
 
       Cfer::LOGGER.debug "Describe stack: #{cfn_stack}"
 
-      case options[:output_format] || 'table'
+      case options[:output_format]
       when 'json'
         puts render_json(cfn_stack, options)
       when 'table'
         puts "Status: #{cfn_stack[:stack_status]}"
         puts "Description: #{cfn_stack[:description]}" if cfn_stack[:description]
         puts ""
-        parameters = (cfn_stack[:parameters] || []).map { |param| {:Type => "Parameter", :Key => param[:parameter_key], :Value => param[:parameter_value]} }
-        outputs = (cfn_stack[:outputs] || []).map { |output| {:Type => "Output", :Key => output[:output_key], :Value => output[:output_value]} }
+        def tablify(list, type)
+          list ||= []
+          list.map { |param|
+            {
+              :Type => type.to_s.titleize,
+              :Key => param[:"#{type}_key"],
+              :Value => param[:"#{type}_value"]
+            }
+          }
+        end
+        parameters = tablify(cfn_stack[:parameters] || [], 'parameter')
+        outputs = tablify(cfn_stack[:outputs] || [], 'output')
         tp parameters + outputs, :Type, :Key, {:Value => {:width => 80}}
       else
         raise Cfer::Util::CferError, "Invalid output format #{options[:output_format]}."
