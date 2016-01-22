@@ -8,11 +8,11 @@ Cfer is a lightweight toolkit for managing CloudFormation templates.
 
 Read about Cfer [here](http://tilmonedwards.com/2015/07/28/cfer.html).
 
-## Production Usage
+## Support
 
-Cfer is pre-1.0 software. Please see the [license](LICENSE.txt) for disclaimers.
+Cfer is pre-1.0 software, and may contain bugs or incomplete features. Please see the [license](LICENSE.txt) for disclaimers.
 
-If you would like support or guidance on Cfer, or CloudFormation in general, I offer DevOps consulting services. Please contact me at stedwards87+cfer@gmail.com and I will be happy to discuss how I can help.
+If you would like support or guidance on Cfer, or CloudFormation in general, I offer DevOps consulting services. Please [Contact BitLancer](http://www.bitlancer.com/contact-us/) and we'll be happy to discuss your needs.
 
 ## Installation
 
@@ -276,10 +276,20 @@ This project also contains a [Code of Conduct](CODE_OF_CONDUCT.md), which should
 ## 0.3.0
 
 ### Enhancements:
-* `parameters` hash now includes parameters that are set on the stack, but not passed in via CLI during an update.
+* `parameters` hash now includes parameters that are set on the existing stack, but not passed in via CLI during a stack update.
+* `parameters` hash now includes defaults for parameters that were not passed on the CLI during a stack creation.
 * Adds a `lookup_output` function, for looking up outputs of stacks in the same account+region. (See #8)
-* Adds a changelog to the README.
+* Adds release notes to the README.
 
 ### Bugfixes
 * Removes automatic parameter mapping in favor of an explicit function available to resources. (Fixes Issue #8)
 * No more double-printing the stack summary when converging a stack with tailing enabled.
+* Update demo to only use 2 AZs, since us-west-1 only has two.
+* `AllowedValues` attribute on parameters is now an array, not a CSV string. (Thanks to @rlister)
+
+## 0.2.0
+
+### Enhancements:
+* Adds support for including other files via `include_template` function.
+* Adds basic Dockerfile
+
