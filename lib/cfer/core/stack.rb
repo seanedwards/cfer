@@ -5,7 +5,12 @@ module Cfer::Core
     include Cfer::Core
     include Cfer::Cfn
 
+    # The parameters strictly as passed via command line
+    attr_reader :input_parameters
+
+    # The fully resolved parameters, including defaults and parameters fetched from an existing stack during an update
     attr_reader :parameters
+
     attr_reader :options
 
     def converge!
@@ -18,11 +23,6 @@ module Cfer::Core
       if @options[:client]
         @options[:client].tail self, &block
       end
-    end
-
-    def lookup_output(stack, out)
-      client = @options[:client] || raise(Cfer::Util::CferError, "Can not fetch stack outputs without a client")
-      client.fetch_output(stack, out)
     end
 
     def initialize(options = {})
@@ -38,15 +38,23 @@ module Cfer::Core
       self[:Outputs] = {}
 
       @parameters = HashWithIndifferentAccess.new
+      @input_parameters = HashWithIndifferentAccess.new
+
+      if options[:client]
+        begin
+          options[:client].fetch_parameters.each do |k, v|
+            @parameters[k] = v
+          end
+        rescue Cfer::Util::StackDoesNotExistError
+          # Creating stack, so there are no parameters to pull.
+        end
+      end
 
       if options[:parameters]
         options[:parameters].each do |key, val|
-          @parameters[key] = val
+          @input_parameters[key] = @parameters[key] = val
         end
       end
-    end
-
-    def pre_block
     end
 
     # Sets the description for this CloudFormation stack
@@ -105,8 +113,10 @@ module Cfer::Core
             verify_param(name, "Parameter #{name} must be >= #{v}") { |input_val| input_val.to_i >= v.to_i }
             v
           when :Description
-            Preconditions.check_argument(v.length <= 4000, "#{key} must be <= 4000 characters")
+            Preconditions.check_argument(v.length <= 4000, "Description must be <= 4000 characters")
             v
+          when :Default
+            @parameters[name] ||= v
           end
         param[k] ||= v
       end
@@ -146,7 +156,7 @@ module Cfer::Core
     # @param name [String] The Logical ID of the output parameter
     # @param value [String] Value to return
     # @param options [Hash] Extra options for this output parameter
-    # @option options [String] :Description Informationa bout the value
+    # @option options [String] :Description Information about the value
     def output(name, value, options = {})
       self[:Outputs][name] = options.merge('Value' => value)
     end
@@ -155,6 +165,10 @@ module Cfer::Core
     # @return [String] The final template
     def to_cfn
       to_h.to_json
+    end
+
+    def client
+      @options[:client] || raise(Cfer::Util::CferError, "Stack has no associated client.")
     end
 
     # Includes template code from one or more files, and evals it in the context of this stack.
@@ -166,6 +180,11 @@ module Cfer::Core
         path = File.join(dirname, file)
         instance_eval(File.read(path), path)
       end
+    end
+
+    def lookup_output(stack, out)
+      client = @options[:client] || raise(Cfer::Util::CferError, "Can not fetch stack outputs without a client")
+      client.fetch_output(stack, out)
     end
 
     private

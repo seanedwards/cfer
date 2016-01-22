@@ -17,8 +17,8 @@ parameter :VpcId, default: lookup_output(parameters[:Vpc], 'vpcid')
 parameter :SubnetId, default: lookup_output(parameters[:Vpc], 'subnetid1')
 
 # This is the Ubuntu 14.04 LTS HVM AMI provided by Amazon.
-parameter :ImageId, default: 'ami-d05e75b8'
-parameter :InstanceType, default: 't2.medium'
+parameter :ImageId, default: 'ami-fce3c696'
+parameter :InstanceType, default: 't2.nano'
 
 # Define a security group to be applied to an instance.
 # This one will allow SSH access from anywhere, and no other inbound traffic.
@@ -81,3 +81,4 @@ resource :instance, "AWS::EC2::Instance" do
 end
 
 output :instance, Fn::ref(:instance)
+output :instanceip, Fn::get_att(:instance, :PublicIp)

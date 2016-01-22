@@ -1,6 +1,12 @@
 module CferExt::Provisioning
-  def cloud_init(doc)
-    userdata doc
+  def cloud_config(options)
+    data = ::YAML.dump(cloud_init_data.stringify_keys)
+    user_data Cfer::Core::Fn::base64("#cloud-config\n##{data}")
+  end
+
+  def shell_init(script, options = {})
+    data = "#!#{options[:shell] || '/usr/bin/env bash'}\n#{cloud_init_data}"
+    user_data Cfer::Core::Fn::base64(data)
   end
 end
 

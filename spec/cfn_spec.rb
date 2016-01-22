@@ -1,12 +1,12 @@
 require 'spec_helper'
 
 describe Cfer::Cfn::Client do
-  cfn = Cfer::Cfn::Client.new stack_name: 'test', region: 'us-east-1'
 
   it 'creates stacks' do
-    stack = create_stack parameters: {:key => 'value'}, client: cfn, mock_describe: true do
+    stack = create_stack parameters: {:key => 'value'}, fetch_stack: true do
       parameter :key
     end
+    cfn = stack.client
 
     expect(cfn).to receive(:validate_template)
       .exactly(1).times
@@ -34,10 +34,16 @@ describe Cfer::Cfn::Client do
   end
 
   it 'updates stacks' do
-    stack = create_stack client: cfn, parameters: { :key => 'value' }, mock_describe: true do
+    stack = create_stack parameters: { :key => 'value' }, fetch_stack: true do
       parameter :key
       parameter :unchanged_key
+
+      resource :abc, "Cfer::TestResource" do
+        test_param parameters[:unchanged_key]
+      end
     end
+    cfn = stack.client
+    stack_cfn = stack.to_h
 
     expect(cfn).to receive(:validate_template)
       .exactly(1).times
@@ -63,17 +69,19 @@ describe Cfer::Cfn::Client do
 
     expect(cfn).to receive(:create_stack)
       .exactly(1).times
-      .with(stack_options)
       .and_raise(Cfer::Util::StackExistsError)
 
     expect(cfn).to receive(:update_stack)
       .exactly(1).times
       .with(stack_options)
 
+    expect(stack_cfn["Resources"]["abc"]["Properties"]["TestParam"]).to eq("unchanged_value")
+
     cfn.converge stack
   end
 
   it 'follows logs' do
+    cfn = Cfer::Cfn::Client.new stack_name: 'test', region: 'us-east-1'
     event_list = [
       double('event 1', event_id: 1, timestamp: DateTime.now, resource_status: 'TEST', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
       double('event 2', event_id: 2, timestamp: DateTime.now, resource_status: 'TEST2', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'efgh'),

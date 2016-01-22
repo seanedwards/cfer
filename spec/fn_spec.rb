@@ -1,16 +1,14 @@
 require 'spec_helper'
 
 describe Cfer::Core::Fn do
-  cfn = Cfer::Cfn::Client.new stack_name: 'test', region: 'us-east-1'
-
   it 'has a working ref function' do
     expect(Cfer::Core::Fn::ref(:abc)).to eq 'Ref' => :abc
   end
 
   it 'has a working lookup function' do
+    cfn = Cfer::Cfn::Client.new(stack_name: 'test', region: 'us-east-1')
     setup_describe_stacks cfn, 'other_stack'
-
-    stack = create_stack client: cfn do
+    stack = create_stack client: cfn, fetch_stack: true do
       resource :abc, "Cfer::TestResource" do
         test_param lookup_output("other_stack", "value")
       end
