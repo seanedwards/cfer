@@ -1,8 +1,57 @@
 require 'spec_helper'
 
 describe Cfer::Core::Fn do
+
+  it 'has a working join function' do
+    expect(Cfer::Core::Fn::join('-', ['a', 'b', 'c'])).to eq 'Fn::Join' => ['-', ['a', 'b', 'c']]
+  end
+
   it 'has a working ref function' do
     expect(Cfer::Core::Fn::ref(:abc)).to eq 'Ref' => :abc
+  end
+
+  it 'has a working get_att function' do
+    expect(Cfer::Core::Fn::get_att(:stack, :output)).to eq 'Fn::GetAtt' => [:stack, :output]
+  end
+
+  it 'has a working find_in_map function' do
+    expect(Cfer::Core::Fn::find_in_map(:map_name, :key1, :key2)).to eq 'Fn::FindInMap' => [:map_name, :key1, :key2]
+  end
+
+  it 'has a working select function' do
+    expect(Cfer::Core::Fn::select(:list, :item)).to eq 'Fn::Select' => [:list, :item]
+  end
+
+  it 'has a working base64 function' do
+    expect(Cfer::Core::Fn::base64('value')).to eq 'Fn::Base64' => 'value'
+  end
+
+  it 'has a working condition function' do
+    expect(Cfer::Core::Fn::condition(:cond)).to eq 'Condition' => :cond
+  end
+
+  it 'has a working and function' do
+    expect(Cfer::Core::Fn::and(:and1, :and2, :and3)).to eq 'Fn::And' => [:and1, :and2, :and3]
+  end
+
+  it 'has a working or function' do
+    expect(Cfer::Core::Fn::or(:and1, :and2, :and3)).to eq 'Fn::Or' => [:and1, :and2, :and3]
+  end
+
+  it 'has a working equals function' do
+    expect(Cfer::Core::Fn::equals(:a, :b)).to eq 'Fn::Equals' => [:a, :b]
+  end
+
+  it 'has a working if function' do
+    expect(Cfer::Core::Fn::if(:cond, :truthy, :falsy)).to eq 'Fn::If' => [:cond, :truthy, :falsy]
+  end
+
+  it 'has a working not function' do
+    expect(Cfer::Core::Fn::not(:expr)).to eq 'Fn::Not' => [:expr]
+  end
+
+  it 'has a working get_azs function' do
+    expect(Cfer::Core::Fn::get_azs(:region)).to eq 'Fn::GetAZs' => :region
   end
 
   it 'has a working lookup function' do

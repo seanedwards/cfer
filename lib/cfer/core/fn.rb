@@ -28,8 +28,12 @@ module Cfer::Core::Fn
       {"Condition" => cond}
     end
 
-    def and(conds)
-      {"Fn::And" => [conds]}
+    def and(*conds)
+      {"Fn::And" => conds}
+    end
+
+    def or(*conds)
+      {"Fn::Or" => conds}
     end
 
     def equals(a, b)
@@ -41,11 +45,7 @@ module Cfer::Core::Fn
     end
 
     def not(cond)
-      {"Fn::Not" => cond}
-    end
-
-    def or(conds)
-      {"Fn::Or" => conds}
+      {"Fn::Not" => [cond]}
     end
 
     def get_azs(region)

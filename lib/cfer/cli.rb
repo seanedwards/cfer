@@ -26,7 +26,7 @@ module Cfer
         default: 'table'
     end
 
-    desc 'converge [OPTIONS] <stack-name>', 'Converges a cloudformation stack according to the template'
+    desc 'converge [OPTIONS] <stack-name>', 'Create or update a cloudformation stack according to the template'
     #method_option :git_lock,
     #  type: :boolean,
     #  default: true,
