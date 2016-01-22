@@ -12,7 +12,7 @@ Read about Cfer [here](http://tilmonedwards.com/2015/07/28/cfer.html).
 
 Cfer is pre-1.0 software. Please see the [license](LICENSE.txt) for disclaimers.
 
-If you would like support or guidance on Cfer, or CloudFormation in general, I offer DevOps consulting services. Please contact me at stedwards+cfer@gmail.com and I will be happy to discuss how I can help.
+If you would like support or guidance on Cfer, or CloudFormation in general, I offer DevOps consulting services. Please contact me at stedwards87+cfer@gmail.com and I will be happy to discuss how I can help.
 
 ## Installation
 
