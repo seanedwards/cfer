@@ -89,25 +89,10 @@ module Cfer::Core
         k = key.to_s.camelize.to_sym
         param[k] =
           case k
-          when :AllowedValues
-            verify_param(name, "Parameter #{name} must be one of: #{v.join(',')}") { |input_val| v.include?(input_val) }
           when :AllowedPattern
             if v.class == Regexp
-              verify_param(name, "Parameter #{name} must match /#{v.source}/") { |input_val| v =~ input_val }
               v.source
-            else
-              verify_param(name, "Parameter #{name} must match /#{v}/") { |input_val| Regexp.new(v) =~ input_val }
             end
-          when :MaxLength
-            verify_param(name, "Parameter #{name} must have length <= #{v}") { |input_val| input_val.length <= v.to_i }
-          when :MinLength
-            verify_param(name, "Parameter #{name} must have length >= #{v}") { |input_val| input_val.length >= v.to_i }
-          when :MaxValue
-            verify_param(name, "Parameter #{name} must be <= #{v}") { |input_val| input_val.to_i <= v.to_i }
-          when :MinValue
-            verify_param(name, "Parameter #{name} must be >= #{v}") { |input_val| input_val.to_i >= v.to_i }
-          when :Description
-            verify_param(name, "Description must be <= 4000 characters") { |input_val| input_val.length <= 4000 }
           when :Default
             @parameters[name] ||= v
           end
@@ -178,11 +163,6 @@ module Cfer::Core
     def lookup_output(stack, out)
       client = @options[:client] || raise(Cfer::Util::CferError, "Can not fetch stack outputs without a client")
       client.fetch_output(stack, out)
-    end
-
-    private
-    def verify_param(param_name, err_msg)
-      raise Cfer::Util::CferError, err_msg if (@input_parameters[param_name] && !yield(@input_parameters[param_name].to_s))
     end
   end
 
