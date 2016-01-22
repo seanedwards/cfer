@@ -49,6 +49,14 @@ module Cfer
       aliases: :t,
       type: :string,
       desc: 'Override the stack filename (defaults to <stack-name>.rb)'
+    method_option :stack_policy,
+      aliases: :s,
+      type: :string,
+      desc: 'Set a new stack policy on create or update of the stack [file|url|json]'
+    method_option :stack_policy_during_update,
+      aliases: :u,
+      type: :string,
+      desc: 'Set a temporary overriding stack policy during an update [file|url|json]'
     template_options
     stack_options
     def converge(stack_name)
@@ -135,4 +143,3 @@ module Cfer
 
 
 end
-

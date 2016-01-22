@@ -28,7 +28,7 @@ module Cfer::Cfn
       @cfn.send(method, *args, &block)
     end
 
-    def converge(stack, _options = {})
+    def converge(stack, options = {})
       Preconditions.check(@name).is_not_nil
       Preconditions.check(stack) { is_not_nil and has_type(Cfer::Core::Stack) }
 
@@ -60,17 +60,27 @@ module Cfer::Cfn
         end
       end
 
+      policy_options = parse_stack_policy(:stack_policy, options[:stack_policy])
+
+      create_options = {
+        stack_name: name,
+        template_body: stack.to_cfn,
+        parameters: create_params,
+        capabilities: response.capabilities
+      }
+
+      update_options = {
+        stack_name: name,
+        template_body: stack.to_cfn,
+        parameters: update_params,
+        capabilities: response.capabilities
+      }
+
       cfn_stack =
         begin
-          create_stack stack_name: name,
-            template_body: stack.to_cfn,
-            parameters: create_params,
-            capabilities: response.capabilities
+          create_stack create_options.merge(policy_options)
         rescue Cfer::Util::StackExistsError
-          update_stack stack_name: name,
-            template_body: stack.to_cfn,
-            parameters: update_params,
-            capabilities: response.capabilities
+          update_stack update_options.merge(policy_options)
         end
 
       flush_cache
@@ -174,6 +184,34 @@ module Cfer::Cfn
         yield event
       end
     end
+
+    # Validates a string as json
+    #
+    # @param string [String]
+    def is_json?(string)
+      JSON.parse(string)
+      true
+    rescue JSON::ParserError
+      false
+    end
+
+    # Parses stack-policy-* options as an S3 URL, file to read, or JSON string
+    #
+    # @param name [String] Name of option: 'stack_policy' or 'stack_policy_during_update'
+    # @param value [String] String containing URL, filename or JSON string
+    # @return [Hash] Hash suitable for merging into options for create_stack or update_stack
+    def parse_stack_policy(name, value)
+      if value.nil?
+        {}
+      elsif value.match(/\A#{URI::regexp(%w[http https s3])}\z/) # looks like a URL
+        {"#{name}_url".to_sym => value}
+      elsif File.exists?(value)                               # looks like a file to read
+        {"#{name}_body".to_sym => File.read(value)}
+      elsif is_json?(value)                                   # looks like a JSON string
+        {"#{name}_body".to_sym => value}
+      else                                                    # none of the above
+        raise Cfer::Util::CferError, "Stack policy must be an S3 url, a filename, or a valid json string"
+      end
+    end
   end
 end
-

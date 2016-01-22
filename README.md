@@ -74,10 +74,12 @@ Creates or updates a CloudFormation stack according to the specified template.
 
 The following options may be used with the `converge` command:
 
-* `--follow` (`-f`): Follows stack events on standard output as the create/update process takes place. 
+* `--follow` (`-f`): Follows stack events on standard output as the create/update process takes place.
 * `--stack-file <template.rb>`: Reads this file from the filesystem, rather than the default `<stack-name>.rb`
 * `--parameters <Key1>:<Value1> <Key2>:<Value2> ...`: Specifies input parameters, which will be available to Ruby in the `parameters` hash, or to CloudFormation by using the `Fn::ref` function
 * `--on-failure <DELETE|ROLLBACK|DO_NOTHING>`: Specifies the action to take when a stack creation fails. Has no effect if the stack already exists and is being updated.
+* `--stack-policy <filename|URL|JSON string>` (`-s`): Stack policy to apply to the stack in order to control updates; takes a local filename containing the policy, a URL to an S3 object, or a raw JSON string.
+* `--stack-policy-during-update <filename|URL|JSON string>` (`-u`): Stack policy as in `--stack-policy` option above, but applied as a temporary override to the permanent policy during stack update.
 
 #### `tail <stack-name>`
 
@@ -85,7 +87,7 @@ Prints the latest `n` stack events, and optionally follows events while a stack 
 
 The following options may be used with the `tail` command:
 
-* `--follow` (`-f`): Follows stack events on standard output as the create/update process takes place. 
+* `--follow` (`-f`): Follows stack events on standard output as the create/update process takes place.
 * `--number` (`-n`): Print the last `n` stack events.
 
 ### Template Anatomy
