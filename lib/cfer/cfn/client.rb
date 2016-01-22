@@ -28,7 +28,7 @@ module Cfer::Cfn
       @cfn.send(method, *args, &block)
     end
 
-    def converge(stack, options = {})
+    def converge(stack, _options = {})
       Preconditions.check(@name).is_not_nil
       Preconditions.check(stack) { is_not_nil and has_type(Cfer::Core::Stack) }
 
@@ -60,14 +60,12 @@ module Cfer::Cfn
         end
       end
 
-      created = false
       cfn_stack =
         begin
           create_stack stack_name: name,
             template_body: stack.to_cfn,
             parameters: create_params,
             capabilities: response.capabilities
-          created = true
         rescue Cfer::Util::StackExistsError
           update_stack stack_name: name,
             template_body: stack.to_cfn,
@@ -83,13 +81,13 @@ module Cfer::Cfn
     # @param options [Hash] The options hash
     # @option options [Fixnum] :number The maximum number of already-existing CloudFormation events to yield.
     # @option options [Boolean] :follow Set to true to wait until the stack enters a `COMPLETE` or `FAILED` state, yielding events as they occur.
-    def tail(options = {}, &block)
+    def tail(options = {})
       q = []
       event_id_highwater = nil
       counter = 0
       number = options[:number] || 0
-      for_each_event name do |event|
-        q.unshift event if counter < number
+      for_each_event name do |fetched_event|
+        q.unshift fetched_event if counter < number
         counter = counter + 1
       end
 
@@ -106,13 +104,13 @@ module Cfer::Cfn
           running = running && (/.+_(COMPLETE|FAILED)$/.match(stack_status) == nil)
 
           yielding = true
-          for_each_event name do |event|
-            if event_id_highwater == event.event_id
+          for_each_event name do |fetched_event|
+            if event_id_highwater == fetched_event.event_id
               yielding = false
             end
 
             if yielding
-              q.unshift event
+              q.unshift fetched_event
             end
           end
 
@@ -159,7 +157,6 @@ module Cfer::Cfn
     private
 
     def cfn_list_to_hash(attribute, list)
-      pluralized = :"#{attribute}s"
       key = :"#{attribute}_key"
       value = :"#{attribute}_value"
 
