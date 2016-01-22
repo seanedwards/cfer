@@ -7,6 +7,10 @@ rvm:
 matrix:
   allow_failures:
     - rvm: ruby-head
+branches:
+  only:
+    - master
+    - develop
 script:
 - bundle exec rspec
 - bundle exec yard
