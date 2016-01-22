@@ -91,30 +91,23 @@ module Cfer::Core
           case k
           when :AllowedValues
             verify_param(name, "Parameter #{name} must be one of: #{v.join(',')}") { |input_val| v.include?(input_val) }
-            v
           when :AllowedPattern
             if v.class == Regexp
               verify_param(name, "Parameter #{name} must match /#{v.source}/") { |input_val| v =~ input_val }
               v.source
             else
               verify_param(name, "Parameter #{name} must match /#{v}/") { |input_val| Regexp.new(v) =~ input_val }
-              v
             end
           when :MaxLength
             verify_param(name, "Parameter #{name} must have length <= #{v}") { |input_val| input_val.length <= v.to_i }
-            v
           when :MinLength
             verify_param(name, "Parameter #{name} must have length >= #{v}") { |input_val| input_val.length >= v.to_i }
-            v
           when :MaxValue
             verify_param(name, "Parameter #{name} must be <= #{v}") { |input_val| input_val.to_i <= v.to_i }
-            v
           when :MinValue
             verify_param(name, "Parameter #{name} must be >= #{v}") { |input_val| input_val.to_i >= v.to_i }
-            v
           when :Description
-            Preconditions.check_argument(v.length <= 4000, "Description must be <= 4000 characters")
-            v
+            verify_param(name, "Description must be <= 4000 characters") { |input_val| v.length <= 4000 }
           when :Default
             @parameters[name] ||= v
           end
