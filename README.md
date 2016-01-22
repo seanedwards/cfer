@@ -271,4 +271,11 @@ This project also contains a [Code of Conduct](CODE_OF_CONDUCT.md), which should
 
 ## 0.3.0
 
+### Enhancements:
+* `parameters` hash now includes parameters that are set on the stack, but not passed in via CLI during an update.
+* Adds a `lookup_output` function, for looking up outputs of stacks in the same account+region. (See #8)
+* Adds a changelog to the README.
+
+### Bugfixes
 * Removes automatic parameter mapping in favor of an explicit function available to resources. (Fixes Issue #8)
+* No more double-printing the stack summary when converging a stack with tailing enabled.
