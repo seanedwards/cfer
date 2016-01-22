@@ -41,7 +41,7 @@ cfer converge instance -t examples/instance.rb --profile [YOUR-PROFILE] --region
 
 You should see something like this:
 
-![Demo](cfer-demo.gif)
+![Demo](doc/cfer-demo.gif)
 
 ### Command line
 
@@ -281,7 +281,7 @@ This project also contains a [Code of Conduct](CODE_OF_CONDUCT.md), which should
 * Adds a `lookup_output` function, for looking up outputs of stacks in the same account+region. (See #8)
 * Adds release notes to the README.
 
-### Bugfixes
+### Bugfixes:
 * Removes automatic parameter mapping in favor of an explicit function available to resources. (Fixes Issue #8)
 * No more double-printing the stack summary when converging a stack with tailing enabled.
 * Update demo to only use 2 AZs, since us-west-1 only has two.
