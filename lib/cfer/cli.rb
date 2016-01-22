@@ -112,7 +112,7 @@ module Cfer
         if Cfer::DEBUG
           Pry::rescued(e)
         else
-          Cfer::Util.bug_report(e)
+          #Cfer::Util.bug_report(e)
         end
         exit 1
       end

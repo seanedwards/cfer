@@ -58,7 +58,7 @@ module Cfer
       rescue Aws::CloudFormation::Errors::ValidationError => e
         Cfer::LOGGER.info "CFN validation error: #{e.message}"
       end
-      describe! stack_name, options
+      describe! stack_name, options unless options[:follow]
     end
 
     def describe!(stack_name, options = {})

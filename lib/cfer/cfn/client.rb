@@ -3,6 +3,7 @@ module Cfer::Cfn
 
   class Client < Cfer::Core::Client
     attr_reader :name
+    attr_reader :stack
 
     def initialize(options)
       @name = options[:stack_name]
@@ -27,51 +28,51 @@ module Cfer::Cfn
       @cfn.send(method, *args, &block)
     end
 
-    def resolve(param)
-      # See if the value follows the form @<stack>.<output>
-      m = /^@(.+?)\.(.+)$/.match(param)
-
-      if m
-        fetch_output(m[1], m[2])
-      else
-        param
-      end
-    end
-
-
     def converge(stack, options = {})
       Preconditions.check(@name).is_not_nil
       Preconditions.check(stack) { is_not_nil and has_type(Cfer::Core::Stack) }
 
       response = validate_template(template_body: stack.to_cfn)
 
-      parameters = response.parameters.map do |tmpl_param|
-        cfn_param = stack.parameters[tmpl_param.parameter_key] || raise(Cfer::Util::CferError, "Parameter #{tmpl_param.parameter_key} was required, but not specified")
-        cfn_param = resolve(cfn_param)
+      create_params = []
+      update_params = []
 
-        output_val = tmpl_param.no_echo ? '*****' : cfn_param
-        Cfer::LOGGER.debug "Parameter #{tmpl_param.parameter_key}=#{output_val}"
+      response.parameters.each do |tmpl_param|
+        cfn_param = stack.input_parameters[tmpl_param.parameter_key]
 
-        {
-          parameter_key: tmpl_param.parameter_key,
-          parameter_value: cfn_param,
-          use_previous_value: false
-        }
+        if cfn_param
+          output_val = tmpl_param.no_echo ? '*****' : cfn_param
+          Cfer::LOGGER.debug "Parameter #{tmpl_param.parameter_key}=#{output_val}"
+          p = {
+            parameter_key: tmpl_param.parameter_key,
+            parameter_value: cfn_param,
+            use_previous_value: false
+          }
+
+          create_params << p
+          update_params << p
+        else
+          Cfer::LOGGER.debug "Parameter #{tmpl_param.parameter_key} is unspecified (unchanged or default)"
+          update_params << {
+            parameter_key: tmpl_param.parameter_key,
+            use_previous_value: true
+          }
+        end
       end
 
-      options = {
-        stack_name: name,
-        template_body: stack.to_cfn,
-        parameters: parameters,
-        capabilities: response.capabilities
-      }
-
       created = false
-      cfn_stack = begin
+      cfn_stack =
+        begin
+          create_stack stack_name: name,
+            template_body: stack.to_cfn,
+            parameters: create_params,
+            capabilities: response.capabilities
           created = true
-          create_stack options
         rescue Cfer::Util::StackExistsError
-          update_stack options
+          update_stack stack_name: name,
+            template_body: stack.to_cfn,
+            parameters: update_params,
+            capabilities: response.capabilities
         end
 
       flush_cache
@@ -127,7 +128,28 @@ module Cfer::Cfn
     end
 
     def fetch_stack(stack_name = @name)
-      @stack_cache[stack_name] ||= describe_stacks(stack_name: stack_name).stacks.first.to_h
+      raise Cfer::Util::StackDoesNotExistError, 'Stack name must be specified' if stack_name == nil
+      begin
+        @stack_cache[stack_name] ||= describe_stacks(stack_name: stack_name).stacks.first.to_h
+      rescue Aws::CloudFormation::Errors::ValidationError => e
+        raise Cfer::Util::StackDoesNotExistError, e.message
+      end
+    end
+
+    def fetch_parameters(stack_name = @name)
+      @stack_parameters[stack_name] ||= cfn_list_to_hash('parameter', fetch_stack(stack_name)[:parameters])
+    end
+
+    def fetch_outputs(stack_name = @name)
+      @stack_outputs[stack_name] ||= cfn_list_to_hash('output', fetch_stack(stack_name)[:outputs])
+    end
+
+    def fetch_output(stack_name, output_name)
+      fetch_outputs(stack_name)[output_name] || raise(Cfer::Util::CferError, "Stack #{stack_name} has no output named `#{output_name}`")
+    end
+
+    def fetch_parameter(stack_name, param_name)
+      fetch_parameters(stack_name)[param_name] || raise(Cfer::Util::CferError, "Stack #{stack_name} has no parameter named `#{param_name}`")
     end
 
     def to_h
@@ -136,22 +158,18 @@ module Cfer::Cfn
 
     private
 
-    def flush_cache
-      @stack_cache = {}
+    def cfn_list_to_hash(attribute, list)
+      pluralized = :"#{attribute}s"
+      key = :"#{attribute}_key"
+      value = :"#{attribute}_value"
+
+      Hash[ *list.map { |kv| [ kv[key], kv[value] ] }.flatten ]
     end
 
-    def fetch_output(stack_name, output_name)
-      stack = fetch_stack(stack_name)
-
-      output = stack[:outputs].find do |o|
-        o[:output_key] == output_name
-      end
-
-      if output
-        output[:output_value]
-      else
-        raise CferError, "Stack #{stack_name} has no output value named `#{output_name}`"
-      end
+    def flush_cache
+      @stack_cache = {}
+      @stack_parameters = {}
+      @stack_outputs = {}
     end
 
     def for_each_event(stack_name)

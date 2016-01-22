@@ -1,28 +1,12 @@
 require 'spec_helper'
 
 describe Cfer::Cfn::Client do
-  cfn = Cfer::Cfn::Client.new stack_name: 'test', region: 'us-east-1'
 
   it 'creates stacks' do
-    expect(cfn).to receive(:describe_stacks)
-      .exactly(1).times
-      .with(stack_name: 'other_stack')
-      .and_return(
-        double(stacks: double(first: double(
-          to_h: {
-            :outputs => [
-              {:output_key => 'value', :output_value => 'remote_value'}
-            ]
-          }
-        )))
-      )
-
-    stack = create_stack parameters: {:key => 'value', :remote_key => '@other_stack.value'}, client: cfn do
+    stack = create_stack parameters: {:key => 'value'}, fetch_stack: true do
       parameter :key
-      parameter :remote_key
-      parameter :remote_default, default: '@other_stack.value'
-      parameter :retrieved_value, default: parameters[:remote_key]
     end
+    cfn = stack.client
 
     expect(cfn).to receive(:validate_template)
       .exactly(1).times
@@ -30,10 +14,7 @@ describe Cfer::Cfn::Client do
       double(
         capabilities: [],
         parameters: [
-          double(parameter_key: 'key', no_echo: false),
-          double(parameter_key: 'remote_key', no_echo: false),
-          double(parameter_key: 'remote_default', no_echo: false, default_value: 'remote_value'),
-          double(parameter_key: 'retrieved_value', no_echo: false, default_value: 'remote_value')
+          double(parameter_key: 'key', no_echo: false)
         ]
       )
     }
@@ -44,10 +25,7 @@ describe Cfer::Cfn::Client do
         stack_name: 'test',
         template_body: stack.to_cfn,
         parameters: [
-          { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false },
-          { :parameter_key => 'remote_key', :parameter_value => 'remote_value', :use_previous_value => false },
-          { :parameter_key => 'remote_default', :parameter_value => 'remote_value', :use_previous_value => false },
-          { :parameter_key => 'retrieved_value', :parameter_value => 'remote_value', :use_previous_value => false }
+          { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false }
         ],
         capabilities: []
       )
@@ -56,31 +34,16 @@ describe Cfer::Cfn::Client do
   end
 
   it 'updates stacks' do
-    expect(cfn).to receive(:describe_stacks)
-      .exactly(1).times
-      .with(stack_name: 'other_stack')
-      .and_return(
-        double(
-          stacks: double(
-            first: double(
-              to_h: {
-                :outputs => [
-                  {
-                    :output_key => 'value',
-                    :output_value => 'new_remote_value'
-                  }
-                ]
-              }
-            )
-          )
-        )
-      )
-
-    stack = create_stack client: cfn, parameters: { :key => 'value', :remote_key => '@other_stack.value' } do
+    stack = create_stack parameters: { :key => 'value' }, fetch_stack: true do
       parameter :key
-      parameter :remote_key
-      parameter :remote_default, Default: '@other_stack.value'
+      parameter :unchanged_key
+
+      resource :abc, "Cfer::TestResource" do
+        test_param parameters[:unchanged_key]
+      end
     end
+    cfn = stack.client
+    stack_cfn = stack.to_h
 
     expect(cfn).to receive(:validate_template)
       .exactly(1).times
@@ -89,8 +52,7 @@ describe Cfer::Cfn::Client do
           capabilities: [],
           parameters: [
             double(parameter_key: 'key', no_echo: false, default_value: nil),
-            double(parameter_key: 'remote_key', no_echo: false, default_value: nil),
-            double(parameter_key: 'remote_default', no_echo: false, default_value: '@other_stack.value')
+            double(parameter_key: 'unchanged_key', no_echo: false, default_value: nil)
           ]
         )
       }
@@ -100,25 +62,26 @@ describe Cfer::Cfn::Client do
       template_body: stack.to_cfn,
       parameters: [
         { :parameter_key => 'key', :parameter_value => 'value', :use_previous_value => false },
-        { :parameter_key => 'remote_key', :parameter_value => 'new_remote_value', :use_previous_value => false },
-        { :parameter_key => 'remote_default', :parameter_value => 'new_remote_value', :use_previous_value => false }
+        { :parameter_key => 'unchanged_key', :use_previous_value => true }
       ],
       capabilities: []
     }
 
     expect(cfn).to receive(:create_stack)
       .exactly(1).times
-      .with(stack_options)
       .and_raise(Cfer::Util::StackExistsError)
 
     expect(cfn).to receive(:update_stack)
       .exactly(1).times
       .with(stack_options)
 
+    expect(stack_cfn["Resources"]["abc"]["Properties"]["TestParam"]).to eq("unchanged_value")
+
     cfn.converge stack
   end
 
   it 'follows logs' do
+    cfn = Cfer::Cfn::Client.new stack_name: 'test', region: 'us-east-1'
     event_list = [
       double('event 1', event_id: 1, timestamp: DateTime.now, resource_status: 'TEST', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'abcd'),
       double('event 2', event_id: 2, timestamp: DateTime.now, resource_status: 'TEST2', resource_type: 'Cfer::TestResource', logical_resource_id: 'test_resource', resource_status_reason: 'efgh'),
