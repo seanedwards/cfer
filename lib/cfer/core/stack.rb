@@ -46,7 +46,7 @@ module Cfer::Core
             @parameters[k] = v
           end
         rescue Cfer::Util::StackDoesNotExistError
-          # Creating stack, so there are no parameters to pull.
+          Cfer::LOGGER.debug "Can't include current stack parameters because the stack doesn't exist yet."
         end
       end
 
