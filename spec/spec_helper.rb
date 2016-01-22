@@ -1,6 +1,7 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
-require 'coveralls'
 require 'pp'
+require "codeclimate-test-reporter"
+CodeClimate::TestReporter.start
 
 def create_stack(options = {}, &block)
   cfn = options[:client] || Cfer::Cfn::Client.new(stack_name: options[:stack_name] || 'test', region: 'us-east-1')
@@ -48,7 +49,6 @@ module Cfer
   DEBUG = true
 end
 
-Coveralls.wear!
 require 'cfer'
 
 Cfer::LOGGER.level = Logger::DEBUG
