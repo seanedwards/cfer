@@ -48,8 +48,8 @@ module Cfer
       tmpl = options[:template] || "#{stack_name}.rb"
       cfn = options[:aws_options] || {}
 
-      cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
-      stack = Cfer::stack_from_file(tmpl, options.merge(client: cfn_stack))
+      cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
+      stack = options[:cfer_stack] || Cfer::stack_from_file(tmpl, options.merge(client: cfn_stack))
 
       begin
         cfn_stack.converge(stack, options)
@@ -65,14 +65,15 @@ module Cfer
     def describe!(stack_name, options = {})
       config(options)
       cfn = options[:aws_options] || {}
-      cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name)).fetch_stack
+      cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
+      cfn_stack = cfn_stack.fetch_stack
 
       Cfer::LOGGER.debug "Describe stack: #{cfn_stack}"
 
       case options[:output_format]
       when 'json'
         puts render_json(cfn_stack, options)
-      when 'table'
+      when 'table', nil
         puts "Status: #{cfn_stack[:stack_status]}"
         puts "Description: #{cfn_stack[:description]}" if cfn_stack[:description]
         puts ""
@@ -97,7 +98,7 @@ module Cfer
     def tail!(stack_name, options = {}, &block)
       config(options)
       cfn = options[:aws_options] || {}
-      cfn_client = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
+      cfn_client = options[:cfer_client] || Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
       if block
         cfn_client.tail(options, &block)
       else

@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Cfer::Cfn::Client do
 
   it 'creates stacks' do
-    stack = create_stack parameters: {:key => 'value'}, fetch_stack: true do
+    stack = create_stack parameters: {:key => 'value'}, fetch_stack: true, times: 2 do
       parameter :key
     end
     cfn = stack.client
@@ -31,11 +31,11 @@ describe Cfer::Cfn::Client do
         stack_policy_body: File.read('spec/support/stack_policy.json')
       )
 
-    cfn.converge stack, stack_policy: 'spec/support/stack_policy.json'
+    Cfer::converge! cfn.name,  cfer_client: cfn, cfer_stack: stack, stack_policy: 'spec/support/stack_policy.json', output_format: 'json'
   end
 
   it 'updates stacks' do
-    stack = create_stack parameters: { :key => 'value' }, fetch_stack: true do
+    stack = create_stack parameters: { :key => 'value' }, fetch_stack: true, times: 2 do
       parameter :key
       parameter :unchanged_key
 
@@ -79,7 +79,7 @@ describe Cfer::Cfn::Client do
 
     expect(stack_cfn["Resources"]["abc"]["Properties"]["TestParam"]).to eq("unchanged_value")
 
-    cfn.converge stack, stack_policy_during_update: 'spec/support/stack_policy_during_update.json'
+    Cfer::converge! cfn.name,  cfer_client: cfn, cfer_stack: stack, stack_policy_during_update: 'spec/support/stack_policy_during_update.json'
   end
 
   it 'follows logs' do
@@ -103,11 +103,12 @@ describe Cfer::Cfn::Client do
       )
 
     expect(cfn).to receive(:describe_stacks)
-      .exactly(2).times
+      .exactly(3).times
       .with(stack_name: 'test')
       .and_return(
         double(stacks: [ double(:stack_status => 'a status') ]),
-        double(stacks: [ double(:stack_status => 'TEST_COMPLETE')])
+        double(stacks: [ double(:stack_status => 'TEST_COMPLETE')]),
+        double(stacks: [ {:stack_status => 'TEST_COMPLETE'} ])
       )
 
     yielder = double('yield receiver')
@@ -115,7 +116,7 @@ describe Cfer::Cfn::Client do
       expect(yielder).to receive(:yielded).with(event)
     end
 
-    cfn.tail(number: 1, follow: true, no_sleep: true) do |event|
+    Cfer::tail! cfn.name, cfer_client: cfn, number: 1, follow: true, no_sleep: true do |event|
       yielder.yielded event
     end
 

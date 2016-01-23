@@ -5,7 +5,7 @@ CodeClimate::TestReporter.start
 
 def create_stack(options = {}, &block)
   cfn = options[:client] || Cfer::Cfn::Client.new(stack_name: options[:stack_name] || 'test', region: 'us-east-1')
-  setup_describe_stacks cfn, cfn.name
+  setup_describe_stacks cfn, cfn.name, options[:times] || 1
   cfn.fetch_stack
 
   s = Cfer.stack_from_block(options.merge(client: cfn), &block)
@@ -13,15 +13,16 @@ def create_stack(options = {}, &block)
   s
 end
 
-def setup_describe_stacks(cfn, stack_name = 'test')
+def setup_describe_stacks(cfn, stack_name = 'test', times = 1)
   expect(cfn).to receive(:describe_stacks)
-    .exactly(1).times
+    .exactly(times).times
     .with(stack_name: stack_name)
     .and_return(
       double(
         stacks: double(
           first: double(
             to_h: {
+              :stack_status => 'CREATE_COMPLETE',
               :parameters => [
                 {
                   :parameter_key => 'parameter',

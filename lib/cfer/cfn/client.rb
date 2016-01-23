@@ -199,7 +199,7 @@ module Cfer::Cfn
         {}
       elsif value.match(/\A#{URI::regexp(%w[http https s3])}\z/) # looks like a URL
         {"#{name}_url".to_sym => value}
-      elsif File.exists?(value)                               # looks like a file to read
+      elsif File.exist?(value)                               # looks like a file to read
         {"#{name}_body".to_sym => File.read(value)}
       elsif is_json?(value)                                   # looks like a JSON string
         {"#{name}_body".to_sym => value}
