@@ -52,7 +52,7 @@ module Cfer::Cfn
           create_params << p
           update_params << p
         else
-          Cfer::LOGGER.debug "Parameter #{tmpl_param.parameter_key} is unspecified (unchanged or default)"
+          Cfer::LOGGER.debug "Parameter #{tmpl_param.parameter_key} is unspecified (default or unchanged)"
           update_params << {
             parameter_key: tmpl_param.parameter_key,
             use_previous_value: true

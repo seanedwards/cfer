@@ -8,5 +8,9 @@ module CferExt::Provisioning
     data = "#!#{options[:shell] || '/usr/bin/env bash'}\n#{cloud_init_data}"
     user_data Cfer::Core::Fn::base64(data)
   end
+
 end
+
+require_relative 'provisioning/cfn-bootstrap.rb'
+require_relative 'provisioning/chef.rb'
 
