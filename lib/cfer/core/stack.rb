@@ -42,9 +42,7 @@ module Cfer::Core
 
       if options[:client]
         begin
-          options[:client].fetch_parameters.each do |k, v|
-            @parameters[k] = v
-          end
+          @parameters.merge! options[:client].fetch_parameters
         rescue Cfer::Util::StackDoesNotExistError
           Cfer::LOGGER.debug "Can't include current stack parameters because the stack doesn't exist yet."
         end

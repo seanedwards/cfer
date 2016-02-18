@@ -37,28 +37,47 @@ module Cfer::Cfn
       create_params = []
       update_params = []
 
-      response.parameters.each do |tmpl_param|
-        cfn_param = stack.input_parameters[tmpl_param.parameter_key]
+      previous_parameters =
+        begin
+          fetch_parameters
+        rescue Cfer::Util::StackDoesNotExistError
+          nil
+        end
 
-        if cfn_param
-          output_val = tmpl_param.no_echo ? '*****' : cfn_param
+      response.parameters.each do |tmpl_param|
+        input_param = stack.input_parameters[tmpl_param.parameter_key]
+        old_param = previous_parameters[tmpl_param.parameter_key] if previous_parameters
+
+        Cfer::LOGGER.debug "== Evaluating Parameter '#{tmpl_param.parameter_key.to_s}':"
+        Cfer::LOGGER.debug "Input value:    #{input_param.to_s || 'nil'}"
+        Cfer::LOGGER.debug "Previous value: #{old_param.to_s || 'nil'}"
+
+
+        if input_param
+          output_val = tmpl_param.no_echo ? '*****' : input_param
           Cfer::LOGGER.debug "Parameter #{tmpl_param.parameter_key}=#{output_val}"
           p = {
             parameter_key: tmpl_param.parameter_key,
-            parameter_value: cfn_param,
+            parameter_value: input_param,
             use_previous_value: false
           }
 
           create_params << p
           update_params << p
         else
-          Cfer::LOGGER.debug "Parameter #{tmpl_param.parameter_key} is unspecified (default or unchanged)"
-          update_params << {
-            parameter_key: tmpl_param.parameter_key,
-            use_previous_value: true
-          }
+          if old_param
+            Cfer::LOGGER.debug "Parameter #{tmpl_param.parameter_key} is unspecified (unchanged)"
+              update_params << {
+              parameter_key: tmpl_param.parameter_key,
+              use_previous_value: true
+            }
+          else
+            Cfer::LOGGER.debug "Parameter #{tmpl_param.parameter_key} is unspecified (default)"
+          end
         end
       end
+
+      Cfer::LOGGER.debug "==================="
 
       stack_options = {
         stack_name: name,
@@ -163,10 +182,15 @@ module Cfer::Cfn
       key = :"#{attribute}_key"
       value = :"#{attribute}_value"
 
-      Hash[ *list.map { |kv| [ kv[key], kv[value] ] }.flatten ]
+      Hash[ *list.map { |kv| [ kv[key].to_s, kv[value].to_s ] }.flatten ]
     end
 
     def flush_cache
+      Cfer::LOGGER.debug "*********** FLUSH CACHE ***************"
+      Cfer::LOGGER.debug "Stack cache: #{@stack_cache}"
+      Cfer::LOGGER.debug "Stack parameters: #{@stack_parameters}"
+      Cfer::LOGGER.debug "Stack outputs: #{@stack_outputs}"
+      Cfer::LOGGER.debug "***************************************"
       @stack_cache = {}
       @stack_parameters = {}
       @stack_outputs = {}

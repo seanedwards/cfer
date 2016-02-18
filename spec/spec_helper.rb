@@ -14,8 +14,7 @@ def create_stack(options = {}, &block)
 end
 
 def setup_describe_stacks(cfn, stack_name = 'test', times = 1)
-  expect(cfn).to receive(:describe_stacks)
-    .exactly(times).times
+  allow(cfn).to receive(:describe_stacks)
     .with(stack_name: stack_name)
     .and_return(
       double(
