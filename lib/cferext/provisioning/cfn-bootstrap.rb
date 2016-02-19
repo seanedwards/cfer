@@ -6,17 +6,18 @@ module CferExt::Provisioning
     script = [ "#!/bin/bash -xe\n" ]
 
     script.concat case options[:flavor]
+      when :redhat, :centos, :amazon
+        [
+          "rpm -Uvh https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm\n"
+        ]
       when :ubuntu, :debian, nil
         [
           "apt-get update --fix-missing\n",
-          "apt-get install python-pip\n"
+          "apt-get install -y python-pip\n",
+          "pip install setuptools\n",
+          "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
         ]
     end
-
-    script = [
-      "pip install setuptools\n",
-      "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
-    ]
 
     script.concat [
       "# Helper function\n",
@@ -36,16 +37,15 @@ module CferExt::Provisioning
 
     script.concat [
       "/usr/local/bin/cfn-init",
-        " --configsets ", options[:cfn_init] || 'default',
+        " --configsets '", Cfer::Core::Fn::join(',', options[:cfn_init_config_set]) || raise('Please specify a `cfn_init_config_set`'), "'",
         " --stack ", Cfer::Cfn::AWS::stack_name,
         " --resource ", @name,
         " --region ", Cfer::Cfn::AWS::region,
         " || error_exit 'Failed to run cfn-init'\n",
     ]
 
-    if options[:cfn_hup]
+    if options[:cfn_hup_config_set]
       cfn_hup(options)
-      cfn_init_config_set :default, [ :cfn_hup ]
 
       script.concat [
         "/usr/local/bin/cfn-hup || error_exit 'Failed to start cfn-hup'\n"
@@ -61,6 +61,10 @@ module CferExt::Provisioning
     user_data Cfer::Core::Fn::base64(
       Cfer::Core::Fn::join('', script)
     )
+  end
+
+  def config_set(name)
+    { "ConfigSet" => name }
   end
 
   def cfn_init_config_set(name, sections)
@@ -122,9 +126,11 @@ module CferExt::Provisioning
 
   def cfn_hup(options)
     resource_name = @name
-    config_set = options[:cfn_hup] || 'default'
+    target_config_set = options[:cfn_hup_config_set] || raise('Please specify a `cfn_hup_config_set`')
 
-    cfn_init_config('cfn_hup') do
+    cfn_init_config_set :cfn_hup, [ :cfn_hup ]
+
+    cfn_init_config(:cfn_hup) do
       if options[:access_key] && options[:secret_key]
         file '/etc/cfn/cfn-credentials', content: Cfer::Core::Fn::join('', [
           "AWSAccessKeyId=", options[:access_key], "\n",
@@ -150,7 +156,7 @@ module CferExt::Provisioning
         "triggers=post.update\n",
         "path=Resources.#{resource_name}.Metadata.AWS::CloudFormation::Init\n",
         "action=/usr/local/bin/cfn-init",
-          " -c '", config_set, "'",
+          " -c '", Cfer::Core::Fn::join(',', target_config_set), "'",
           " -s ", Cfer::Cfn::AWS::stack_name,
           " --region ", Cfer::Cfn::AWS::region,
           " -r #{resource_name}",
