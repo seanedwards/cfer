@@ -15,7 +15,7 @@ resource :instance, "AWS::EC2::Instance" do
 
   # Configure chef to generate a Berksfile that will download the AWS cookbook from the Chef supermarket.
   # Set the run list to run the AWS cookbook, so our instance will have the AWS SDK available.
-  chef_solo version: parameters[:chefversion], # 12.7.2
+  chef_solo version: 'latest',
     node: {
       cfer: {
         demo: {
