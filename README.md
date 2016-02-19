@@ -284,6 +284,7 @@ This project also contains a [Code of Conduct](https://github.com/seanedwards/cf
 * `parameters` hash now includes parameters that are set on the existing stack, but not passed in via CLI during a stack update.
 * `parameters` hash now includes defaults for parameters that were not passed on the CLI during a stack creation.
 * Adds a `lookup_output` function, for looking up outputs of stacks in the same account+region. (See #8)
+* Adds provisioning for cfn-init and chef-solo, including resource signaling.
 * Adds support for stack policies.
 * Cfer no longer validates parameters itself. CloudFormation will throw an error if something is wrong.
 * Adds release notes to the README.

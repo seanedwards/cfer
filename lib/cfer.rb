@@ -20,6 +20,13 @@ module Cfer
   module Core
   end
 
+  %w{
+    DB
+    ASG
+  }.each do |acronym|
+    ActiveSupport::Inflector.inflections.acronym acronym
+  end
+
   # The Cfer logger
   LOGGER = Logger.new(STDERR)
   LOGGER.level = Logger::INFO
@@ -155,7 +162,7 @@ module Cfer
 
     def render_json(obj, options = {})
       if options[:pretty_print]
-        puts JSON.pretty_generate(obj)
+        puts JSON.pretty_generate(obj, options)
       else
         puts obj.to_json
       end

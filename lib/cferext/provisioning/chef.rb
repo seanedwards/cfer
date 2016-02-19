@@ -14,12 +14,18 @@ module CferExt::Provisioning
     if options[:berksfile]
       cfn_init_config :install_berkshelf do
         file '/var/chef/berkshelf.sh', content: <<-EOF.strip_heredoc
-          export BERKSHELF_PATH=/var/chef
-          if [ -f /var/chef/Berksfile.lock ]
+          export BERKSHELF_PATH=/var/chef/berkshelf
+
+          # Some cookbooks have UTF-8, and cfn-init uses US-ASCII because of reasons
+          export LANG=en_US.UTF-8
+          export RUBYOPTS="-E utf-8"
+
+          # Berkshelf seems a bit unreliable, so retry these commands a couple times.
+          if [ -e Berksfile.lock ]
           then
-            /opt/chef/embedded/bin/berks update -b /var/chef/Berksfile
+            for i in {1..3}; do /opt/chef/embedded/bin/berks update && break || sleep 15; done
           fi
-          /opt/chef/embedded/bin/berks install -b /var/chef/Berksfile
+          for i in {1..3}; do /opt/chef/embedded/bin/berks vendor /var/chef/cookbooks -b /var/chef/Berksfile && break || sleep 15; done
         EOF
         command :install_berkshelf, '/opt/chef/embedded/bin/gem install berkshelf --no-ri --no-rdoc'
         command :install_git, 'apt-get install -y git'
@@ -30,7 +36,7 @@ module CferExt::Provisioning
     if options[:berksfile]
       cfn_init_config :run_berkshelf do
         file '/var/chef/Berksfile', content: options[:berksfile].strip_heredoc
-        command :run_berkshelf, 'bash /var/chef/berkshelf.sh'
+        command :run_berkshelf, 'bash -l /var/chef/berkshelf.sh', cwd: '/var/chef'
       end
       run_set.prepend :run_berkshelf
     end

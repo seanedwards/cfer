@@ -37,7 +37,6 @@ resource :instance, "AWS::EC2::Instance",
     # Review this cookbook here: https://github.com/seanedwards/cfer-cookbook-demo
     berksfile: <<-EOF
       source "https://supermarket.chef.io"
-      puts ENV
       cookbook 'ec2-demo', github: 'seanedwards/cfer-cookbook-demo', branch: 'master'
     EOF
 
