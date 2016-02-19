@@ -26,12 +26,19 @@ module CferExt::Provisioning
     ]
 
     if options[:signal]
-      script.concat [ "  /usr/local/bin/cfn-signal -e 1 -r \"$1\" '", options[:signal], "'\n" ]
+      script.concat [
+        "/usr/local/bin/cfn-signal",
+          " -s false",
+          " --resource '", options[:signal], "'",
+          " --stack ", Cfer::Cfn::AWS::stack_name,
+          " --region ", Cfer::Cfn::AWS::region,
+          "\n"
+        ]
     end
 
     script.concat [
       "  exit 1\n",
-      "}\n",
+      "}\n"
     ]
 
 
@@ -41,7 +48,7 @@ module CferExt::Provisioning
         " --stack ", Cfer::Cfn::AWS::stack_name,
         " --resource ", @name,
         " --region ", Cfer::Cfn::AWS::region,
-        " || error_exit 'Failed to run cfn-init'\n",
+        " || error_exit 'Failed to run cfn-init'\n"
     ]
 
     if options[:cfn_hup_config_set]
@@ -54,8 +61,13 @@ module CferExt::Provisioning
 
     if options[:signal]
       script.concat [
-        "/usr/local/bin/cfn-signal -e 0 -r \"cfn-init setup complete\" '", options[:signal], "'\n"
-      ]
+        "/usr/local/bin/cfn-signal",
+          " -s true",
+          " --resource '", options[:signal], "'",
+          " --stack ", Cfer::Cfn::AWS::stack_name,
+          " --region ", Cfer::Cfn::AWS::region,
+          "\n"
+        ]
     end
 
     user_data Cfer::Core::Fn::base64(

@@ -5,7 +5,15 @@ description 'Example stack template for a small EC2 instance'
 # Include common template code that will be used for examples that create EC2 instances.
 include_template 'common/instance_deps.rb'
 
-resource :instance, "AWS::EC2::Instance" do
+resource :instance, "AWS::EC2::Instance",
+  # Set a creation policy so that the stack will wait for
+  # on-instance provisioning to complete before marking the instance
+  # as done.
+  :CreationPolicy => {
+    :ResourceSignal => {
+      :Count => 1
+    }
+  } do
   # Chef provisioning depends on cfn-init, so set that up first.
   # We will have the initial provisioning set up cfn-hup, install chef, and run our cookbooks.
   # Cfn-hup will only rerun chef when the metadata changes.
