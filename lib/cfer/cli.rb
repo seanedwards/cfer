@@ -34,7 +34,6 @@ module Cfer
 
     method_option :on_failure,
       type: :string,
-      default: 'DELETE',
       desc: 'The action to take if the stack creation fails'
     method_option :follow,
       aliases: :f,
@@ -57,6 +56,9 @@ module Cfer
       aliases: :u,
       type: :string,
       desc: 'Set a temporary overriding stack policy during an update [file|url|json]'
+    method_option :timeout,
+      type: :numeric,
+      desc: 'The timeout (in minutes) before the stack operation aborts'
     template_options
     stack_options
     def converge(stack_name)

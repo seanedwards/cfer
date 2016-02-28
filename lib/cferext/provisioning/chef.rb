@@ -66,7 +66,9 @@ module CferExt::Provisioning
         owner: 'root',
         group: 'root'
 
-      command :run_chef, 'chef-solo -c /etc/chef/solo.rb -j /etc/chef/config.json'
+      chef_cmd = 'chef-solo -c /etc/chef/solo.rb -j /etc/chef/config.json'
+      chef_cmd << " -o '#{options[:run_list].join(',')}'" if options[:run_list]
+      command :run_chef, chef_cmd
     end
   end
 end

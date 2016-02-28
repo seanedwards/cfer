@@ -1,5 +1,10 @@
 module CferExt::Provisioning
 
+  def cfn_auth(name, options = {})
+    self[:Metadata]['AWS::CloudFormation::Authentication'] ||= {}
+    self[:Metadata]['AWS::CloudFormation::Authentication'][name] = options
+  end
+
   def cfn_init_setup(options = {})
     self[:Metadata]['AWS::CloudFormation::Init'] = {}
 
