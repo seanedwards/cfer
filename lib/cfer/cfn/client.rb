@@ -82,10 +82,11 @@ module Cfer::Cfn
       stack_options = {
         stack_name: name,
         template_body: stack.to_cfn,
-        capabilities: response.capabilities,
-        on_failure: options[:on_failure],
-        timeout_in_minutes: options[:timeout]
+        capabilities: response.capabilities
       }
+
+      stack_options[:on_failure] = options[:on_failure] if options[:on_failure]
+      stack_options[:timeout_in_minutes] = options[:timeout] if options[:timeout]
 
       stack_options.merge! parse_stack_policy(:stack_policy, options[:stack_policy])
       stack_options.merge! parse_stack_policy(:stack_policy_during_update, options[:stack_policy_during_update])
