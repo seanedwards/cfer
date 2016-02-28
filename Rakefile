@@ -3,13 +3,11 @@ gem 'cfer'
 require 'cfer'
 require 'highline'
 
-Cfer::LOGGER.level = Logger::DEBUG
-
 task :default => [:spec]
 
 task :config_aws, [:profile] do |t, args|
-  Aws.config.update region: ENV['AWS_REGION'] || 'us-east-1',
-    credentials: Aws::SharedCredentials.new(profile_name: ENV['AWS_PROFILE'] || 'default')
+  Aws.config.update region: ENV['AWS_REGION'] || ask('AWS Region?') { |q| q.default = 'us-east-1' },
+    credentials: Aws::SharedCredentials.new(profile_name: ENV['AWS_PROFILE'] || ask('AWS Profile?') { |q| q.default = 'default' })
 end
 
 task :vpc => :config_aws do |t, args|
@@ -22,7 +20,7 @@ task :describe_vpc => :config_aws do
   Cfer.describe! 'vpc'
 end
 
-task :instance => :config_aws do |t, args|
+task :instance => :vpc do |t, args|
   key_pair = ask("Enter your EC2 KeyPair name: ")
 
   Cfer.converge! 'instance',

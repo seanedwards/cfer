@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = "cfer"
   spec.version       = Cfer::VERSION
   spec.authors       = ["Sean Edwards"]
-  spec.email         = ["stedwards87+git@gmail.com"]
+  spec.email         = ["stedwards87+cfer@gmail.com"]
 
   spec.summary       = %q{Toolkit for automating infrastructure using AWS CloudFormation}
   spec.description   = spec.summary
@@ -30,6 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'highline'
   spec.add_runtime_dependency 'table_print'
   spec.add_runtime_dependency "rake"
+  spec.add_runtime_dependency "erubis"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "yard"

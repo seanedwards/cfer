@@ -26,7 +26,7 @@ module Cfer
         default: 'table'
     end
 
-    desc 'converge [OPTIONS] <stack-name>', 'Converges a cloudformation stack according to the template'
+    desc 'converge [OPTIONS] <stack-name>', 'Create or update a cloudformation stack according to the template'
     #method_option :git_lock,
     #  type: :boolean,
     #  default: true,
@@ -34,7 +34,6 @@ module Cfer
 
     method_option :on_failure,
       type: :string,
-      default: 'DELETE',
       desc: 'The action to take if the stack creation fails'
     method_option :follow,
       aliases: :f,
@@ -49,6 +48,17 @@ module Cfer
       aliases: :t,
       type: :string,
       desc: 'Override the stack filename (defaults to <stack-name>.rb)'
+    method_option :stack_policy,
+      aliases: :s,
+      type: :string,
+      desc: 'Set a new stack policy on create or update of the stack [file|url|json]'
+    method_option :stack_policy_during_update,
+      aliases: :u,
+      type: :string,
+      desc: 'Set a temporary overriding stack policy during an update [file|url|json]'
+    method_option :timeout,
+      type: :numeric,
+      desc: 'The timeout (in minutes) before the stack operation aborts'
     template_options
     stack_options
     def converge(stack_name)
@@ -112,7 +122,7 @@ module Cfer
         if Cfer::DEBUG
           Pry::rescued(e)
         else
-          Cfer::Util.bug_report(e)
+          #Cfer::Util.bug_report(e)
         end
         exit 1
       end
@@ -135,4 +145,3 @@ module Cfer
 
 
 end
-

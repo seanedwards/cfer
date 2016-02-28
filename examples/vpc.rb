@@ -49,7 +49,7 @@ resource :routetable, 'AWS::EC2::RouteTable' do
   vpc_id Fn::ref(:vpc)
 end
 
-(1..3).each do |i|
+(1..2).each do |i|
   resource "subnet#{i}", 'AWS::EC2::Subnet' do
     # Other CloudFormation intrinsics, such as `Fn::Select` and `AWS::Region` are available as Ruby objects
     # Inspecting these functions will reveal that they simply return a Ruby hash representing the same CloudFormation structures

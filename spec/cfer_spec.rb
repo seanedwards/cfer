@@ -51,58 +51,7 @@ describe Cfer do
     expect(stack[:Parameters][:test][:Type]).to eq 'String'
 
     expect(stack[:Parameters][:regex][:AllowedPattern]).to eq '[abc]+123'
-    expect(stack[:Parameters][:list][:AllowedValues]).to eq 'a,b,c'
-  end
-
-  it 'fails parameter validations' do
-    expect {
-      create_stack parameters: {:a => 'bcdef', :x => 'yz'} do
-        parameter :a, min_length: 3
-        parameter :x, min_length: 3
-      end
-    }.to raise_error Cfer::Util::CferError, 'Parameter x must have length >= 3'
-
-    expect {
-      create_stack parameters: {:a => 'bcdef', :x => 'yz'} do
-        parameter :a, max_length: 3
-        parameter :x, max_length: 3
-      end
-    }.to raise_error Cfer::Util::CferError, 'Parameter a must have length <= 3'
-
-    expect {
-      create_stack parameters: {:a => '5', :x => '2'} do
-        parameter :x, min_value: 3
-        parameter :a, min_value: 3
-      end
-    }.to raise_error Cfer::Util::CferError, 'Parameter x must be >= 3'
-
-    expect {
-      create_stack parameters: {:a => 5, :x => 2} do
-        parameter :a, max_value: 3
-        parameter :x, max_value: 3
-      end
-    }.to raise_error Cfer::Util::CferError, 'Parameter a must be <= 3'
-
-    expect {
-      create_stack parameters: {:a => 'b', :x => 'y'} do
-        parameter :x, allowed_values: ['y']
-        parameter :a, allowed_values: ['a', 'c']
-      end
-    }.to raise_error Cfer::Util::CferError, 'Parameter a must be one of: a,c'
-
-    expect {
-      create_stack parameters: {:a => 'xym', :x => 'abc'} do
-        parameter :x, allowed_pattern: /abc/
-        parameter :a, allowed_pattern: /xyz/
-      end
-    }.to raise_error Cfer::Util::CferError, 'Parameter a must match /xyz/'
-
-    expect {
-      create_stack parameters: {:a => 'xym', :x => 'abc'} do
-        parameter :x, allowed_pattern: 'abc'
-        parameter :a, allowed_pattern: 'xyz'
-      end
-    }.to raise_error Cfer::Util::CferError, 'Parameter a must match /xyz/'
+    expect(stack[:Parameters][:list][:AllowedValues]).to eq ['a', 'b', 'c']
   end
 
   it 'creates outputs' do

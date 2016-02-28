@@ -5,7 +5,12 @@ module Cfer::Core
     include Cfer::Core
     include Cfer::Cfn
 
+    # The parameters strictly as passed via command line
+    attr_reader :input_parameters
+
+    # The fully resolved parameters, including defaults and parameters fetched from an existing stack during an update
     attr_reader :parameters
+
     attr_reader :options
 
     def converge!
@@ -18,10 +23,6 @@ module Cfer::Core
       if @options[:client]
         @options[:client].tail self, &block
       end
-    end
-
-    def resolve(val)
-      @options[:client] ? @options[:client].resolve(val) : val
     end
 
     def initialize(options = {})
@@ -37,15 +38,21 @@ module Cfer::Core
       self[:Outputs] = {}
 
       @parameters = HashWithIndifferentAccess.new
+      @input_parameters = HashWithIndifferentAccess.new
+
+      if options[:client]
+        begin
+          @parameters.merge! options[:client].fetch_parameters
+        rescue Cfer::Util::StackDoesNotExistError
+          Cfer::LOGGER.debug "Can't include current stack parameters because the stack doesn't exist yet."
+        end
+      end
 
       if options[:parameters]
         options[:parameters].each do |key, val|
-          @parameters[key] = resolve(val)
+          @input_parameters[key] = @parameters[key] = val
         end
       end
-    end
-
-    def pre_block
     end
 
     # Sets the description for this CloudFormation stack
@@ -80,35 +87,12 @@ module Cfer::Core
         k = key.to_s.camelize.to_sym
         param[k] =
           case k
-          when :AllowedValues
-            str_list = v.join(',')
-            verify_param(name, "Parameter #{name} must be one of: #{str_list}") { |input_val| str_list.include?(input_val) }
-            str_list
           when :AllowedPattern
             if v.class == Regexp
-              verify_param(name, "Parameter #{name} must match /#{v.source}/") { |input_val| v =~ input_val }
               v.source
-            else
-              verify_param(name, "Parameter #{name} must match /#{v}/") { |input_val| Regexp.new(v) =~ input_val }
-              v
             end
-          when :MaxLength
-            verify_param(name, "Parameter #{name} must have length <= #{v}") { |input_val| input_val.length <= v.to_i }
-            v
-          when :MinLength
-            verify_param(name, "Parameter #{name} must have length >= #{v}") { |input_val| input_val.length >= v.to_i }
-            v
-          when :MaxValue
-            verify_param(name, "Parameter #{name} must be <= #{v}") { |input_val| input_val.to_i <= v.to_i }
-            v
-          when :MinValue
-            verify_param(name, "Parameter #{name} must be >= #{v}") { |input_val| input_val.to_i >= v.to_i }
-            v
-          when :Description
-            Preconditions.check_argument(v.length <= 4000, "#{key} must be <= 4000 characters")
-            v
           when :Default
-            @parameters[name] ||= resolve(v)
+            @parameters[name] ||= v
           end
         param[k] ||= v
       end
@@ -148,7 +132,7 @@ module Cfer::Core
     # @param name [String] The Logical ID of the output parameter
     # @param value [String] Value to return
     # @param options [Hash] Extra options for this output parameter
-    # @option options [String] :Description Informationa bout the value
+    # @option options [String] :Description Information about the value
     def output(name, value, options = {})
       self[:Outputs][name] = options.merge('Value' => value)
     end
@@ -157,6 +141,10 @@ module Cfer::Core
     # @return [String] The final template
     def to_cfn
       to_h.to_json
+    end
+
+    def client
+      @options[:client] || raise(Cfer::Util::CferError, "Stack has no associated client.")
     end
 
     # Includes template code from one or more files, and evals it in the context of this stack.
@@ -170,9 +158,9 @@ module Cfer::Core
       end
     end
 
-    private
-    def verify_param(param_name, err_msg)
-      raise Cfer::Util::CferError, err_msg if (@parameters[param_name] && !yield(@parameters[param_name].to_s))
+    def lookup_output(stack, out)
+      client = @options[:client] || raise(Cfer::Util::CferError, "Can not fetch stack outputs without a client")
+      client.fetch_output(stack, out)
     end
   end
 
