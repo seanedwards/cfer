@@ -77,6 +77,8 @@ The following options may be used with the `converge` command:
 * `--follow` (`-f`): Follows stack events on standard output as the create/update process takes place.
 * `--stack-file <template.rb>`: Reads this file from the filesystem, rather than the default `<stack-name>.rb`
 * `--parameters <Key1>:<Value1> <Key2>:<Value2> ...`: Specifies input parameters, which will be available to Ruby in the `parameters` hash, or to CloudFormation by using the `Fn::ref` function
+* `--parameter-file <params_file.[yaml|json]`: Specifies input parameters from a YAML or JSON file
+* `--parameter-environment <env_name>`: Requires `--parameter-file`. Merges the specified key in the YAML or JSON file into the root of the parameter file before passing it into the Cfer stack, i.e. to provide different constants for different AWS environments. The priority for parameters is, in ascending order, **stack default**, **file**, **environment**, and **command line**.
 * `--on-failure <DELETE|ROLLBACK|DO_NOTHING>`: Specifies the action to take when a stack creation fails. Has no effect if the stack already exists and is being updated.
 * `--stack-policy <filename|URL|JSON string>` (`-s`): Stack policy to apply to the stack in order to control updates; takes a local filename containing the policy, a URL to an S3 object, or a raw JSON string.
 * `--stack-policy-during-update <filename|URL|JSON string>` (`-u`): Stack policy as in `--stack-policy` option above, but applied as a temporary override to the permanent policy during stack update.
