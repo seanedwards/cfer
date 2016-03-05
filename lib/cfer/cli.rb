@@ -12,11 +12,16 @@ module Cfer
     class_option :pretty_print, type: :boolean, default: :true, desc: 'Render JSON in a more human-friendly format'
 
     def self.template_options
-
       method_option :parameters,
         type: :hash,
         desc: 'The CloudFormation parameters to pass to the stack',
         default: {}
+      method_option :parameter_file,
+        type: :string,
+        desc: 'A YAML or JSON file with CloudFormation parameters to pass to the stack'
+      method_option :parameter_environment,
+        type: :string,
+        desc: 'If parameter_file is set, will merge the subkey of this into the parameter list.'
     end
 
     def self.stack_options

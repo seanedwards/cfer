@@ -37,6 +37,21 @@ describe Cfer do
     expect(stack[:Parameters][:option_value][:Default]).to eq 'value'
   end
 
+  it 'handles file and environment parameters' do
+    options = {
+      parameters: { 'CLIValue' => 'from_cli' },
+
+      parameter_file: "#{__dir__}/support/parameters_stack.yaml",
+      parameter_environment: 'my_env'
+    }
+
+    merged_parameters = Cfer.send(:generate_final_parameters, options)
+
+    expect(merged_parameters['FileValue']).to eq 'from_file'
+    expect(merged_parameters['EnvValue']).to eq 'from_env'
+    expect(merged_parameters['CLIValue']).to eq 'from_cli'
+  end
+
   it 'creates parameters' do
     stack = create_stack do
       parameter :test, Default: 'abc', Description: 'A test parameter'
