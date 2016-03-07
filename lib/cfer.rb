@@ -125,7 +125,8 @@ module Cfer
     def generate!(tmpl, options = {})
       config(options)
       cfn_stack = Cfer::Cfn::Client.new(options[:aws_options] || {})
-      stack = Cfer::stack_from_file(tmpl, options.merge(client: cfn_stack)).to_h
+      stack = Cfer::stack_from_file(tmpl,
+        options.merge(client: cfn_stack, parameters: generate_final_parameters(options))).to_h
       puts render_json(stack, options)
     end
 
