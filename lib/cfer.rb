@@ -56,7 +56,13 @@ module Cfer
       cfn = options[:aws_options] || {}
 
       cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
-      stack = options[:cfer_stack] || Cfer::stack_from_file(tmpl, options.merge(client: cfn_stack))
+      stack = options[:cfer_stack] ||
+              Cfer::stack_from_file(tmpl,
+                options.merge(
+                  client: cfn_stack,
+                  parameters: generate_final_parameters(options)
+                )
+              )
 
       begin
         cfn_stack.converge(stack, options)
@@ -119,7 +125,8 @@ module Cfer
     def generate!(tmpl, options = {})
       config(options)
       cfn_stack = Cfer::Cfn::Client.new(options[:aws_options] || {})
-      stack = Cfer::stack_from_file(tmpl, options.merge(client: cfn_stack)).to_h
+      stack = Cfer::stack_from_file(tmpl,
+        options.merge(client: cfn_stack, parameters: generate_final_parameters(options))).to_h
       puts render_json(stack, options)
     end
 
@@ -158,6 +165,35 @@ module Cfer
 
       Aws.config.update region: options[:region] if options[:region]
       Aws.config.update credentials: Aws::SharedCredentials.new(profile_name: options[:profile]) if options[:profile]
+    end
+
+    def generate_final_parameters(options)
+      raise "parameter-environment set but parameter_file not set" \
+        if options[:parameter_environment] && options[:parameter_file].nil?
+
+      file_params =
+        if options[:parameter_file]
+          case File.extname(options[:parameter_file])
+          when '.yaml'
+            require 'yaml'
+            YAML.load_file(options[:parameter_file])
+          when '.json'
+            JSON.parse(IO.read(options[:parameter_file]))
+          else
+            raise "Unrecognized parameter file format: #{File.extname(options[:parameter_file])}"
+          end
+        else
+          {}
+        end
+
+      if options[:parameter_environment]
+        raise "no key '#{options[:parameter_environment]}' found in parameters file." \
+          unless file_params.key?(options[:parameter_environment])
+
+        file_params = file_params.deep_merge(file_params[options[:parameter_environment]])
+      end
+
+      file_params.deep_merge(options[:parameters])
     end
 
     def render_json(obj, options = {})
