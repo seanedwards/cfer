@@ -182,10 +182,12 @@ module Cfer::Cfn
     private
 
     def cfn_list_to_hash(attribute, list)
+      return {} unless list
+
       key = :"#{attribute}_key"
       value = :"#{attribute}_value"
 
-      Hash[ *list.map { |kv| [ kv[key].to_s, kv[value].to_s ] }.flatten ]
+      HashWithIndifferentAccess[ *list.map { |kv| [ kv[key].to_s, kv[value].to_s ] }.flatten ]
     end
 
     def flush_cache

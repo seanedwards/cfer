@@ -40,6 +40,8 @@ module Cfer::Core
       @parameters = HashWithIndifferentAccess.new
       @input_parameters = HashWithIndifferentAccess.new
 
+      @include_base = options[:include_base] || File.dirname(caller.first.split(/:\d/,2).first)
+
       if options[:client]
         begin
           @parameters.merge! options[:client].fetch_parameters
@@ -150,10 +152,8 @@ module Cfer::Core
     # Includes template code from one or more files, and evals it in the context of this stack.
     # Filenames are relative to the file containing the invocation of this method.
     def include_template(*files)
-      calling_file = caller.first.split(/:\d/,2).first
-      dirname = File.dirname(calling_file)
       files.each do |file|
-        path = File.join(dirname, file)
+        path = File.join(@include_base, file)
         instance_eval(File.read(path), path)
       end
     end
