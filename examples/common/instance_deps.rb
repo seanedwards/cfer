@@ -8,12 +8,12 @@ parameter :KeyName
 # If you created the VPC stack with a different name, you can overwrite these default values
 # by adding `Vpc:<vpc_stack_name> to your `--parameters` option
 parameter :Vpc, default: 'vpc'
-parameter :VpcId, default: lookup_output(parameters[:Vpc], 'vpcid')
-parameter :SubnetId, default: lookup_output(parameters[:Vpc], 'subnetid1')
+parameter :VpcId, default: (lookup_output(parameters[:Vpc], 'vpcid') rescue nil)
+parameter :SubnetId, default: (lookup_output(parameters[:Vpc], 'subnetid1') rescue nil)
 
 # This is the Ubuntu 14.04 LTS HVM AMI provided by Amazon.
 parameter :ImageId, default: 'ami-fce3c696'
-parameter :InstanceType, default: 't2.nano'
+parameter :InstanceType, default: 't2.micro'
 
 # Define a security group to be applied to an instance.
 # This one will allow SSH access from anywhere, and no other inbound traffic.

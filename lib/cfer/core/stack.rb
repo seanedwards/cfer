@@ -84,6 +84,8 @@ module Cfer::Core
     def parameter(name, options = {})
       param = {}
       options.each do |key, v|
+        next if v === nil
+
         k = key.to_s.camelize.to_sym
         param[k] =
           case k

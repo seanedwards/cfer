@@ -101,6 +101,14 @@ module Cfer
       Cfer.generate! tmpl, options
     end
 
+    desc 'estimate [OPTIONS] <template.rb>', 'Prints a link to the Amazon cost caculator estimating the cost of the resulting CloudFormation stack'
+    long_desc <<-LONGDESC
+    LONGDESC
+    template_options
+    def estimate(tmpl)
+      Cfer.estimate! tmpl, options
+    end
+
     def self.main(args)
       Cfer::LOGGER.debug "Cfer version #{Cfer::VERSION}"
       begin

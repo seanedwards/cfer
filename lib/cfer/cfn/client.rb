@@ -28,6 +28,29 @@ module Cfer::Cfn
       @cfn.send(method, *args, &block)
     end
 
+    def estimate(stack, options = {})
+      response = validate_template(template_body: stack.to_cfn)
+
+      estimate_params = []
+      response.parameters.each do |tmpl_param|
+        input_param = stack.input_parameters[tmpl_param.parameter_key]
+        if input_param
+          output_val = tmpl_param.no_echo ? '*****' : input_param
+          Cfer::LOGGER.debug "Parameter #{tmpl_param.parameter_key}=#{output_val}"
+          p = {
+            parameter_key: tmpl_param.parameter_key,
+            parameter_value: input_param,
+            use_previous_value: false
+          }
+
+          estimate_params << p
+        end
+      end
+
+      estimate_response = estimate_template_cost(template_body: stack.to_cfn, parameters: estimate_params)
+      estimate_response.url
+    end
+
     def converge(stack, options = {})
       Preconditions.check(@name).is_not_nil
       Preconditions.check(stack) { is_not_nil and has_type(Cfer::Core::Stack) }
