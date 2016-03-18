@@ -10,19 +10,27 @@ module CferExt::Provisioning
 
     script = [ "#!/bin/bash -xe\n" ]
 
-    script.concat case options[:flavor]
-      when :redhat, :centos, :amazon
-        [
-          "rpm -Uvh https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm\n"
-        ]
-      when :ubuntu, :debian, nil
-        [
-          "apt-get update --fix-missing\n",
-          "apt-get install -y python-pip\n",
-          "pip install setuptools\n",
-          "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
-        ]
-    end
+    script.concat [
+      "which cfn-init > /dev/null\n",
+      "if [[ $? -ne 0 ]]\n",
+      "then\n"
+    ]
+      script.concat case options[:flavor]
+        when :redhat, :centos, :amazon
+          [
+            "rpm -Uvh https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm\n"
+          ]
+        when :ubuntu, :debian, nil
+          [
+            "apt-get update --fix-missing\n",
+            "apt-get install -y python-pip\n",
+            "pip install setuptools\n",
+            "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+          ]
+      end
+    script.concat [
+      "fi\n"
+    ]
 
     script.concat [
       "# Helper function\n",
@@ -85,7 +93,7 @@ module CferExt::Provisioning
   end
 
   def cfn_init_config_set(name, sections)
-    cfg_sets = cloudformation_init['configSets'] || {}
+    cfg_sets = cloudformation_init['configSets'] || { 'default' => [] }
     cfg_set = Set.new(cfg_sets[name] || [])
     cfg_set.merge sections
     cfg_sets[name] = cfg_set.to_a
@@ -171,7 +179,7 @@ module CferExt::Provisioning
       file '/etc/cfn/hooks.d/cfn-init-reload.conf', content: Cfer::Core::Fn::join('', [
         "[cfn-auto-reloader-hook]\n",
         "triggers=post.update\n",
-        "path=Resources.#{resource_name}.Metadata.AWS::CloudFormation::Init\n",
+        "path=Resources.#{resource_name}.Metadata\n",
         "action=/usr/local/bin/cfn-init",
           " -c '", Cfer::Core::Fn::join(',', target_config_set), "'",
           " -s ", Cfer::Cfn::AWS::stack_name,
