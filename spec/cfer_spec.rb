@@ -86,7 +86,7 @@ describe Cfer do
       end
 
       resource :test_resource_2, 'Cfer::TestResource' do
-        other_resource test_resource
+        other_resource Cfer::Core::Fn::ref(:test_resource)
       end
     end
 

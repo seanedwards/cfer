@@ -8,6 +8,6 @@
 /spec/reports/
 /tmp/
 *.swp
-*/.tags
+**/.tags
 
 !/doc/cfer-demo.gif

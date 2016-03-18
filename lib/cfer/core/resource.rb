@@ -28,7 +28,7 @@ module Cfer::Cfn
       key = camelize_property(method_sym)
       case arguments.size
       when 0
-        Cfer::Core::Fn::ref(method_sym)
+       raise "Expected a value when setting property #{key}"
       when 1
         properties key => arguments.first
       else

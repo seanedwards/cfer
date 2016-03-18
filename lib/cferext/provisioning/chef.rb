@@ -62,7 +62,7 @@ module CferExt::Provisioning
         owner: 'root',
         group: 'root'
 
-      file "/etc/chef/config.json", content: chef_config.to_json,
+      file "/etc/chef/config.json", content: chef_config,
         owner: 'root',
         group: 'root'
 
