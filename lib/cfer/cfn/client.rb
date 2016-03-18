@@ -251,6 +251,8 @@ module Cfer::Cfn
       Cfer::LOGGER.debug "Using #{name} from: #{value}"
       if value.nil?
         {}
+      elsif value.is_a?(Hash)
+        {"#{name}_body".to_sym => value.to_json}
       elsif value.match(/\A#{URI::regexp(%w[http https s3])}\z/) # looks like a URL
         {"#{name}_url".to_sym => value}
       elsif File.exist?(value)                               # looks like a file to read
