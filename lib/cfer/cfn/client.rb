@@ -117,8 +117,10 @@ module Cfer::Cfn
       cfn_stack =
         begin
           create_stack stack_options.merge parameters: create_params
+          :created
         rescue Cfer::Util::StackExistsError
           update_stack stack_options.merge parameters: update_params
+          :updated
         end
 
       flush_cache

@@ -65,9 +65,25 @@ module Cfer
               )
 
       begin
-        cfn_stack.converge(stack, options)
+        operation = cfn_stack.converge(stack, options)
         if options[:follow]
-          tail! stack_name, options
+          begin
+            tail! stack_name, options
+          rescue Interrupt
+            puts "Caught interrupt. What would you like to do?"
+            case HighLine.new($stdin, $stderr).choose('Continue', 'Quit', 'Rollback')
+            when 'Continue'
+              retry
+            when 'Rollback'
+              case operation
+              when :created
+                cfn_stack.delete_stack stack_name: stack_name
+              when :updated
+                cfn_stack.cancel_update_stack stack_name: stack_name
+              end
+              retry
+            end
+          end
         end
       rescue Aws::CloudFormation::Errors::ValidationError => e
         Cfer::LOGGER.info "CFN validation error: #{e.message}"
@@ -176,7 +192,7 @@ module Cfer
       Cfer::LOGGER.level = Logger::DEBUG if options[:verbose]
 
       Aws.config.update region: options[:region] if options[:region]
-      Aws.config.update credentials: Aws::SharedCredentials.new(profile_name: options[:profile]) if options[:profile]
+      Aws.config.update credentials: Cfer::Cfn::CferCredentialsProvider.new(profile_name: options[:profile]) if options[:profile]
     end
 
     def generate_final_parameters(options)
