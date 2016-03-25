@@ -6,6 +6,7 @@ module Cfer::Cfn
     attr_reader :stack
 
     def initialize(options)
+      super
       @name = options[:stack_name]
       options.delete :stack_name
       @cfn = Aws::CloudFormation::Client.new(options)

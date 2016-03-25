@@ -43,6 +43,13 @@ module Cfer::Core
       self[:Resources] = {}
       self[:Outputs] = {}
 
+      if git = options[:client].git
+        self[:Metadata][:Cfer][:Git] = {
+          Rev: git.object('HEAD^').sha,
+          Clean: git.status.changed.empty?
+        }
+      end
+
       @parameters = HashWithIndifferentAccess.new
       @input_parameters = HashWithIndifferentAccess.new
 
