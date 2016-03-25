@@ -289,6 +289,7 @@ This project also contains a [Code of Conduct](https://github.com/seanedwards/cf
 * Adds `cfer estimate` command to estimate the cost of a template using the AWS CloudFormation cost estimation API.
 * Enhancements to chef provisioner to allow for references in chef attributes. (Thanks to @eropple)
 * Adds continue/rollback/quit selection when `^C` is caught during a converge.
+* Stores Cfer version and Git repo information in the Repo metadata
 
 ### Bugfixes
 
