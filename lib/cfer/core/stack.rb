@@ -31,6 +31,12 @@ module Cfer::Core
 
       @options = options
 
+      self[:Metadata] = {
+        :Cfer => {
+          :Version => Cfer::SEMANTIC_VERSION.to_h.delete_if { |k, v| v === nil }
+        }
+      }
+
       self[:Parameters] = {}
       self[:Mappings] = {}
       self[:Conditions] = {}

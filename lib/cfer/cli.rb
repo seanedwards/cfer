@@ -4,6 +4,7 @@ require 'table_print'
 
 module Cfer
   class Cli < Thor
+    map '-v' => :version, '--version' => :version
 
     namespace 'cfer'
     class_option :verbose, type: :boolean, default: false
@@ -139,6 +140,11 @@ module Cfer
         end
         exit 1
       end
+    end
+
+    desc 'version', 'Prints the current version of Cfer'
+    def version
+      puts Cfer::VERSION
     end
 
     private
