@@ -1,3 +1,5 @@
+require 'yaml'
+
 module Cfer
   module Cfn
     class CferCredentialsProvider < Aws::SharedCredentials
@@ -12,18 +14,41 @@ module Cfer
         )
         @credentials =
           if role_arn = profile['role_arn']
-            role_credentials_options = {
-              role_session_name: [*('A'..'Z')].sample(16).join,
-              role_arn: role_arn,
-              credentials: credentials
-            }
+            role_creds =
+              begin
+                YAML::load_file('.cfer-role')
+              rescue
+                {}
+              end
 
-            if profile['mfa_serial']
-              role_credentials_options[:serial_number] ||= profile['mfa_serial']
-              role_credentials_options[:token_code] ||= HighLine.new($stdin, $stderr).ask('Enter MFA Code:')
+            if stored_creds = role_creds[profile_name]
+              if (Time.now.to_i + 5 * 60) > stored_creds[:expiration].to_i
+                stored_creds = nil
+              end
             end
 
-            Aws::AssumeRoleCredentials.new(role_credentials_options).credentials
+            if stored_creds == nil
+              role_credentials_options = {
+                role_session_name: [*('A'..'Z')].sample(16).join,
+                role_arn: role_arn,
+                credentials: credentials
+              }
+
+              if profile['mfa_serial']
+                role_credentials_options[:serial_number] ||= profile['mfa_serial']
+                role_credentials_options[:token_code] ||= HighLine.new($stdin, $stderr).ask('Enter MFA Code:')
+              end
+
+              creds = Aws::AssumeRoleCredentials.new(role_credentials_options)
+              stored_creds = {
+                expiration: creds.expiration,
+                credentials: creds.credentials
+              }
+              role_creds[profile_name] = stored_creds
+            end
+
+            IO.write('.cfer-role', YAML.dump(role_creds))
+            stored_creds[:credentials]
           else
             credentials
           end
@@ -39,7 +64,7 @@ module Cfer
           end
         else
           msg = "Profile `#{profile_name}' not found in #{path}"
-          raise Errors::NoSuchProfileError, msg
+          raise Aws::Errors::NoSuchProfileError, msg
         end
       end
     end

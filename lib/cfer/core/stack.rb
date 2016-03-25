@@ -163,6 +163,11 @@ module Cfer::Core
       client = @options[:client] || raise(Cfer::Util::CferError, "Can not fetch stack outputs without a client")
       client.fetch_output(stack, out)
     end
+
+    def lookup_outputs(stack)
+      client = @options[:client] || raise(Cfer::Util::CferError, "Can not fetch stack outputs without a client")
+      client.fetch_outputs(stack)
+    end
   end
 
 end

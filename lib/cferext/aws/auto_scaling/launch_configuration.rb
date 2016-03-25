@@ -12,4 +12,10 @@ module CferExt::AWS::AutoScaling
       super(name, type, options, &block)
     end
   end
+
+  class AutoScalingGroup < Cfer::Cfn::Resource
+    def desired_size(size)
+      desired_capacity size
+    end
+  end
 end
