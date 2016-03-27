@@ -15,7 +15,9 @@ Read about Cfer [here](http://tilmonedwards.com/2015/07/28/cfer.html).
 
 Cfer is pre-1.0 software, and may contain bugs or incomplete features. Please see the [license](https://github.com/seanedwards/cfer/blob/master/LICENSE.txt) for disclaimers.
 
-If you would like support or guidance on Cfer, or CloudFormation in general, I offer DevOps consulting services. Please [Contact Bitlancer](http://www.bitlancer.com/contact-us/) and we'll be happy to discuss your needs.
+If you would like support or guidance on Cfer, or CloudFormation in general, I offer DevOps consulting services. Please [Contact me](mailto:stedwards87+cfer@gmail.com) and I'll be happy to discuss your needs.
+
+You can also find me at [@tilmonedwards](https://twitter.com/tilmonedwards). If you use Cfer, or are considering it, I'd love to hear from you.
 
 ## Installation
 
@@ -282,6 +284,10 @@ This project also contains a [Code of Conduct](https://github.com/seanedwards/cf
 
 ## 0.4.0
 
+### **BREAKING CHANGES**
+
+* Instances and Launch Configurations that used `cfn_init_setup` in the provisioning tools will be replaced, because the [`UserData` property](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-instance.html#cfn-ec2-instance-userdata) changes.
+
 ### Enhancements
 * Adds support for assume-role authentication with MFA (see: https://docs.aws.amazon.com/cli/latest/userguide/cli-roles.html)
 * Adds support for yml-format parameter files with environment-specific sections.
@@ -289,7 +295,8 @@ This project also contains a [Code of Conduct](https://github.com/seanedwards/cf
 * Adds `cfer estimate` command to estimate the cost of a template using the AWS CloudFormation cost estimation API.
 * Enhancements to chef provisioner to allow for references in chef attributes. (Thanks to @eropple)
 * Adds continue/rollback/quit selection when `^C` is caught during a converge.
-* Stores Cfer version and Git repo information in the Repo metadata
+* Stores Cfer version and Git repo information in the Repo metadata.
+* Added support for uploading templates to S3 with the `--s3-path` and `--force-s3` options.
 
 ### Bugfixes
 

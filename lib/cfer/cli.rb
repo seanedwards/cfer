@@ -65,6 +65,18 @@ module Cfer
     method_option :timeout,
       type: :numeric,
       desc: 'The timeout (in minutes) before the stack operation aborts'
+    method_option :upgrade,
+      type: :boolean,
+      default: false,
+      desc: 'Allow Cfer to introduce potentially breaking changes, which may replace resources.'
+    method_option :s3_path,
+      type: :string,
+      desc: 'Specifies an S3 path in case the stack is created with a URL.'
+    method_option :force_s3,
+      type: :boolean,
+      default: false,
+      desc: 'Forces Cfer to upload the template to S3 and pass CloudFormation a URL.'
+
     template_options
     stack_options
     def converge(stack_name)

@@ -3,6 +3,13 @@ gem 'cfer'
 require 'cfer'
 require 'highline'
 
+require 'pry'
+require 'pry-rescue'
+
+module Cfer
+  DEBUG = true
+end
+
 task :default => [:spec]
 
 task :config_aws, [:profile] do |t, args|

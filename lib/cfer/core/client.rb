@@ -5,11 +5,7 @@ module Cfer::Core
     attr_reader :git
 
     def initialize(options)
-      begin
-        @git = Git.open(options[:working_directory] || '.')
-      rescue Exception
-        # git will be null if we can't open the repo
-      end
+      @git = Git.open(options[:working_directory] || '.') rescue nil
     end
 
     def converge

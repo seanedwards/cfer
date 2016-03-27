@@ -1,4 +1,6 @@
 require_relative '../core/client'
+require 'uri'
+
 module Cfer::Cfn
 
   class Client < Cfer::Core::Client
@@ -8,8 +10,9 @@ module Cfer::Cfn
     def initialize(options)
       super
       @name = options[:stack_name]
-      options.delete :stack_name
-      @cfn = Aws::CloudFormation::Client.new(options)
+      @options = options
+      @options.delete :stack_name
+      @cfn = Aws::CloudFormation::Client.new(@options)
       flush_cache
     end
 
@@ -61,12 +64,15 @@ module Cfer::Cfn
       create_params = []
       update_params = []
 
-      previous_parameters =
-        begin
-          fetch_parameters
-        rescue Cfer::Util::StackDoesNotExistError
-          nil
-        end
+      previous_parameters = fetch_parameters rescue nil
+
+      current_version = Cfer::SEMANTIC_VERSION
+      previous_version = fetch_cfer_version
+
+      current_hash = stack.git_version
+      previous_hash = fetch_git_hash
+
+      # Compare current and previous versions and hashes?
 
       response.parameters.each do |tmpl_param|
         input_param = stack.input_parameters[tmpl_param.parameter_key]
@@ -105,7 +111,6 @@ module Cfer::Cfn
 
       stack_options = {
         stack_name: name,
-        template_body: stack.to_cfn,
         capabilities: response.capabilities
       }
 
@@ -114,6 +119,8 @@ module Cfer::Cfn
 
       stack_options.merge! parse_stack_policy(:stack_policy, options[:stack_policy])
       stack_options.merge! parse_stack_policy(:stack_policy_during_update, options[:stack_policy_during_update])
+
+      stack_options.merge! upload_or_return_template(stack.to_cfn, options)
 
       cfn_stack =
         begin
@@ -176,21 +183,51 @@ module Cfer::Cfn
       end
     end
 
+    def stack_cache(stack_name)
+      @stack_cache[stack_name] ||= {}
+    end
+
     def fetch_stack(stack_name = @name)
       raise Cfer::Util::StackDoesNotExistError, 'Stack name must be specified' if stack_name == nil
       begin
-        @stack_cache[stack_name] ||= describe_stacks(stack_name: stack_name).stacks.first.to_h
+        stack_cache(stack_name)[:stack] ||= describe_stacks(stack_name: stack_name).stacks.first.to_h
       rescue Aws::CloudFormation::Errors::ValidationError => e
         raise Cfer::Util::StackDoesNotExistError, e.message
       end
     end
 
+    def fetch_summary(stack_name = @name)
+      stack_cache(stack_name)[:summary] ||= get_template_summary(stack_name: stack_name)
+    end
+
+    def fetch_metadata(stack_name = @name)
+      md = fetch_summary(stack_name).metadata
+      stack_cache(stack_name)[:metadata] ||=
+        if md
+          JSON.parse(md)
+        else
+          {}
+        end
+    end
+
+    def fetch_cfer_version(stack_name = @name)
+      previous_version = Semantic::Version.new('0.0.0')
+      if previous_version_hash = fetch_metadata(stack_name).fetch('Cfer', {}).fetch('Version', nil)
+        previous_version_hash.each { |k, v| previous_version.send(k + '=', v) }
+        previous_version
+      end
+    end
+
+    def fetch_git_hash(stack_name = @name)
+      fetch_metadata(stack_name).fetch('Cfer', {}).fetch('Git', {}).fetch('Rev', nil)
+    end
+
     def fetch_parameters(stack_name = @name)
-      @stack_parameters[stack_name] ||= cfn_list_to_hash('parameter', fetch_stack(stack_name)[:parameters])
+      stack_cache(stack_name)[:parameters] ||= cfn_list_to_hash('parameter', fetch_stack(stack_name)[:parameters])
     end
 
     def fetch_outputs(stack_name = @name)
-      @stack_outputs[stack_name] ||= cfn_list_to_hash('output', fetch_stack(stack_name)[:outputs])
+      stack_cache(stack_name)[:outputs] ||= cfn_list_to_hash('output', fetch_stack(stack_name)[:outputs])
     end
 
     def fetch_output(stack_name, output_name)
@@ -207,6 +244,23 @@ module Cfer::Cfn
 
     private
 
+    def upload_or_return_template(cfn_hash, options = {})
+      if cfn_hash.bytesize <= 51200 && !options[:force_s3]
+        { template_body: cfn_hash }
+      else
+        raise Cfer::Util::CferError, 'Cfer needs to upload the template to S3, but no bucket was specified.' unless options[:s3_path]
+
+        uri = URI(options[:s3_path])
+        template = Aws::S3::Object.new bucket_name: uri.host, key: uri.path.reverse.chomp('/').reverse
+        template.put body: cfn_hash
+
+        template_url = template.public_url
+        template_url = template_url + '?versionId=' + template.version_id if template.version_id
+
+        { template_url: template_url }
+      end
+    end
+
     def cfn_list_to_hash(attribute, list)
       return {} unless list
 
@@ -219,12 +273,8 @@ module Cfer::Cfn
     def flush_cache
       Cfer::LOGGER.debug "*********** FLUSH CACHE ***************"
       Cfer::LOGGER.debug "Stack cache: #{@stack_cache}"
-      Cfer::LOGGER.debug "Stack parameters: #{@stack_parameters}"
-      Cfer::LOGGER.debug "Stack outputs: #{@stack_outputs}"
       Cfer::LOGGER.debug "***************************************"
       @stack_cache = {}
-      @stack_parameters = {}
-      @stack_outputs = {}
     end
 
     def for_each_event(stack_name)

@@ -13,16 +13,18 @@ module Cfer::Core
 
     attr_reader :options
 
-    def converge!
-      if @options[:client]
-        @options[:client].converge self
-      end
+    attr_reader :git_version
+
+    def client
+      @options[:client] || raise('No client set on this stack')
     end
 
-    def tail!(&block)
-      if @options[:client]
-        @options[:client].tail self, &block
-      end
+    def converge!(options = {})
+      client.converge self, options
+    end
+
+    def tail!(options = {}, &block)
+      client.tail self, options, &block
     end
 
     def initialize(options = {})
@@ -44,8 +46,9 @@ module Cfer::Core
       self[:Outputs] = {}
 
       if options[:client] && git = options[:client].git
+        @git_version = git.object('HEAD^').sha
         self[:Metadata][:Cfer][:Git] = {
-          Rev: git.object('HEAD^').sha,
+          Rev: @git_version,
           Clean: git.status.changed.empty?
         }
       end

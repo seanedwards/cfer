@@ -65,10 +65,10 @@ module Cfer
               )
 
       begin
-        operation = cfn_stack.converge(stack, options)
+        operation = stack.converge!(options)
         if options[:follow]
           begin
-            tail! stack_name, options
+            tail! stack_name, options.merge(cfer_client: cfn_stack)
           rescue Interrupt
             puts "Caught interrupt. What would you like to do?"
             case HighLine.new($stdin, $stderr).choose('Continue', 'Quit', 'Rollback')
@@ -221,7 +221,7 @@ module Cfer
         file_params = file_params.deep_merge(file_params[options[:parameter_environment]])
       end
 
-      file_params.deep_merge(options[:parameters])
+      file_params.deep_merge(options[:parameters] || {})
     end
 
     def render_json(obj, options = {})
