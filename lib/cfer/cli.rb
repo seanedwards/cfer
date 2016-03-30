@@ -76,6 +76,12 @@ module Cfer
       type: :boolean,
       default: false,
       desc: 'Forces Cfer to upload the template to S3 and pass CloudFormation a URL.'
+    method_option :change,
+      type: :string,
+      desc: 'Issues updates as a Cfn change set.'
+    method_option :change_description,
+      type: :string,
+      desc: 'The description of this Cfn change'
 
     template_options
     stack_options
