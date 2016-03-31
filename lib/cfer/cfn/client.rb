@@ -24,6 +24,17 @@ module Cfer::Cfn
       end
     end
 
+
+    def delete_stack(stack_name)
+      begin
+        @cfn.delete_stack({
+          stack_name: stack_name, # required
+        })
+      rescue Aws::CloudFormation::Errors
+        raise CferError, "Stack delete #{stack_name}"
+      end
+    end
+
     def responds_to?(method)
       @cfn.responds_to? method
     end
@@ -67,10 +78,10 @@ module Cfer::Cfn
       previous_parameters = fetch_parameters rescue nil
 
       current_version = Cfer::SEMANTIC_VERSION
-      previous_version = fetch_cfer_version
+      previous_version = fetch_cfer_version rescue nil
 
       current_hash = stack.git_version
-      previous_hash = fetch_git_hash
+      previous_hash = fetch_git_hash rescue nil
 
       # Compare current and previous versions and hashes?
 
@@ -197,7 +208,11 @@ module Cfer::Cfn
     end
 
     def fetch_summary(stack_name = @name)
-      stack_cache(stack_name)[:summary] ||= get_template_summary(stack_name: stack_name)
+      begin
+        stack_cache(stack_name)[:summary] ||= get_template_summary(stack_name: stack_name)
+      rescue Aws::CloudFormation::Errors::ValidationError => e
+        raise Cfer::Util::StackDoesNotExistError, e.message
+      end
     end
 
     def fetch_metadata(stack_name = @name)
@@ -208,6 +223,10 @@ module Cfer::Cfn
         else
           {}
         end
+    end
+
+    def remove(stack_name, options = {})
+      delete_stack(stack_name)
     end
 
     def fetch_cfer_version(stack_name = @name)

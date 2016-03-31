@@ -8,7 +8,9 @@ module Cfer::Cfn
       self.merge!(options)
       self[:Properties] = HashWithIndifferentAccess.new
       build_from_block(&block)
+
     end
+
 
     def tag(k, v, **options)
       self[:Properties][:Tags] ||= []
@@ -24,5 +26,6 @@ module Cfer::Cfn
       self[:Properties].fetch key
     end
 
+    private
   end
 end

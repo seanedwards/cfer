@@ -158,6 +158,13 @@ module Cfer
       puts cfn_stack.estimate(stack)
     end
 
+    def remove!(stack_name, options = {})
+      config(options)
+      cfn = options[:aws_options] || {}
+      cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
+      cfn_stack.delete_stack(stack_name)
+    end
+
     # Builds a Cfer::Core::Stack from a Ruby block
     #
     # @param options [Hash] The stack options
@@ -234,6 +241,8 @@ module Cfer
 
     def templatize_errors(base_loc)
       yield
+    rescue Cfer::Util::CferError => e
+      raise e
     rescue SyntaxError => e
       raise Cfer::Util::TemplateError.new([]), e.message
     rescue StandardError => e
