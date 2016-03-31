@@ -298,7 +298,6 @@ This project also contains a [Code of Conduct](https://github.com/seanedwards/cf
 ## 0.4.0
 
 ### **BREAKING CHANGES**
-
 * Instances and Launch Configurations that used `cfn_init_setup` in the provisioning tools will be replaced, because the [`UserData` property](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-instance.html#cfn-ec2-instance-userdata) changes.
 
 ### Enhancements

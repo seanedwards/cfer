@@ -138,7 +138,11 @@ module Cfer::Cfn
           create_stack stack_options.merge parameters: create_params
           :created
         rescue Cfer::Util::StackExistsError
-          update_stack stack_options.merge parameters: update_params
+          if options[:change]
+            create_change_set stack_options.merge change_set_name: options[:change], description: options[:change_description], parameters: update_params
+          else
+            update_stack stack_options.merge parameters: update_params
+          end
           :updated
         end
 

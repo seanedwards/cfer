@@ -66,7 +66,7 @@ module Cfer
 
       begin
         operation = stack.converge!(options)
-        if options[:follow]
+        if options[:follow] && !options[:change]
           begin
             tail! stack_name, options.merge(cfer_client: cfn_stack)
           rescue Interrupt
