@@ -1,36 +1,30 @@
 require 'cferext/aws/iam/policy_generator'
 
-module CferExt
-  module AWS
-    module IAM
+Cfer::Core::Resource.extend_resource "AWS::IAM::ManagedPolicy" do
+  include CferExt::AWS::IAM::WithPolicyDocument
+end
 
-      class ManagedPolicy < Cfer::Core::Resource
-        include WithPolicyDocument
-      end
+Cfer::Core::Resource.extend_resource "AWS::IAM::User" do
+  include CferExt::AWS::IAM::WithPolicies
+end
 
-      class User < Cfer::Core::Resource
-        include WithPolicies
-      end
+Cfer::Core::Resource.extend_resource "AWS::IAM::Group" do
+  include CferExt::AWS::IAM::WithPolicies
+end
 
-      class Group < Cfer::Core::Resource
-        include WithPolicies
-      end
+Cfer::Core::Resource.extend_resource "AWS::IAM::Role" do
+  include CferExt::AWS::IAM::WithPolicies
 
-      class Role < Cfer::Core::Resource
-        include WithPolicies
-
-        def assume_role_policy_document(doc = nil, &block)
-          doc = CferExt::AWS::IAM.generate_policy(&block) if doc == nil
-          properties :AssumeRolePolicyDocument => doc
-        end
-      end
-
-      class Policy < Cfer::Core::Resource
-        def policy_document(doc = nil, &block)
-          doc = CferExt::AWS::IAM.generate_policy(&block) if doc == nil
-          properties :PolicyDocument => doc
-        end
-      end
-    end
+  def assume_role_policy_document(doc = nil, &block)
+    doc = CferExt::AWS::IAM.generate_policy(&block) if doc == nil
+    properties :AssumeRolePolicyDocument => doc
   end
 end
+
+Cfer::Core::Resource.extend_resource "AWS::IAM::Policy" do
+  def policy_document(doc = nil, &block)
+    doc = CferExt::AWS::IAM.generate_policy(&block) if doc == nil
+    properties :PolicyDocument => doc
+  end
+end
+
