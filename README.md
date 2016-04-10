@@ -298,7 +298,7 @@ This project also contains a [Code of Conduct](https://github.com/seanedwards/cf
 ## 0.4.0
 
 ### **BREAKING CHANGES**
-* Instances and Launch Configurations that used `cfn_init_setup` in the provisioning tools will be replaced, because the [`UserData` property](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-instance.html#cfn-ec2-instance-userdata) changes.
+* Provisioning is removed from Cfer core and moved to [cfer-provisioning](https://github.com/seanedwards/cfer-provisioning)
 
 ### Enhancements
 * Adds support for assume-role authentication with MFA (see: https://docs.aws.amazon.com/cli/latest/userguide/cli-roles.html)
@@ -309,6 +309,7 @@ This project also contains a [Code of Conduct](https://github.com/seanedwards/cf
 * Adds continue/rollback/quit selection when `^C` is caught during a converge.
 * Stores Cfer version and Git repo information in the Repo metadata.
 * Added support for uploading templates to S3 with the `--s3-path` and `--force-s3` options.
+* Added new way of extending resources, making plugins easier.
 
 ### Bugfixes
 
