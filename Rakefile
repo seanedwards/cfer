@@ -1,4 +1,5 @@
-#require "bundler/gem_tasks"
+require "bundler/gem_tasks"
+
 gem 'cfer'
 require 'cfer'
 require 'highline'

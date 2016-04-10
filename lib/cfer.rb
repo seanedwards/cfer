@@ -198,6 +198,9 @@ module Cfer
       Cfer::LOGGER.debug "Options: #{options}"
       Cfer::LOGGER.level = Logger::DEBUG if options[:verbose]
 
+      require 'rubygems'
+      require 'bundler/setup'
+
       Aws.config.update region: options[:region] if options[:region]
       Aws.config.update credentials: Cfer::Cfn::CferCredentialsProvider.new(profile_name: options[:profile]) if options[:profile]
     end

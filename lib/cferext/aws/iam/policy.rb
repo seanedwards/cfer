@@ -1,4 +1,4 @@
-require_relative 'policy_generator.rb'
+require 'cferext/aws/iam/policy_generator'
 
 module CferExt
   module AWS
