@@ -113,13 +113,16 @@ describe Cfer do
   it 'creates resources with special classes' do
 
     module ::CferExt::Cfer
-      class TestCustomResource < Cfer::Cfn::Resource
+      class TestCustomResource < Cfer::Core::Resource
         def property(value)
           actual_value value
           other_property 'abc'
           other_property_2 123
         end
       end
+    end
+
+    Cfer::Core::Resource.extend_resource "Cfer::TestPlugin" do
     end
 
     stack = create_stack do

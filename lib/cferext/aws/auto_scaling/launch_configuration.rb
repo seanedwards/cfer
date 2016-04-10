@@ -1,19 +1,8 @@
-require 'cferext/provisioning'
-
-require 'base64'
-require 'yaml'
-
 module CferExt::AWS::AutoScaling
-  class LaunchConfiguration < Cfer::Cfn::Resource
-    include CferExt::Provisioning
-
-    def initialize(name, type, options = {}, &block)
-      options[:Metadata] ||= {}
-      super(name, type, options, &block)
-    end
+  class LaunchConfiguration < Cfer::Core::Resource
   end
 
-  class AutoScalingGroup < Cfer::Cfn::Resource
+  class AutoScalingGroup < Cfer::Core::Resource
     def desired_size(size)
       desired_capacity size
     end

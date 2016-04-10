@@ -2,7 +2,7 @@ description 'Example stack template for a small EC2 instance'
 
 # NOTE: This template depends on vpc.rb
 
-# Include common template code that will be used for examples that create EC2 instances.
+# You can use hte `include_template` function to include other ruby files into this Cloudformation template.
 include_template 'common/instance_deps.rb'
 
 # We can define extension objects, which extend the basic JSON-building
@@ -14,7 +14,7 @@ module CferExt::AWS::EC2
   # This class adds methods to resources with the type `AWS::EC2::Instance`
   # Remember, this class could go in your own gem to be shared between your templates
   # in a way that works with the rest of your infrastructure.
-  class Instance < Cfer::Cfn::Resource
+  class Instance < Cfer::Core::Resource
     def boot_script(data)
       # This function simply wraps a bash script in the little bit of extra
       # sugar (hashbang + base64 encoding) that EC2 requires for userdata boot scripts.

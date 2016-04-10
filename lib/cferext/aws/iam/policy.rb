@@ -4,19 +4,19 @@ module CferExt
   module AWS
     module IAM
 
-      class ManagedPolicy < Cfer::Cfn::Resource
+      class ManagedPolicy < Cfer::Core::Resource
         include WithPolicyDocument
       end
 
-      class User < Cfer::Cfn::Resource
+      class User < Cfer::Core::Resource
         include WithPolicies
       end
 
-      class Group < Cfer::Cfn::Resource
+      class Group < Cfer::Core::Resource
         include WithPolicies
       end
 
-      class Role < Cfer::Cfn::Resource
+      class Role < Cfer::Core::Resource
         include WithPolicies
 
         def assume_role_policy_document(doc = nil, &block)
@@ -25,7 +25,7 @@ module CferExt
         end
       end
 
-      class Policy < Cfer::Cfn::Resource
+      class Policy < Cfer::Core::Resource
         def policy_document(doc = nil, &block)
           doc = CferExt::AWS::IAM.generate_policy(&block) if doc == nil
           properties :PolicyDocument => doc

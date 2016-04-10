@@ -5,7 +5,10 @@ module Cfer::Core
     attr_reader :git
 
     def initialize(options)
-      @git = Git.open(options[:working_directory] || '.') rescue nil
+      path = options[:working_directory] || '.'
+      if File.exist?("#{path}/.git")
+        @git = Git.open(path) rescue nil
+      end
     end
 
     def converge

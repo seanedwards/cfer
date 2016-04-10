@@ -45,8 +45,7 @@ module Cfer::Core
       self[:Resources] = {}
       self[:Outputs] = {}
 
-      if options[:client] && git = options[:client].git
-        @git_version = git.object('HEAD^').sha
+      if options[:client] && git = options[:client].git && @git_version = (git.object('HEAD^').sha rescue nil)
         self[:Metadata][:Cfer][:Git] = {
           Rev: @git_version,
           Clean: git.status.changed.empty?
@@ -137,9 +136,7 @@ module Cfer::Core
     def resource(name, type, options = {}, &block)
       Preconditions.check_argument(/[[:alnum:]]+/ =~ name, "Resource name must be alphanumeric")
 
-      clazz = "CferExt::#{type}".split('::').inject(Object) { |o, c| o.const_get c if o && o.const_defined?(c) } || Cfer::Cfn::Resource
-      Preconditions.check_argument clazz <= Cfer::Cfn::Resource, "#{type} is not a valid resource type because CferExt::#{type} does not inherit from `Cfer::Cfn::Resource`"
-
+      clazz = Cfer::Core::Resource.resource_class(type)
       rc = clazz.new(name, type, options, &block)
 
       self[:Resources][name] = rc
