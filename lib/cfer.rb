@@ -158,10 +158,10 @@ module Cfer
       puts cfn_stack.estimate(stack)
     end
 
-    def remove!(stack_name, options = {})
+    def delete!(stack_name, options = {})
       config(options)
       cfn = options[:aws_options] || {}
-      cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
+      cfn_stack = options[:cfer_client] || cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
       cfn_stack.delete_stack(stack_name)
     end
 

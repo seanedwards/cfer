@@ -84,6 +84,9 @@ The following options may be used with the `converge` command:
 * `--on-failure <DELETE|ROLLBACK|DO_NOTHING>`: Specifies the action to take when a stack creation fails. Has no effect if the stack already exists and is being updated.
 * `--stack-policy <filename|URL|JSON string>` (`-s`): Stack policy to apply to the stack in order to control updates; takes a local filename containing the policy, a URL to an S3 object, or a raw JSON string.
 * `--stack-policy-during-update <filename|URL|JSON string>` (`-u`): Stack policy as in `--stack-policy` option above, but applied as a temporary override to the permanent policy during stack update.
+* `--s3-path <S3_PATH>`: Path to an S3 bucket location where the template will be stored. This is required if the template output exceeds [51,200 bytes](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html).
+* `--force-s3`: Forces Cfer to upload the template to S3, even if it's small enough to be uploaded directly to the cloudformation API.
+* `--change <CHANGE_NAME>`: Creates a [CloudFormation Change Set](https://aws.amazon.com/blogs/aws/new-change-sets-for-aws-cloudformation/), rather than immediately updating the stack.
 
 #### `tail <stack-name>`
 

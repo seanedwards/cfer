@@ -82,6 +82,15 @@ describe Cfer::Cfn::Client do
     Cfer::converge! cfn.name,  cfer_client: cfn, cfer_stack: stack, stack_policy_during_update: 'spec/support/stack_policy_during_update.json'
   end
 
+  it 'deletes stacks' do
+    cfn = Cfer::Cfn::Client.new stack_name: 'test-stack', region: 'us-east-1'
+
+    expect(cfn).to receive(:delete_stack).with('test-stack')
+      .exactly(1).times
+
+    Cfer::delete! 'test-stack', cfer_client: cfn
+  end
+
   it 'follows logs' do
     cfn = Cfer::Cfn::Client.new stack_name: 'test', region: 'us-east-1'
     event_list = [

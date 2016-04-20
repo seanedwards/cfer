@@ -2,30 +2,24 @@ description 'Example stack template for a small EC2 instance'
 
 # NOTE: This template depends on vpc.rb
 
-# You can use hte `include_template` function to include other ruby files into this Cloudformation template.
+# You can use the `include_template` function to include other ruby files into this Cloudformation template.
 include_template 'common/instance_deps.rb'
 
-# We can define extension objects, which extend the basic JSON-building
+# We can define extensions to resources, which extend the basic JSON-building
 # functionality of Cfer. Cfer provides a few of these, but you're free
-# to define your own by creating a class that matches the name of an
-# CloudFormation resource type, inheriting from `Cfer::AWS::Resource`
-# inside the `CferExt` module:
-module CferExt::AWS::EC2
-  # This class adds methods to resources with the type `AWS::EC2::Instance`
-  # Remember, this class could go in your own gem to be shared between your templates
-  # in a way that works with the rest of your infrastructure.
-  class Instance < Cfer::Core::Resource
-    def boot_script(data)
-      # This function simply wraps a bash script in the little bit of extra
-      # sugar (hashbang + base64 encoding) that EC2 requires for userdata boot scripts.
-      # See the AWS docs here: http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
-      script = <<-EOS.strip_heredoc
-      #!/bin/bash
-      #{data}
-      EOS
+# to define your own by using `Cfer::Core::Resource.extend_resource` and specifying a
+# CloudFormation resource type. Inside the block, define any methods you'd like to use:
+Cfer::Core::Resource.extend_resource "AWS::EC2::Instance" do
+  def boot_script(data)
+    # This function simply wraps a bash script in the little bit of extra
+    # sugar (hashbang + base64 encoding) that EC2 requires for userdata boot scripts.
+    # See the AWS docs here: http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
+    script = <<-EOS.strip_heredoc
+    #!/bin/bash
+    #{data}
+    EOS
 
-      user_data Base64.encode64(script)
-    end
+    user_data Base64.encode64(script)
   end
 end
 

@@ -65,10 +65,6 @@ module Cfer
     method_option :timeout,
       type: :numeric,
       desc: 'The timeout (in minutes) before the stack operation aborts'
-    method_option :upgrade,
-      type: :boolean,
-      default: false,
-      desc: 'Allow Cfer to introduce potentially breaking changes, which may replace resources.'
     method_option :s3_path,
       type: :string,
       desc: 'Specifies an S3 path in case the stack is created with a URL.'
@@ -95,10 +91,10 @@ module Cfer
       Cfer.describe! stack_name, options
     end
 
-    desc 'remove <stack>', 'Remove a CloudFormation stack'
+    desc 'delete <stack>', 'Deletes a CloudFormation stack'
     stack_options
-    def remove(stack_name)
-      Cfer.remove! stack_name, options
+    def delete(stack_name)
+      Cfer.delete! stack_name, options
     end
 
     desc 'tail <stack>', 'Follows stack events on standard output as they occur'
