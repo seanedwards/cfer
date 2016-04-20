@@ -43,6 +43,14 @@ def setup_describe_stacks(cfn, stack_name = 'test', times = 1)
         )
       )
     )
+
+  allow(cfn).to receive(:get_template_summary)
+   .with(stack_name: stack_name)
+   .and_return(
+     double(
+       metadata: "{}"
+     )
+   )
 end
 
 module Cfer

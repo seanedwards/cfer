@@ -56,12 +56,34 @@ module Cfer
       cfn = options[:aws_options] || {}
 
       cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
-      stack = options[:cfer_stack] || Cfer::stack_from_file(tmpl, options.merge(client: cfn_stack))
+      stack = options[:cfer_stack] ||
+              Cfer::stack_from_file(tmpl,
+                options.merge(
+                  client: cfn_stack,
+                  parameters: generate_final_parameters(options)
+                )
+              )
 
       begin
-        cfn_stack.converge(stack, options)
-        if options[:follow]
-          tail! stack_name, options
+        operation = stack.converge!(options)
+        if options[:follow] && !options[:change]
+          begin
+            tail! stack_name, options.merge(cfer_client: cfn_stack)
+          rescue Interrupt
+            puts "Caught interrupt. What would you like to do?"
+            case HighLine.new($stdin, $stderr).choose('Continue', 'Quit', 'Rollback')
+            when 'Continue'
+              retry
+            when 'Rollback'
+              case operation
+              when :created
+                cfn_stack.delete_stack stack_name: stack_name
+              when :updated
+                cfn_stack.cancel_update_stack stack_name: stack_name
+              end
+              retry
+            end
+          end
         end
       rescue Aws::CloudFormation::Errors::ValidationError => e
         Cfer::LOGGER.info "CFN validation error: #{e.message}"
@@ -118,9 +140,29 @@ module Cfer
 
     def generate!(tmpl, options = {})
       config(options)
-      cfn_stack = Cfer::Cfn::Client.new(options[:aws_options] || {})
-      stack = Cfer::stack_from_file(tmpl, options.merge(client: cfn_stack)).to_h
+      cfn = options[:aws_options] || {}
+
+      cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn)
+      stack = options[:cfer_stack] || Cfer::stack_from_file(tmpl,
+        options.merge(client: cfn_stack, parameters: generate_final_parameters(options))).to_h
       puts render_json(stack, options)
+    end
+
+    def estimate!(tmpl, options = {})
+      config(options)
+      cfn = options[:aws_options] || {}
+
+      cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn)
+      stack = options[:cfer_stack] || Cfer::stack_from_file(tmpl,
+        options.merge(client: cfn_stack, parameters: generate_final_parameters(options)))
+      puts cfn_stack.estimate(stack)
+    end
+
+    def delete!(stack_name, options = {})
+      config(options)
+      cfn = options[:aws_options] || {}
+      cfn_stack = options[:cfer_client] || cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
+      cfn_stack.delete_stack(stack_name)
     end
 
     # Builds a Cfer::Core::Stack from a Ruby block
@@ -156,8 +198,40 @@ module Cfer
       Cfer::LOGGER.debug "Options: #{options}"
       Cfer::LOGGER.level = Logger::DEBUG if options[:verbose]
 
+      require 'rubygems'
+      require 'bundler/setup'
+
       Aws.config.update region: options[:region] if options[:region]
-      Aws.config.update credentials: Aws::SharedCredentials.new(profile_name: options[:profile]) if options[:profile]
+      Aws.config.update credentials: Cfer::Cfn::CferCredentialsProvider.new(profile_name: options[:profile]) if options[:profile]
+    end
+
+    def generate_final_parameters(options)
+      raise "parameter-environment set but parameter_file not set" \
+        if options[:parameter_environment] && options[:parameter_file].nil?
+
+      file_params =
+        if options[:parameter_file]
+          case File.extname(options[:parameter_file])
+          when '.yaml'
+            require 'yaml'
+            YAML.load_file(options[:parameter_file])
+          when '.json'
+            JSON.parse(IO.read(options[:parameter_file]))
+          else
+            raise "Unrecognized parameter file format: #{File.extname(options[:parameter_file])}"
+          end
+        else
+          {}
+        end
+
+      if options[:parameter_environment]
+        raise "no key '#{options[:parameter_environment]}' found in parameters file." \
+          unless file_params.key?(options[:parameter_environment])
+
+        file_params = file_params.deep_merge(file_params[options[:parameter_environment]])
+      end
+
+      file_params.deep_merge(options[:parameters] || {})
     end
 
     def render_json(obj, options = {})
@@ -170,6 +244,8 @@ module Cfer
 
     def templatize_errors(base_loc)
       yield
+    rescue Cfer::Util::CferError => e
+      raise e
     rescue SyntaxError => e
       raise Cfer::Util::TemplateError.new([]), e.message
     rescue StandardError => e

@@ -37,6 +37,21 @@ describe Cfer do
     expect(stack[:Parameters][:option_value][:Default]).to eq 'value'
   end
 
+  it 'handles file and environment parameters' do
+    options = {
+      parameters: { 'CLIValue' => 'from_cli' },
+
+      parameter_file: "#{__dir__}/support/parameters_stack.yaml",
+      parameter_environment: 'my_env'
+    }
+
+    merged_parameters = Cfer.send(:generate_final_parameters, options)
+
+    expect(merged_parameters['FileValue']).to eq 'from_file'
+    expect(merged_parameters['EnvValue']).to eq 'from_env'
+    expect(merged_parameters['CLIValue']).to eq 'from_cli'
+  end
+
   it 'creates parameters' do
     stack = create_stack do
       parameter :test, Default: 'abc', Description: 'A test parameter'
@@ -71,7 +86,7 @@ describe Cfer do
       end
 
       resource :test_resource_2, 'Cfer::TestResource' do
-        other_resource test_resource
+        other_resource Cfer::Core::Fn::ref(:test_resource)
       end
     end
 
@@ -98,13 +113,16 @@ describe Cfer do
   it 'creates resources with special classes' do
 
     module ::CferExt::Cfer
-      class TestCustomResource < Cfer::Cfn::Resource
+      class TestCustomResource < Cfer::Core::Resource
         def property(value)
           actual_value value
           other_property 'abc'
           other_property_2 123
         end
       end
+    end
+
+    Cfer::Core::Resource.extend_resource "Cfer::TestPlugin" do
     end
 
     stack = create_stack do

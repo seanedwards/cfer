@@ -1,0 +1,7 @@
+FileValue: from_file
+EnvValue: NOPE_FILE
+CLIValue: NOPE_FILE
+
+my_env:
+    EnvValue: from_env
+    CLIValue: NOPE_ENV

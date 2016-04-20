@@ -13,16 +13,18 @@ module Cfer::Core
 
     attr_reader :options
 
-    def converge!
-      if @options[:client]
-        @options[:client].converge self
-      end
+    attr_reader :git_version
+
+    def client
+      @options[:client] || raise('No client set on this stack')
     end
 
-    def tail!(&block)
-      if @options[:client]
-        @options[:client].tail self, &block
-      end
+    def converge!(options = {})
+      client.converge self, options
+    end
+
+    def tail!(options = {}, &block)
+      client.tail self, options, &block
     end
 
     def initialize(options = {})
@@ -31,11 +33,24 @@ module Cfer::Core
 
       @options = options
 
+      self[:Metadata] = {
+        :Cfer => {
+          :Version => Cfer::SEMANTIC_VERSION.to_h.delete_if { |k, v| v === nil }
+        }
+      }
+
       self[:Parameters] = {}
       self[:Mappings] = {}
       self[:Conditions] = {}
       self[:Resources] = {}
       self[:Outputs] = {}
+
+      if options[:client] && git = options[:client].git && @git_version = (git.object('HEAD^').sha rescue nil)
+        self[:Metadata][:Cfer][:Git] = {
+          Rev: @git_version,
+          Clean: git.status.changed.empty?
+        }
+      end
 
       @parameters = HashWithIndifferentAccess.new
       @input_parameters = HashWithIndifferentAccess.new
@@ -84,6 +99,8 @@ module Cfer::Core
     def parameter(name, options = {})
       param = {}
       options.each do |key, v|
+        next if v === nil
+
         k = key.to_s.camelize.to_sym
         param[k] =
           case k
@@ -119,9 +136,7 @@ module Cfer::Core
     def resource(name, type, options = {}, &block)
       Preconditions.check_argument(/[[:alnum:]]+/ =~ name, "Resource name must be alphanumeric")
 
-      clazz = "CferExt::#{type}".split('::').inject(Object) { |o, c| o.const_get c if o && o.const_defined?(c) } || Cfer::Cfn::Resource
-      Preconditions.check_argument clazz <= Cfer::Cfn::Resource, "#{type} is not a valid resource type because CferExt::#{type} does not inherit from `Cfer::Cfn::Resource`"
-
+      clazz = Cfer::Core::Resource.resource_class(type)
       rc = clazz.new(name, type, options, &block)
 
       self[:Resources][name] = rc
@@ -150,10 +165,9 @@ module Cfer::Core
     # Includes template code from one or more files, and evals it in the context of this stack.
     # Filenames are relative to the file containing the invocation of this method.
     def include_template(*files)
-      calling_file = caller.first.split(/:\d/,2).first
-      dirname = File.dirname(calling_file)
+      include_base = options[:include_base] || File.dirname(caller.first.split(/:\d/,2).first)
       files.each do |file|
-        path = File.join(dirname, file)
+        path = File.join(include_base, file)
         instance_eval(File.read(path), path)
       end
     end
@@ -161,6 +175,63 @@ module Cfer::Core
     def lookup_output(stack, out)
       client = @options[:client] || raise(Cfer::Util::CferError, "Can not fetch stack outputs without a client")
       client.fetch_output(stack, out)
+    end
+
+    def lookup_outputs(stack)
+      client = @options[:client] || raise(Cfer::Util::CferError, "Can not fetch stack outputs without a client")
+      client.fetch_outputs(stack)
+    end
+
+    private
+
+    def post_block
+      begin
+        validate_stack!(self)
+      rescue Cfer::Util::CferValidationError => e
+        Cfer::LOGGER.error "Cfer detected #{e.errors.size > 1 ? 'errors' : 'an error'} when generating the stack:"
+        e.errors.each do |err|
+          Cfer::LOGGER.error "* #{err[:error]} in Stack#{validation_contextualize(err[:context])}"
+        end
+        raise e
+      end
+    end
+
+    def validate_stack!(hash)
+      errors = []
+      context = []
+      _inner_validate_stack!(hash, errors, context)
+
+      raise Cfer::Util::CferValidationError, errors unless errors.empty?
+    end
+
+    def _inner_validate_stack!(hash, errors = [], context = [])
+      case hash
+      when Hash
+        hash.each do |k, v|
+          _inner_validate_stack!(v, errors, context + [k])
+        end
+      when Array
+        hash.each_index do |i|
+          _inner_validate_stack!(hash[i], errors, context + [i])
+        end
+      when nil
+        errors << {
+          error: "CloudFormation does not allow nulls in templates",
+          context: context
+        }
+      end
+    end
+
+    def validation_contextualize(err_ctx)
+      err_ctx.inject("") do |err_str, ctx|
+        err_str <<
+          case ctx
+          when String
+            ".#{ctx}"
+          when Numeric
+            "[#{ctx}]"
+          end
+      end
     end
   end
 

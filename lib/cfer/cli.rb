@@ -4,6 +4,7 @@ require 'table_print'
 
 module Cfer
   class Cli < Thor
+    map '-v' => :version, '--version' => :version
 
     namespace 'cfer'
     class_option :verbose, type: :boolean, default: false
@@ -12,11 +13,16 @@ module Cfer
     class_option :pretty_print, type: :boolean, default: :true, desc: 'Render JSON in a more human-friendly format'
 
     def self.template_options
-
       method_option :parameters,
         type: :hash,
         desc: 'The CloudFormation parameters to pass to the stack',
         default: {}
+      method_option :parameter_file,
+        type: :string,
+        desc: 'A YAML or JSON file with CloudFormation parameters to pass to the stack'
+      method_option :parameter_environment,
+        type: :string,
+        desc: 'If parameter_file is set, will merge the subkey of this into the parameter list.'
     end
 
     def self.stack_options
@@ -59,6 +65,20 @@ module Cfer
     method_option :timeout,
       type: :numeric,
       desc: 'The timeout (in minutes) before the stack operation aborts'
+    method_option :s3_path,
+      type: :string,
+      desc: 'Specifies an S3 path in case the stack is created with a URL.'
+    method_option :force_s3,
+      type: :boolean,
+      default: false,
+      desc: 'Forces Cfer to upload the template to S3 and pass CloudFormation a URL.'
+    method_option :change,
+      type: :string,
+      desc: 'Issues updates as a Cfn change set.'
+    method_option :change_description,
+      type: :string,
+      desc: 'The description of this Cfn change'
+
     template_options
     stack_options
     def converge(stack_name)
@@ -69,6 +89,12 @@ module Cfer
     stack_options
     def describe(stack_name)
       Cfer.describe! stack_name, options
+    end
+
+    desc 'delete <stack>', 'Deletes a CloudFormation stack'
+    stack_options
+    def delete(stack_name)
+      Cfer.delete! stack_name, options
     end
 
     desc 'tail <stack>', 'Follows stack events on standard output as they occur'
@@ -94,6 +120,14 @@ module Cfer
     template_options
     def generate(tmpl)
       Cfer.generate! tmpl, options
+    end
+
+    desc 'estimate [OPTIONS] <template.rb>', 'Prints a link to the Amazon cost caculator estimating the cost of the resulting CloudFormation stack'
+    long_desc <<-LONGDESC
+    LONGDESC
+    template_options
+    def estimate(tmpl)
+      Cfer.estimate! tmpl, options
     end
 
     def self.main(args)
@@ -126,6 +160,11 @@ module Cfer
         end
         exit 1
       end
+    end
+
+    desc 'version', 'Prints the current version of Cfer'
+    def version
+      puts Cfer::VERSION
     end
 
     private

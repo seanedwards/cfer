@@ -3,6 +3,14 @@ module Cfer::Util
   class CferError < StandardError
   end
 
+  class CferValidationError < CferError
+    attr_reader :errors
+    def initialize(errors)
+      @errors = errors
+      super(errors)
+    end
+  end
+
   class StackExistsError < CferError
   end
 

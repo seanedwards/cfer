@@ -15,7 +15,9 @@ Read about Cfer [here](http://tilmonedwards.com/2015/07/28/cfer.html).
 
 Cfer is pre-1.0 software, and may contain bugs or incomplete features. Please see the [license](https://github.com/seanedwards/cfer/blob/master/LICENSE.txt) for disclaimers.
 
-If you would like support or guidance on Cfer, or CloudFormation in general, I offer DevOps consulting services. Please [Contact Bitlancer](http://www.bitlancer.com/contact-us/) and we'll be happy to discuss your needs.
+If you would like support or guidance on Cfer, or CloudFormation in general, I offer DevOps consulting services. Please [Contact me](mailto:stedwards87+cfer@gmail.com) and I'll be happy to discuss your needs.
+
+You can also find me at [@tilmonedwards](https://twitter.com/tilmonedwards). If you use Cfer, or are considering it, I'd love to hear from you.
 
 ## Installation
 
@@ -77,9 +79,14 @@ The following options may be used with the `converge` command:
 * `--follow` (`-f`): Follows stack events on standard output as the create/update process takes place.
 * `--stack-file <template.rb>`: Reads this file from the filesystem, rather than the default `<stack-name>.rb`
 * `--parameters <Key1>:<Value1> <Key2>:<Value2> ...`: Specifies input parameters, which will be available to Ruby in the `parameters` hash, or to CloudFormation by using the `Fn::ref` function
+* `--parameter-file <params_file.[yaml|json]`: Specifies input parameters from a YAML or JSON file
+* `--parameter-environment <env_name>`: Requires `--parameter-file`. Merges the specified key in the YAML or JSON file into the root of the parameter file before passing it into the Cfer stack, i.e. to provide different constants for different AWS environments. The priority for parameters is, in ascending order, **stack default**, **file**, **environment**, and **command line**.
 * `--on-failure <DELETE|ROLLBACK|DO_NOTHING>`: Specifies the action to take when a stack creation fails. Has no effect if the stack already exists and is being updated.
 * `--stack-policy <filename|URL|JSON string>` (`-s`): Stack policy to apply to the stack in order to control updates; takes a local filename containing the policy, a URL to an S3 object, or a raw JSON string.
 * `--stack-policy-during-update <filename|URL|JSON string>` (`-u`): Stack policy as in `--stack-policy` option above, but applied as a temporary override to the permanent policy during stack update.
+* `--s3-path <S3_PATH>`: Path to an S3 bucket location where the template will be stored. This is required if the template output exceeds [51,200 bytes](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html).
+* `--force-s3`: Forces Cfer to upload the template to S3, even if it's small enough to be uploaded directly to the cloudformation API.
+* `--change <CHANGE_NAME>`: Creates a [CloudFormation Change Set](https://aws.amazon.com/blogs/aws/new-change-sets-for-aws-cloudformation/), rather than immediately updating the stack.
 
 #### `tail <stack-name>`
 
@@ -89,6 +96,19 @@ The following options may be used with the `tail` command:
 
 * `--follow` (`-f`): Follows stack events on standard output as the create/update process takes place.
 * `--number` (`-n`): Print the last `n` stack events.
+
+#### `remove <stack-name>`
+
+Removes or deletes an existing CloudFormation stack. 
+
+```bash
+cfer remove vpc --profile [YOUR-PROFILE] --region [YOUR-REGION]
+```
+
+This can also be done in the following way with the awscli tools, but now eliminates the need to install that package.
+```bash
+aws cloudformation delete-stack --stack-name vpc
+```
 
 ### Template Anatomy
 
@@ -277,6 +297,24 @@ This project also contains a [Code of Conduct](https://github.com/seanedwards/cf
 * Name branch `release/<major.minor>`
 
 # Release Notes
+
+## 0.4.0
+
+### **BREAKING CHANGES**
+* Provisioning is removed from Cfer core and moved to [cfer-provisioning](https://github.com/seanedwards/cfer-provisioning)
+
+### Enhancements
+* Adds support for assume-role authentication with MFA (see: https://docs.aws.amazon.com/cli/latest/userguide/cli-roles.html)
+* Adds support for yml-format parameter files with environment-specific sections.
+* Adds a DSL for IAM policies.
+* Adds `cfer estimate` command to estimate the cost of a template using the AWS CloudFormation cost estimation API.
+* Enhancements to chef provisioner to allow for references in chef attributes. (Thanks to @eropple)
+* Adds continue/rollback/quit selection when `^C` is caught during a converge.
+* Stores Cfer version and Git repo information in the Repo metadata.
+* Added support for uploading templates to S3 with the `--s3-path` and `--force-s3` options.
+* Added new way of extending resources, making plugins easier.
+
+### Bugfixes
 
 ## 0.3.0
 
