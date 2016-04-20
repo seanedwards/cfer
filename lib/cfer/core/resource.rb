@@ -23,7 +23,6 @@ module Cfer::Core
     end
 
     def get_property(key)
-      puts self[:Properties]
       self[:Properties].fetch key
     end
 

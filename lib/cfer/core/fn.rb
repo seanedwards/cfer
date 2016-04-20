@@ -1,7 +1,7 @@
 module Cfer::Core::Fn
   class << self
-    def join(sep, args)
-      {"Fn::Join" => [sep, args]}
+    def join(sep, *args)
+      {"Fn::Join" => [sep, [ *args ].flatten ]}
     end
 
     def ref(r)

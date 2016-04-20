@@ -4,6 +4,7 @@ describe Cfer::Core::Fn do
 
   it 'has a working join function' do
     expect(Cfer::Core::Fn::join('-', ['a', 'b', 'c'])).to eq 'Fn::Join' => ['-', ['a', 'b', 'c']]
+    expect(Cfer::Core::Fn::join('-', 'a', 'b', 'c')).to eq 'Fn::Join' => ['-', ['a', 'b', 'c']]
   end
 
   it 'has a working ref function' do
