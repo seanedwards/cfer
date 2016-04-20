@@ -313,6 +313,7 @@ This project also contains a [Code of Conduct](https://github.com/seanedwards/cf
 * Stores Cfer version and Git repo information in the Repo metadata.
 * Added support for uploading templates to S3 with the `--s3-path` and `--force-s3` options.
 * Added new way of extending resources, making plugins easier.
+* Added support for [CloudFormation Change Sets](https://aws.amazon.com/blogs/aws/new-change-sets-for-aws-cloudformation/) via the `--change` option.
 
 ### Bugfixes
 
