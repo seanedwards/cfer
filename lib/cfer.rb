@@ -85,10 +85,11 @@ module Cfer
             end
           end
         end
+        describe! stack_name, options
       rescue Aws::CloudFormation::Errors::ValidationError => e
         Cfer::LOGGER.info "CFN validation error: #{e.message}"
       end
-      describe! stack_name, options unless options[:follow]
+      stack
     end
 
     def describe!(stack_name, options = {})
@@ -122,6 +123,7 @@ module Cfer
       else
         raise Cfer::Util::CferError, "Invalid output format #{options[:output_format]}."
       end
+      cfn_stack
     end
 
     def tail!(stack_name, options = {}, &block)
@@ -135,7 +137,6 @@ module Cfer
           Cfer::LOGGER.info "%s %-30s %-40s %-20s %s" % [event.timestamp, color_map(event.resource_status), event.resource_type, event.logical_resource_id, event.resource_status_reason]
         end
       end
-      describe! stack_name, options
     end
 
     def generate!(tmpl, options = {})
@@ -163,6 +164,10 @@ module Cfer
       cfn = options[:aws_options] || {}
       cfn_stack = options[:cfer_client] || cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
       cfn_stack.delete_stack(stack_name)
+
+      if options[:follow]
+        tail! stack_name, options.merge(cfer_client: cfn_stack)
+      end
     end
 
     # Builds a Cfer::Core::Stack from a Ruby block
@@ -199,7 +204,8 @@ module Cfer
       Cfer::LOGGER.level = Logger::DEBUG if options[:verbose]
 
       require 'rubygems'
-      require 'bundler/setup'
+      require 'bundler'
+      Bundler.setup(:cfer)
 
       Aws.config.update region: options[:region] if options[:region]
       Aws.config.update credentials: Cfer::Cfn::CferCredentialsProvider.new(profile_name: options[:profile]) if options[:profile]

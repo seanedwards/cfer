@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'docile', '~> 1.1', '>= 1.1.5'
   spec.add_runtime_dependency 'thor', '~> 0.19.1'
-  spec.add_runtime_dependency 'activesupport', '~> 4.2', '>= 4.2.6'
+  spec.add_runtime_dependency 'activesupport', '~> 4.2', '>= 4.2.0'
   spec.add_runtime_dependency 'aws-sdk', '~> 2.2', '>= 2.2.33'
   spec.add_runtime_dependency 'aws-sdk-resources', '~> 2.2', '>= 2.2.33'
   spec.add_runtime_dependency 'preconditions', '~> 0.3.0'
@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'highline', '~> 1.7', '>= 1.7.8'
   spec.add_runtime_dependency 'table_print', '~> 1.5', '>= 1.5.6'
   spec.add_runtime_dependency "git", '~> 1.3'
-  spec.add_runtime_dependency "bundler"
 
   spec.add_development_dependency "yard", '~> 0.8.7.6'
+  spec.add_development_dependency "rake"
 end

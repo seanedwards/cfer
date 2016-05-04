@@ -173,18 +173,22 @@ module Cfer::Cfn
       running = true
       if options[:follow]
         while running
-          stack_status = describe_stacks(stack_name: name).stacks.first.stack_status
-          running = running && (/.+_(COMPLETE|FAILED)$/.match(stack_status) == nil)
+          begin
+            stack_status = describe_stacks(stack_name: name).stacks.first.stack_status
+            running = running && (/.+_(COMPLETE|FAILED)$/.match(stack_status) == nil)
 
-          yielding = true
-          for_each_event name do |fetched_event|
-            if event_id_highwater == fetched_event.event_id
-              yielding = false
-            end
+            yielding = true
+            for_each_event name do |fetched_event|
+              if event_id_highwater == fetched_event.event_id
+                yielding = false
+              end
 
-            if yielding
-              q.unshift fetched_event
+              if yielding
+                q.unshift fetched_event
+              end
             end
+          rescue Aws::CloudFormation::Errors::ValidationError
+            running = false
           end
 
           while q.size > 0
