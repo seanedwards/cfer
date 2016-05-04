@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'docile', '~> 1.1', '>= 1.1.5'
   spec.add_runtime_dependency 'thor', '~> 0.19.1'
-  spec.add_runtime_dependency 'activesupport', '~> 4.2', '>= 4.2.0'
+  spec.add_runtime_dependency 'activesupport', '~> 4'
   spec.add_runtime_dependency 'aws-sdk', '~> 2.2', '>= 2.2.33'
   spec.add_runtime_dependency 'aws-sdk-resources', '~> 2.2', '>= 2.2.33'
   spec.add_runtime_dependency 'preconditions', '~> 0.3.0'
