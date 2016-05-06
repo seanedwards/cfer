@@ -1,15 +1,19 @@
 module Cfer::Core
   class Resource < Cfer::BlockHash
+    include Cfer::Core::Hooks
+
     @@types = {}
 
-    def initialize(name, type, **options, &block)
+    attr_reader :stack
+
+    def initialize(name, type, stack, **options, &block)
       @name = name
+      @stack = stack
 
       self[:Type] = type
       self.merge!(options)
       self[:Properties] = HashWithIndifferentAccess.new
       build_from_block(&block)
-
     end
 
 
@@ -32,10 +36,16 @@ module Cfer::Core
       end
 
       def extend_resource(type, &block)
-        resource_class(type).instance_eval(&block)
+        resource_class(type).class_eval(&block)
+      end
+
+      def before(type, &block)
+        resource_class(type).pre_hooks << block
+      end
+
+      def after(type, &block)
+        resource_class(type).post_hooks << block
       end
     end
-
-    private
   end
 end

@@ -86,7 +86,7 @@ describe Cfer do
       end
 
       resource :test_resource_2, 'Cfer::TestResource' do
-        other_resource Cfer::Core::Fn::ref(:test_resource)
+        other_resource Cfer::Core::Functions::Fn::ref(:test_resource)
       end
     end
 
@@ -142,4 +142,43 @@ describe Cfer do
     expect(stack[:Resources][:test_resource][:Properties][:OtherProperty2]).to eq 123
   end
 
+  it 'executes hooks in the right order' do
+    list = []
+
+    Cfer::Core::Resource.before "Cfer::TestPlugin" do
+      list << :before_r
+    end
+
+    Cfer::Core::Resource.after "Cfer::TestPlugin" do
+      list << :after_r
+    end
+
+    Cfer::Core::Stack.before do
+      list << :before_s
+    end
+
+    Cfer::Core::Stack.after do
+      list << :after_s
+    end
+
+    stack = create_stack do
+      resource :test_resource, 'Cfer::TestPlugin' do
+        list << :during
+      end
+      resource :test_resource_2, 'Cfer::TestPlugin' do
+        list << :during
+      end
+    end
+
+    expect(list).to eq [
+      :before_s,
+        :before_r,
+          :during,
+        :after_r,
+        :before_r,
+          :during,
+        :after_r,
+      :after_s
+    ]
+  end
 end

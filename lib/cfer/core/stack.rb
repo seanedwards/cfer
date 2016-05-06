@@ -2,8 +2,8 @@ module Cfer::Core
 
   # Defines the structure of a CloudFormation stack
   class Stack < Cfer::Block
-    include Cfer::Core
-    include Cfer::Cfn
+    include Cfer::Core::Functions
+    include Cfer::Core::Hooks
 
     # The parameters strictly as passed via command line
     attr_reader :input_parameters
@@ -137,7 +137,7 @@ module Cfer::Core
       Preconditions.check_argument(/[[:alnum:]]+/ =~ name, "Resource name must be alphanumeric")
 
       clazz = Cfer::Core::Resource.resource_class(type)
-      rc = clazz.new(name, type, options, &block)
+      rc = clazz.new(name, type, self, options, &block)
 
       self[:Resources][name] = rc
       rc
@@ -182,57 +182,10 @@ module Cfer::Core
       client.fetch_outputs(stack)
     end
 
-    private
-
-    def post_block
-      begin
-        validate_stack!(self)
-      rescue Cfer::Util::CferValidationError => e
-        Cfer::LOGGER.error "Cfer detected #{e.errors.size > 1 ? 'errors' : 'an error'} when generating the stack:"
-        e.errors.each do |err|
-          Cfer::LOGGER.error "* #{err[:error]} in Stack#{validation_contextualize(err[:context])}"
-        end
-        raise e
-      end
-    end
-
-    def validate_stack!(hash)
-      errors = []
-      context = []
-      _inner_validate_stack!(hash, errors, context)
-
-      raise Cfer::Util::CferValidationError, errors unless errors.empty?
-    end
-
-    def _inner_validate_stack!(hash, errors = [], context = [])
-      case hash
-      when Hash
-        hash.each do |k, v|
-          _inner_validate_stack!(v, errors, context + [k])
-        end
-      when Array
-        hash.each_index do |i|
-          _inner_validate_stack!(hash[i], errors, context + [i])
-        end
-      when nil
-        errors << {
-          error: "CloudFormation does not allow nulls in templates",
-          context: context
-        }
-      end
-    end
-
-    def validation_contextualize(err_ctx)
-      err_ctx.inject("") do |err_str, ctx|
-        err_str <<
-          case ctx
-          when String
-            ".#{ctx}"
-          when Numeric
-            "[#{ctx}]"
-          end
+    class << self
+      def extend_stack(&block)
+        class_eval(&block)
       end
     end
   end
-
 end
