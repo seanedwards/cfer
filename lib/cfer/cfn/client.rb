@@ -44,7 +44,8 @@ module Cfer::Cfn
     end
 
     def estimate(stack, options = {})
-      response = validate_template(template_body: stack.to_cfn)
+      estimate_options = upload_or_return_template(stack.to_cfn, options)
+      response = validate_template(estimate_options)
 
       estimate_params = []
       response.parameters.each do |tmpl_param|
@@ -62,7 +63,7 @@ module Cfer::Cfn
         end
       end
 
-      estimate_response = estimate_template_cost(template_body: stack.to_cfn, parameters: estimate_params)
+      estimate_response = estimate_template_cost(estimate_options.merge(parameters: estimate_params))
       estimate_response.url
     end
 
@@ -70,7 +71,9 @@ module Cfer::Cfn
       Preconditions.check(@name).is_not_nil
       Preconditions.check(stack) { is_not_nil and has_type(Cfer::Core::Stack) }
 
-      response = validate_template(template_body: stack.to_cfn)
+      template_options = upload_or_return_template(stack.to_cfn, options)
+
+      response = validate_template(template_options)
 
       create_params = []
       update_params = []
@@ -131,7 +134,7 @@ module Cfer::Cfn
       stack_options.merge! parse_stack_policy(:stack_policy, options[:stack_policy])
       stack_options.merge! parse_stack_policy(:stack_policy_during_update, options[:stack_policy_during_update])
 
-      stack_options.merge! upload_or_return_template(stack.to_cfn, options)
+      stack_options.merge! template_options
 
       cfn_stack =
         begin
@@ -272,20 +275,21 @@ module Cfer::Cfn
     private
 
     def upload_or_return_template(cfn_hash, options = {})
-      if cfn_hash.bytesize <= 51200 && !options[:force_s3]
-        { template_body: cfn_hash }
-      else
-        raise Cfer::Util::CferError, 'Cfer needs to upload the template to S3, but no bucket was specified.' unless options[:s3_path]
+      @template_options ||=
+        if cfn_hash.bytesize <= 51200 && !options[:force_s3]
+          { template_body: cfn_hash }
+        else
+          raise Cfer::Util::CferError, 'Cfer needs to upload the template to S3, but no bucket was specified.' unless options[:s3_path]
 
-        uri = URI(options[:s3_path])
-        template = Aws::S3::Object.new bucket_name: uri.host, key: uri.path.reverse.chomp('/').reverse
-        template.put body: cfn_hash
+          uri = URI(options[:s3_path])
+          template = Aws::S3::Object.new bucket_name: uri.host, key: uri.path.reverse.chomp('/').reverse
+          template.put body: cfn_hash
 
-        template_url = template.public_url
-        template_url = template_url + '?versionId=' + template.version_id if template.version_id
+          template_url = template.public_url
+          template_url = template_url + '?versionId=' + template.version_id if template.version_id
 
-        { template_url: template_url }
-      end
+          { template_url: template_url }
+        end
     end
 
     def cfn_list_to_hash(attribute, list)
