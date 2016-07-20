@@ -12,14 +12,18 @@ module Cfer
       self
     end
 
+    def build_from_string(*args, str, file)
+      build_from_block(*args) do
+        instance_eval str, file
+      end
+      self
+    end
+
     # Evaluates a DSL from a Ruby script file
     # @param args [Array<Object>] (see: #build_from_block)
     # @param file [File] The Ruby script to evaluate
     def build_from_file(*args, file)
-      build_from_block(*args) do
-        instance_eval File.read(file), file
-      end
-      self
+      build_from_string File.read(file), file
     end
 
     # Executed just before the DSL is evaluated

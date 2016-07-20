@@ -190,9 +190,23 @@ module Cfer
     # @param options [Hash] (see #stack_from_block)
     # @return [Cfer::Core::Stack] The assembled stack object
     def stack_from_file(file, options = {})
+      return stack_from_stdin(options) if file == '-'
+
       s = Cfer::Core::Stack.new(options)
       templatize_errors(file) do
         s.build_from_file file
+      end
+      s
+    end
+
+    # Builds a Cfer::Core::Stack from stdin
+    #
+    # @param options [Hash] (see #stack_from_block)
+    # @return [Cfer::Core::Stack] The assembled stack object
+    def stack_from_stdin(options = {})
+      s = Cfer::Core::Stack.new(options)
+      templatize_errors('STDIN') do
+        s.build_from_string STDIN.read, 'STDIN'
       end
       s
     end

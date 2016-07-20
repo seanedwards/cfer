@@ -8,6 +8,7 @@
 * Pulled stack validation out into an extension using post-build hooks.
 * Adds some extension methods to improve usability of certain resources.
 * Namespace cleanup.
+* Supports reading ruby template from stdin by specifying the filename `-`
 
 ## 0.4.2
 
