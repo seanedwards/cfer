@@ -1,0 +1,82 @@
+#!/usr/bin/env ruby
+require 'json'
+require 'pp'
+require 'active_support/inflector'
+
+template = JSON.parse(STDIN.read)
+
+def indent(str, prefix = '  ')
+  prefix + str.gsub("\n", "\n#{prefix}")
+end
+
+def serialize_arg(arg, indent=0)
+  ret = ""
+  PP.pp(arg, ret)
+  ret.strip
+end
+
+def serialize_args(*args)
+  options = args.last.is_a?(Hash) ? args.pop : {}
+  args_str = []
+
+  args.each do |arg|
+    args_str << serialize_arg(arg)
+  end
+
+  opts_str = []
+  options.each do |k, v|
+    opts_str << "#{serialize_arg(k)}: #{serialize_arg(v)}"
+  end
+  args_str << indent(opts_str.join(",\n"), '  ') unless opts_str.empty?
+
+  args_str.join(', ').strip
+end
+
+description = template.delete('Description')
+parameters = template.delete('Parameters') || {}
+resources = template.delete('Resources') || {}
+outputs = template.delete('Outputs') || {}
+version = template.delete('AWSTemplateFormatVersion')
+
+if description
+  puts "description #{serialize_arg(description)}"
+  puts ""
+end
+
+puts "##############"
+puts "# Parameters #"
+puts "##############"
+
+parameters.each do |k, param|
+  puts "parameter #{serialize_args(k, param)}"
+  puts ""
+end
+
+puts "#############"
+puts "# Resources #"
+puts "#############"
+
+resources.each do |k, attrs|
+  properties = attrs.delete('Properties') || {}
+  type = attrs.delete('Type')
+
+  puts "resource #{serialize_args(k, type, attrs)} do"
+  properties.each do |k, v|
+    puts indent("#{k.underscore} #{serialize_args(v)}", '  ')
+  end
+  puts "end"
+  puts ""
+end
+
+outputs.each do |k, out|
+  value = out.delete('Value')
+
+  puts "output #{serialize_args(k, value, out)}"
+end
+
+puts ""
+
+template.each do |k, v|
+  puts "self[#{serialize_arg(k)}] = #{serialize_arg(v)}"
+end
+
