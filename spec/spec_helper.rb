@@ -1,7 +1,10 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'pp'
+require 'aws-sdk'
 require "codeclimate-test-reporter"
 CodeClimate::TestReporter.start
+
+Aws.config[:stub_responses] = true
 
 def create_stack(options = {}, &block)
   cfn = options[:client] || Cfer::Cfn::Client.new(stack_name: options[:stack_name] || 'test', region: 'us-east-1')

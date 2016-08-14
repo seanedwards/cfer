@@ -11,8 +11,8 @@ Cfer::Core::Resource.before 'Cfer::CustomResource' do
   properties BeforeValue: 1234
 end
 
-Cfer::Core::Resource.before 'Cfer::CustomResource' do
-  properties AfterValue: 5678
+Cfer::Core::Resource.after 'Cfer::CustomResource' do
+  properties AfterValue: get_property(:TestValue2)
 end
 
 def describe_resource(type, &block)
@@ -34,7 +34,7 @@ describe CferExt do
     expect(rc[:BeforeValue]).to eq 1234
     expect(rc[:TestValue]).to eq "asdf"
     expect(rc[:TestValue2]).to eq "asdf"
-    expect(rc[:AfterValue]).to eq 5678
+    expect(rc[:AfterValue]).to eq "asdf"
   end
 
   it 'extends AWS::CloudFormation::WaitCondition' do
@@ -68,4 +68,5 @@ describe CferExt do
 
     expect(rc[:VPCSecurityGroups]).to eq :asdf
   end
+
 end
