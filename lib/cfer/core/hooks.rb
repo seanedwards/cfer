@@ -1,4 +1,5 @@
 module Cfer::Core
+  # Provides support for hooking into resource types, and evaluating code before or after properties are set
   module Hooks
     def pre_block
       self.class.pre_hooks.each do |hook|

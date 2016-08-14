@@ -16,33 +16,49 @@ module Cfer::Core
       build_from_block(&block)
     end
 
-
+    # Sets a tag on this resource. The resource must support the CloudFormation `Tags` property.
+    # @param k [String] The name of the tag to set
+    # @param v [String] The value for this tag
+    # @param options [Hash] An arbitrary set of additional properties to be added to this tag, for example `PropagateOnLaunch` on `AWS::AutoScaling::AutoScalingGroup`
     def tag(k, v, **options)
       self[:Properties][:Tags] ||= []
       self[:Properties][:Tags].unshift({"Key" => k, "Value" => v}.merge(options))
     end
 
+    # Directly sets raw properties in the underlying CloudFormation structure.
+    # @param keyvals [Hash] The properties to set on this object.
     def properties(keyvals = {})
       self[:Properties].merge!(keyvals)
     end
 
+    # Gets the current value of a given property
+    # @param key [String] The name of the property to fetch
     def get_property(key)
       self[:Properties].fetch key
     end
 
     class << self
+      # Fetches the DSL class for a CloudFormation resource type
+      # @param type [String] The type of resource, for example `AWS::EC2::Instance`
+      # @return [Class] The DSL class representing this resource type, including all extensions
       def resource_class(type)
         @@types[type] ||= "CferExt::#{type}".split('::').inject(Object) { |o, c| o.const_get c if o && o.const_defined?(c) } || Class.new(Cfer::Core::Resource)
       end
 
+      # Patches code into DSL classes for CloudFormation resources
+      # @param type [String] The type of resource, for example `AWS::EC2::Instance`
       def extend_resource(type, &block)
         resource_class(type).class_eval(&block)
       end
 
+      # Registers a hook that will be run before properties are set on a resource
+      # @param type [String] The type of resource, for example `AWS::EC2::Instance`
       def before(type, &block)
         resource_class(type).pre_hooks << block
       end
 
+      # Registers a hook that will be run after properties have been set on a resource
+      # @param type [String] The type of resource, for example `AWS::EC2::Instance`
       def after(type, &block)
         resource_class(type).post_hooks << block
       end

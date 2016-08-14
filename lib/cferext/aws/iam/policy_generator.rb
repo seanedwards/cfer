@@ -10,7 +10,7 @@ module CferExt
         end
 
         def statement(options = {}, &block)
-          statement = Cfer::BlockHash.new(&block)
+          statement = ::Cfer::BlockHash.new(&block)
           statement.merge! options
           statement.build_from_block(&block)
           self[:Statement].unshift statement
@@ -34,7 +34,7 @@ module CferExt
           doc = CferExt::AWS::IAM.generate_policy(&block) if doc == nil
           get_property(:Policies) << {
             PolicyName: name,
-            PolicyDocument: doc.to_h
+            PolicyDocument: doc
           }
         end
       end

@@ -69,4 +69,63 @@ describe CferExt do
     expect(rc[:VPCSecurityGroups]).to eq :asdf
   end
 
+  it 'extends AWS::KMS::Key' do
+    rc = describe_resource 'AWS::KMS::Key' do
+      key_policy {
+        statement {
+          effect :Allow
+          principal AWS: "arn:aws:iam::123456789012:user/Alice"
+          action '*'
+          resource '*'
+        }
+      }
+    end
+
+    expect(rc[:KeyPolicy][:Statement].first[:Effect]).to eq(:Allow)
+  end
+
+  it 'extends AWS::IAM::User, Group and Role' do
+    %w{User Group Role}.each do |type|
+
+      rc = describe_resource "AWS::IAM::#{type}" do
+        policy :test_policy do
+          statement {
+            effect :Allow
+            principal AWS: "arn:aws:iam::123456789012:user/Alice"
+            action '*'
+            resource '*'
+          }
+        end
+      end
+      expect(rc[:Policies].first[:PolicyName]).to eq(:test_policy)
+      expect(rc[:Policies].first[:PolicyDocument][:Statement].first[:Effect]).to eq(:Allow)
+    end
+  end
+
+  it 'extends AWS::IAM::Role' do
+    rc = describe_resource "AWS::IAM::Role" do
+      assume_role_policy_document do
+        allow do
+          principal Service: 'ec2.amazonaws.com'
+          action 'sts:AssumeRole'
+        end
+      end
+    end
+
+    expect(rc[:AssumeRolePolicyDocument]).to eq(CferExt::AWS::IAM::EC2_ASSUME_ROLE_POLICY_DOCUMENT)
+  end
+
+  it 'extends AWS::IAM::Policy' do
+    rc = describe_resource "AWS::IAM::Policy" do
+      policy_document do
+        statement {
+          effect :Allow
+          principal AWS: "arn:aws:iam::123456789012:user/Alice"
+          action '*'
+          resource '*'
+        }
+      end
+    end
+    expect(rc[:PolicyDocument][:Statement].first[:Effect]).to eq(:Allow)
+  end
 end

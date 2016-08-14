@@ -1,3 +1,4 @@
+# Utility methods to make CloudFormation functions feel more like Ruby
 module Cfer::Core::Functions
   def join(sep, *args)
     {"Fn::Join" => [sep, [ *args ].flatten ]}

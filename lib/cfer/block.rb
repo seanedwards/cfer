@@ -12,6 +12,10 @@ module Cfer
       self
     end
 
+    # Evaluates a DSL from a Ruby string
+    # @param args [Array<Object>] Extra arguments to be passed into the block
+    # @param str [String] The Cfer source template to evaluate
+    # @param file [File] The file that will be reported in any error messages
     def build_from_string(*args, str, file)
       build_from_block(*args) do
         instance_eval str, file
@@ -35,13 +39,23 @@ module Cfer
     end
   end
 
+  # BlockHash is a Block that responds to DSL-style properties.
   class BlockHash < Block
-    NON_PROXIED_METHODS = [:parameters, :options, :lookup_output]
+    NON_PROXIED_METHODS = [
+      :parameters,
+      :options,
+      :lookup_output,
+      :lookup_outputs
+    ].freeze
 
+    # Directly sets raw properties in the underlying CloudFormation structure.
+    # @param keyvals [Hash] The properties to set on this object.
     def properties(keyvals = {})
       self.merge!(keyvals)
     end
 
+    # Gets the current value of a given property
+    # @param key [String] The name of the property to fetch
     def get_property(key)
       self.fetch key
     end

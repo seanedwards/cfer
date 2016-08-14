@@ -158,6 +158,7 @@ module Cfer::Core
       to_h.to_json
     end
 
+    # Gets the Cfn client, if one exists, or throws an error if one does not
     def client
       @options[:client] || raise(Cfer::Util::CferError, "Stack has no associated client.")
     end
@@ -172,11 +173,15 @@ module Cfer::Core
       end
     end
 
+    # Looks up a specific output of another CloudFormation stack in the same region.
+    # @param stack [String] The name of the stack to fetch an output from
+    # @param out [String] The name of the output to fetch from the stack
     def lookup_output(stack, out)
-      client = @options[:client] || raise(Cfer::Util::CferError, "Can not fetch stack outputs without a client")
-      client.fetch_output(stack, out)
+      lookup_outputs(stack).fetch(out)
     end
 
+    # Looks up a hash of all outputs from another CloudFormation stack in the same region.
+    # @param stack [String] The name of the stack to fetch outputs from
     def lookup_outputs(stack)
       client = @options[:client] || raise(Cfer::Util::CferError, "Can not fetch stack outputs without a client")
       client.fetch_outputs(stack)

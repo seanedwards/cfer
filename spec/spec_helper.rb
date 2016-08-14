@@ -2,6 +2,7 @@ $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'pp'
 require 'aws-sdk'
 require "codeclimate-test-reporter"
+require 'pry' rescue nil
 CodeClimate::TestReporter.start
 
 Aws.config[:stub_responses] = true

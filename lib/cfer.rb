@@ -14,9 +14,11 @@ end
 
 # Contains the core Cfer logic
 module Cfer
+  # Code relating to working with Amazon CloudFormation
   module Cfn
   end
 
+  # Code relating to building the CloudFormation document out of the Ruby DSL
   module Core
   end
 
@@ -50,6 +52,9 @@ module Cfer
 
   class << self
 
+    # Creates or updates a CloudFormation stack
+    # @param stack_name [String] The name of the stack to update
+    # @param options [Hash]
     def converge!(stack_name, options = {})
       config(options)
       tmpl = options[:template] || "#{stack_name}.rb"
