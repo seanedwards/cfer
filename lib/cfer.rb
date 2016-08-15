@@ -61,13 +61,15 @@ module Cfer
       cfn = options[:aws_options] || {}
 
       cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
-      stack = options[:cfer_stack] ||
-              Cfer::stack_from_file(tmpl,
-                options.merge(
-                  client: cfn_stack,
-                  parameters: generate_final_parameters(options)
-                )
-              )
+      raise Cfer::Util::CferError, "No such template file: #{tmpl}" unless File.exists?(tmpl)
+      stack =
+        options[:cfer_stack] ||
+          Cfer::stack_from_file(tmpl,
+            options.merge(
+              client: cfn_stack,
+              parameters: generate_final_parameters(options)
+            )
+          )
 
       begin
         operation = stack.converge!(options)
@@ -90,7 +92,9 @@ module Cfer
             end
           end
         end
-        describe! stack_name, options
+
+        # This is allowed to fail, particularly if we decided to roll back
+        describe! stack_name, options rescue nil
       rescue Aws::CloudFormation::Errors::ValidationError => e
         Cfer::LOGGER.info "CFN validation error: #{e.message}"
       end
@@ -149,6 +153,7 @@ module Cfer
       cfn = options[:aws_options] || {}
 
       cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn)
+      raise Cfer::Util::CferError, "No such template file: #{tmpl}" unless File.exists?(tmpl)
       stack = options[:cfer_stack] || Cfer::stack_from_file(tmpl,
         options.merge(client: cfn_stack, parameters: generate_final_parameters(options))).to_h
       puts render_json(stack, options)
@@ -168,7 +173,7 @@ module Cfer
       config(options)
       cfn = options[:aws_options] || {}
       cfn_stack = options[:cfer_client] || cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
-      cfn_stack.delete_stack(stack_name)
+      cfn_stack.delete_stack(stack_name: stack_name)
 
       if options[:follow]
         tail! stack_name, options.merge(cfer_client: cfn_stack)
@@ -227,32 +232,41 @@ module Cfer
     end
 
     def generate_final_parameters(options)
-      raise "parameter-environment set but parameter_file not set" \
+      raise Cfer::Util::CferError, "parameter-environment set but parameter_file not set" \
         if options[:parameter_environment] && options[:parameter_file].nil?
 
       file_params =
         if options[:parameter_file]
           case File.extname(options[:parameter_file])
-          when '.yaml'
+          when '.yaml', '.yml'
             require 'yaml'
             YAML.load_file(options[:parameter_file])
           when '.json'
             JSON.parse(IO.read(options[:parameter_file]))
           else
-            raise "Unrecognized parameter file format: #{File.extname(options[:parameter_file])}"
+            raise Cfer::Util::CferError, "Unrecognized parameter file format: #{File.extname(options[:parameter_file])}"
           end
         else
           {}
         end
 
       if options[:parameter_environment]
-        raise "no key '#{options[:parameter_environment]}' found in parameters file." \
+        raise Cfer::Util::CferError, "no key '#{options[:parameter_environment]}' found in parameters file." \
           unless file_params.key?(options[:parameter_environment])
 
         file_params = file_params.deep_merge(file_params[options[:parameter_environment]])
       end
 
-      file_params.deep_merge(options[:parameters] || {})
+      cli_params = {}
+      (options[:parameter] || []).each do |param|
+        m = /(^.+?):(.+$)/.match(param)
+        raise Cfer::Util::CferError, "Invalid parameter format. Expected `<name>:<value>`, got `#{param}`." unless m
+        cli_params[m[1]] = m[2]
+      end
+
+      final_params = file_params.deep_merge(cli_params).deep_merge(options[:parameters] || {})
+      Cfer::LOGGER.debug "Final parameters: #{final_params}"
+      final_params
     end
 
     def render_json(obj, options = {})

@@ -110,38 +110,6 @@ describe Cfer do
     expect(stack[:Resources][:test_resource][:Properties][:Tags]).to contain_exactly 'Key' => 'a', 'Value' => 'b', :xyz => 'abc'
   end
 
-  it 'creates resources with special classes' do
-
-    module ::CferExt::Cfer
-      class TestCustomResource < Cfer::Core::Resource
-        def property(value)
-          actual_value value
-          other_property 'abc'
-          other_property_2 123
-        end
-      end
-    end
-
-    Cfer::Core::Resource.extend_resource "Cfer::TestPlugin" do
-    end
-
-    stack = create_stack do
-      resource :test_resource, 'Cfer::TestCustomResource' do
-        property 'xyz'
-      end
-    end
-
-    expect(stack[:Resources][:test_resource]).to have_type CferExt::Cfer::TestCustomResource
-
-    expect(stack[:Resources][:test_resource][:Properties]).to have_key :ActualValue
-    expect(stack[:Resources][:test_resource][:Properties]).to have_key :OtherProperty
-    expect(stack[:Resources][:test_resource][:Properties]).to have_key :OtherProperty2
-
-    expect(stack[:Resources][:test_resource][:Properties][:ActualValue]).to eq 'xyz'
-    expect(stack[:Resources][:test_resource][:Properties][:OtherProperty]).to eq 'abc'
-    expect(stack[:Resources][:test_resource][:Properties][:OtherProperty2]).to eq 123
-  end
-
   it 'executes hooks in the right order' do
     list = []
 
