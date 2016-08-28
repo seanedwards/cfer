@@ -17,7 +17,6 @@
 
 ### Bugfixes
 * Fixes "Stack does not exist" error being reported when stack creation fails and `--on-failure=DELETE` is specified.
-* `Cfer::Core::Resource.extend_resource` now patches into the correct scope.
 
 ## 0.4.2
 
