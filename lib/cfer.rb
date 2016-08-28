@@ -57,6 +57,7 @@ module Cfer
     # @param options [Hash]
     def converge!(stack_name, options = {})
       config(options)
+      options[:on_failure].upcase! if options[:on_failure]
       tmpl = options[:template] || "#{stack_name}.rb"
       cfn = options[:aws_options] || {}
 
@@ -90,7 +91,7 @@ module Cfer
             end
           end
         end
-        describe! stack_name, options
+        describe! stack_name, options rescue nil # It's fine if we can't do this.
       rescue Aws::CloudFormation::Errors::ValidationError => e
         Cfer::LOGGER.info "CFN validation error: #{e.message}"
       end
