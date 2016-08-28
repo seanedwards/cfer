@@ -192,15 +192,19 @@ module Cfer
 
     # Builds a Cfer::Core::Stack from a ruby script
     #
-    # @param file [String] The file containing the Cfn DSL
+    # @param file [String] The file containing the Cfn DSL or plain JSON
     # @param options [Hash] (see #stack_from_block)
     # @return [Cfer::Core::Stack] The assembled stack object
     def stack_from_file(file, options = {})
       return stack_from_stdin(options) if file == '-'
 
       s = Cfer::Core::Stack.new(options)
-      templatize_errors(file) do
-        s.build_from_file file
+      if file.ends_with?('.json')
+        s.deep_merge! JSON.parse(File.read(file))
+      else
+        templatize_errors(file) do
+          s.build_from_file file
+        end
       end
       s
     end
