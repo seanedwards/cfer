@@ -4,11 +4,20 @@
 
 ### Enhancements
 * Adds support for Pre-build and Post-build hooks for resources and stacks.
+* Adds `json-to-cfer` script to automatically convert json templates to Cfer DSL code.
+* Adds support for directly converging JSON files.
 * Relaxes some version constraints to make it easier to integrate with older Rails projects.
 * Pulled stack validation out into an extension using post-build hooks.
 * Adds some extension methods to improve usability of certain resources.
 * Namespace cleanup.
 * Supports reading ruby template from stdin by specifying the filename `-`
+* Adds exponential backoff to `tail` command.
+* `--on-failure` flag is now case insensitive.
+* Various test improvements.
+
+### Bugfixes
+* Fixes "Stack does not exist" error being reported when stack creation fails and `--on-failure=DELETE` is specified.
+* `Cfer::Core::Resource.extend_resource` now patches into the correct scope.
 
 ## 0.4.2
 
