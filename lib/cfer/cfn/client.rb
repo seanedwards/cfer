@@ -157,6 +157,9 @@ module Cfer::Cfn
     # @param options [Hash] The options hash
     # @option options [Fixnum] :number The maximum number of already-existing CloudFormation events to yield.
     # @option options [Boolean] :follow Set to true to wait until the stack enters a `COMPLETE` or `FAILED` state, yielding events as they occur.
+    # @option options [Boolean] :no_sleep Don't pause between polling. This is used for tests, and shouldn't be when polling the AWS API.
+    # @option options [Fixnum] :backoff The exponential backoff factor (default 1.5)
+    # @option options [Fixnum] :backoff_max_wait The maximum amount of time that exponential backoff will wait before polling agian (default 15s)
     def tail(options = {})
       q = []
       event_id_highwater = nil
@@ -173,9 +176,12 @@ module Cfer::Cfn
         event_id_highwater = event.event_id
       end
 
+      sleep_time = 1
+
       running = true
       if options[:follow]
         while running
+          sleep_time = [sleep_time * (options[:backoff] || 1), options[:backoff_max_wait] || 15].min
           begin
             stack_status = describe_stacks(stack_name: name).stacks.first.stack_status
             running = running && (/.+_(COMPLETE|FAILED)$/.match(stack_status) == nil)
@@ -198,9 +204,10 @@ module Cfer::Cfn
             event = q.shift
             yield event
             event_id_highwater = event.event_id
+            sleep_time = 1
           end
 
-          sleep 1 if running unless options[:no_sleep]
+          sleep sleep_time if running unless options[:no_sleep]
         end
       end
     end
