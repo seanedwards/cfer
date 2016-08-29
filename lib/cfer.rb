@@ -102,9 +102,18 @@ module Cfer
       config(options)
       cfn = options[:aws_options] || {}
       cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
+      cfn_metadata = cfn_stack.fetch_metadata
       cfn_stack = cfn_stack.fetch_stack
 
+      cfer_version = cfn_metadata.fetch("Cfer", {}).fetch("Version", nil)
+      if cfer_version
+        cfer_version_str = [cfer_version["major"], cfer_version["minor"], cfer_version["patch"]].join '.'
+        cfer_version_str << '-' << cfer_version["pre"] unless cfer_version["pre"].nil?
+        cfer_version_str << '+' << cfer_version["pre"] unless cfer_version["pre"].nil?
+      end
+
       Cfer::LOGGER.debug "Describe stack: #{cfn_stack}"
+      Cfer::LOGGER.debug "Describe metadata: #{cfn_metadata}"
 
       case options[:output_format]
       when 'json'
@@ -112,6 +121,7 @@ module Cfer
       when 'table', nil
         puts "Status: #{cfn_stack[:stack_status]}"
         puts "Description: #{cfn_stack[:description]}" if cfn_stack[:description]
+        puts "Created with Cfer version: #{Semantic::Version.new(cfer_version_str).to_s} (current: #{Cfer::SEMANTIC_VERSION.to_s})" if cfer_version
         puts ""
         def tablify(list, type)
           list ||= []
