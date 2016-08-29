@@ -298,5 +298,5 @@ This project also contains a [Code of Conduct](https://github.com/seanedwards/cf
 
 # Release Notes
 
-[Change Log](https://github.com/seanedwards/cfer/CHANGELOG.md)
+[Change Log](https://github.com/seanedwards/cfer/blob/master/CHANGELOG.md)
 
