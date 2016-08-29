@@ -19,12 +19,28 @@ describe Cfer do
     expect(stack[:Resources][:abc][:Type]).to eq 'Cfer::TestResource'
   end
 
+  it 'reads templates from json files' do
+    stack = Cfer::stack_from_file('spec/support/simple_stack.json')
+
+    expect(stack[:Parameters]).to have_key :test
+    expect(stack[:Resources]).to have_key :abc
+    expect(stack[:Resources][:abc][:Type]).to eq 'Cfer::TestResource'
+  end
+
   it 'includes templates from files' do
     stack = Cfer::stack_from_file('spec/support/includes_stack.rb')
 
     expect(stack[:Resources]).to have_key :abc
     expect(stack[:Resources][:abc][:Type]).to eq 'Cfer::TestResource'
     expect(stack[:Resources][:abc][:Properties][:Tags]).to contain_exactly 'Key' => :Name, 'Value' => 'foo'
+  end
+
+  it 'includes json templates from files' do
+    stack = Cfer::stack_from_file('spec/support/includes_json_stack.rb')
+
+    expect(stack[:Resources]).to have_key :abc
+    expect(stack[:Resources][:abc][:Type]).to eq 'Cfer::TestResource'
+    expect(stack[:Resources][:abc][:Properties][:Tags]).to contain_exactly 'Key' => "Name", 'Value' => 'foo'
   end
 
   it 'passes parameters and options' do
@@ -86,7 +102,7 @@ describe Cfer do
       end
 
       resource :test_resource_2, 'Cfer::TestResource' do
-        other_resource Cfer::Core::Fn::ref(:test_resource)
+        other_resource Cfer::Core::Functions::Fn::ref(:test_resource)
       end
     end
 
@@ -142,4 +158,43 @@ describe Cfer do
     expect(stack[:Resources][:test_resource][:Properties][:OtherProperty2]).to eq 123
   end
 
+  it 'executes hooks in the right order' do
+    list = []
+
+    Cfer::Core::Resource.before "Cfer::TestPlugin" do
+      list << :before_r
+    end
+
+    Cfer::Core::Resource.after "Cfer::TestPlugin" do
+      list << :after_r
+    end
+
+    Cfer::Core::Stack.before do
+      list << :before_s
+    end
+
+    Cfer::Core::Stack.after do
+      list << :after_s
+    end
+
+    stack = create_stack do
+      resource :test_resource, 'Cfer::TestPlugin' do
+        list << :during
+      end
+      resource :test_resource_2, 'Cfer::TestPlugin' do
+        list << :during
+      end
+    end
+
+    expect(list).to eq [
+      :before_s,
+        :before_r,
+          :during,
+        :after_r,
+        :before_r,
+          :during,
+        :after_r,
+      :after_s
+    ]
+  end
 end

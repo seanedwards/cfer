@@ -14,9 +14,11 @@ end
 
 # Contains the core Cfer logic
 module Cfer
+  # Code relating to working with Amazon CloudFormation
   module Cfn
   end
 
+  # Code relating to building the CloudFormation document out of the Ruby DSL
   module Core
   end
 
@@ -50,8 +52,12 @@ module Cfer
 
   class << self
 
+    # Creates or updates a CloudFormation stack
+    # @param stack_name [String] The name of the stack to update
+    # @param options [Hash]
     def converge!(stack_name, options = {})
       config(options)
+      options[:on_failure].upcase! if options[:on_failure]
       tmpl = options[:template] || "#{stack_name}.rb"
       cfn = options[:aws_options] || {}
 
@@ -85,19 +91,29 @@ module Cfer
             end
           end
         end
+        describe! stack_name, options rescue nil # It's fine if we can't do this.
       rescue Aws::CloudFormation::Errors::ValidationError => e
         Cfer::LOGGER.info "CFN validation error: #{e.message}"
       end
-      describe! stack_name, options unless options[:follow]
+      stack
     end
 
     def describe!(stack_name, options = {})
       config(options)
       cfn = options[:aws_options] || {}
       cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
+      cfn_metadata = cfn_stack.fetch_metadata
       cfn_stack = cfn_stack.fetch_stack
 
+      cfer_version = cfn_metadata.fetch("Cfer", {}).fetch("Version", nil)
+      if cfer_version
+        cfer_version_str = [cfer_version["major"], cfer_version["minor"], cfer_version["patch"]].join '.'
+        cfer_version_str << '-' << cfer_version["pre"] unless cfer_version["pre"].nil?
+        cfer_version_str << '+' << cfer_version["pre"] unless cfer_version["pre"].nil?
+      end
+
       Cfer::LOGGER.debug "Describe stack: #{cfn_stack}"
+      Cfer::LOGGER.debug "Describe metadata: #{cfn_metadata}"
 
       case options[:output_format]
       when 'json'
@@ -105,6 +121,7 @@ module Cfer
       when 'table', nil
         puts "Status: #{cfn_stack[:stack_status]}"
         puts "Description: #{cfn_stack[:description]}" if cfn_stack[:description]
+        puts "Created with Cfer version: #{Semantic::Version.new(cfer_version_str).to_s} (current: #{Cfer::SEMANTIC_VERSION.to_s})" if cfer_version
         puts ""
         def tablify(list, type)
           list ||= []
@@ -122,6 +139,7 @@ module Cfer
       else
         raise Cfer::Util::CferError, "Invalid output format #{options[:output_format]}."
       end
+      cfn_stack
     end
 
     def tail!(stack_name, options = {}, &block)
@@ -135,7 +153,6 @@ module Cfer
           Cfer::LOGGER.info "%s %-30s %-40s %-20s %s" % [event.timestamp, color_map(event.resource_status), event.resource_type, event.logical_resource_id, event.resource_status_reason]
         end
       end
-      describe! stack_name, options
     end
 
     def generate!(tmpl, options = {})
@@ -163,6 +180,10 @@ module Cfer
       cfn = options[:aws_options] || {}
       cfn_stack = options[:cfer_client] || cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
       cfn_stack.delete_stack(stack_name)
+
+      if options[:follow]
+        tail! stack_name, options.merge(cfer_client: cfn_stack)
+      end
     end
 
     # Builds a Cfer::Core::Stack from a Ruby block
@@ -181,13 +202,31 @@ module Cfer
 
     # Builds a Cfer::Core::Stack from a ruby script
     #
-    # @param file [String] The file containing the Cfn DSL
+    # @param file [String] The file containing the Cfn DSL or plain JSON
     # @param options [Hash] (see #stack_from_block)
     # @return [Cfer::Core::Stack] The assembled stack object
     def stack_from_file(file, options = {})
+      return stack_from_stdin(options) if file == '-'
+
       s = Cfer::Core::Stack.new(options)
-      templatize_errors(file) do
-        s.build_from_file file
+      if file.ends_with?('.json')
+        s.deep_merge! JSON.parse(File.read(file))
+      else
+        templatize_errors(file) do
+          s.build_from_file file
+        end
+      end
+      s
+    end
+
+    # Builds a Cfer::Core::Stack from stdin
+    #
+    # @param options [Hash] (see #stack_from_block)
+    # @return [Cfer::Core::Stack] The assembled stack object
+    def stack_from_stdin(options = {})
+      s = Cfer::Core::Stack.new(options)
+      templatize_errors('STDIN') do
+        s.build_from_string STDIN.read, 'STDIN'
       end
       s
     end
@@ -197,9 +236,6 @@ module Cfer
     def config(options)
       Cfer::LOGGER.debug "Options: #{options}"
       Cfer::LOGGER.level = Logger::DEBUG if options[:verbose]
-
-      require 'rubygems'
-      require 'bundler/setup'
 
       Aws.config.update region: options[:region] if options[:region]
       Aws.config.update credentials: Cfer::Cfn::CferCredentialsProvider.new(profile_name: options[:profile]) if options[:profile]

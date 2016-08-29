@@ -2,8 +2,8 @@ module Cfer::Core
 
   # Defines the structure of a CloudFormation stack
   class Stack < Cfer::Block
-    include Cfer::Core
-    include Cfer::Cfn
+    include Cfer::Core::Functions
+    include Cfer::Core::Hooks
 
     # The parameters strictly as passed via command line
     attr_reader :input_parameters
@@ -137,7 +137,7 @@ module Cfer::Core
       Preconditions.check_argument(/[[:alnum:]]+/ =~ name, "Resource name must be alphanumeric")
 
       clazz = Cfer::Core::Resource.resource_class(type)
-      rc = clazz.new(name, type, options, &block)
+      rc = clazz.new(name, type, self, options, &block)
 
       self[:Resources][name] = rc
       rc
@@ -158,6 +158,7 @@ module Cfer::Core
       to_h.to_json
     end
 
+    # Gets the Cfn client, if one exists, or throws an error if one does not
     def client
       @options[:client] || raise(Cfer::Util::CferError, "Stack has no associated client.")
     end
@@ -168,71 +169,32 @@ module Cfer::Core
       include_base = options[:include_base] || File.dirname(caller.first.split(/:\d/,2).first)
       files.each do |file|
         path = File.join(include_base, file)
-        instance_eval(File.read(path), path)
+        if path.ends_with?('.json')
+          self.deep_merge! JSON.parse(File.read(path))
+        else
+          instance_eval(File.read(path), path)
+        end
       end
     end
 
+    # Looks up a specific output of another CloudFormation stack in the same region.
+    # @param stack [String] The name of the stack to fetch an output from
+    # @param out [String] The name of the output to fetch from the stack
     def lookup_output(stack, out)
-      client = @options[:client] || raise(Cfer::Util::CferError, "Can not fetch stack outputs without a client")
-      client.fetch_output(stack, out)
+      lookup_outputs(stack).fetch(out)
     end
 
+    # Looks up a hash of all outputs from another CloudFormation stack in the same region.
+    # @param stack [String] The name of the stack to fetch outputs from
     def lookup_outputs(stack)
       client = @options[:client] || raise(Cfer::Util::CferError, "Can not fetch stack outputs without a client")
       client.fetch_outputs(stack)
     end
 
-    private
-
-    def post_block
-      begin
-        validate_stack!(self)
-      rescue Cfer::Util::CferValidationError => e
-        Cfer::LOGGER.error "Cfer detected #{e.errors.size > 1 ? 'errors' : 'an error'} when generating the stack:"
-        e.errors.each do |err|
-          Cfer::LOGGER.error "* #{err[:error]} in Stack#{validation_contextualize(err[:context])}"
-        end
-        raise e
-      end
-    end
-
-    def validate_stack!(hash)
-      errors = []
-      context = []
-      _inner_validate_stack!(hash, errors, context)
-
-      raise Cfer::Util::CferValidationError, errors unless errors.empty?
-    end
-
-    def _inner_validate_stack!(hash, errors = [], context = [])
-      case hash
-      when Hash
-        hash.each do |k, v|
-          _inner_validate_stack!(v, errors, context + [k])
-        end
-      when Array
-        hash.each_index do |i|
-          _inner_validate_stack!(hash[i], errors, context + [i])
-        end
-      when nil
-        errors << {
-          error: "CloudFormation does not allow nulls in templates",
-          context: context
-        }
-      end
-    end
-
-    def validation_contextualize(err_ctx)
-      err_ctx.inject("") do |err_str, ctx|
-        err_str <<
-          case ctx
-          when String
-            ".#{ctx}"
-          when Numeric
-            "[#{ctx}]"
-          end
+    class << self
+      def extend_stack(&block)
+        class_eval(&block)
       end
     end
   end
-
 end

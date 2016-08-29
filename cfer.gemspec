@@ -14,23 +14,25 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/seanedwards/cfer"
   spec.license       = "MIT"
 
+  spec.required_ruby_version = ['~> 2.2', '>= 2.2.5']
+
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = 'bin'
-  spec.executables   = 'cfer'
+  spec.executables   = ['cfer', 'json-to-cfer']
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency 'docile', '~> 1.1', '>= 1.1.5'
+  spec.add_runtime_dependency 'docile', '~> 1.1'
   spec.add_runtime_dependency 'thor', '~> 0.19.1'
-  spec.add_runtime_dependency 'activesupport', '~> 4.2', '>= 4.2.6'
-  spec.add_runtime_dependency 'aws-sdk', '~> 2.2', '>= 2.2.33'
-  spec.add_runtime_dependency 'aws-sdk-resources', '~> 2.2', '>= 2.2.33'
+  spec.add_runtime_dependency 'activesupport', '>= 3'
+  spec.add_runtime_dependency 'aws-sdk', '~> 2.2'
+  spec.add_runtime_dependency 'aws-sdk-resources', '~> 2.2'
   spec.add_runtime_dependency 'preconditions', '~> 0.3.0'
-  spec.add_runtime_dependency 'semantic', '~> 1.4', '>= 1.4.1'
+  spec.add_runtime_dependency 'semantic', '~> 1.4'
   spec.add_runtime_dependency 'rainbow', '~> 2.1'
-  spec.add_runtime_dependency 'highline', '~> 1.7', '>= 1.7.8'
-  spec.add_runtime_dependency 'table_print', '~> 1.5', '>= 1.5.6'
+  spec.add_runtime_dependency 'highline', '~> 1.7'
+  spec.add_runtime_dependency 'table_print', '~> 1.5'
   spec.add_runtime_dependency "git", '~> 1.3'
-  spec.add_runtime_dependency "bundler"
 
   spec.add_development_dependency "yard", '~> 0.8.7.6'
+  spec.add_development_dependency "rake"
 end

@@ -112,12 +112,11 @@ describe Cfer::Cfn::Client do
       )
 
     expect(cfn).to receive(:describe_stacks)
-      .exactly(3).times
+      .exactly(2).times
       .with(stack_name: 'test')
       .and_return(
         double(stacks: [ double(:stack_status => 'a status') ]),
-        double(stacks: [ double(:stack_status => 'TEST_COMPLETE')]),
-        double(stacks: [ {:stack_status => 'TEST_COMPLETE'} ])
+        double(stacks: [ double(:stack_status => 'TEST_COMPLETE')])
       )
 
     yielder = double('yield receiver')
