@@ -1,4 +1,6 @@
 require 'docile'
+require 'json'
+require 'yaml'
 
 module Cfer
   # Represents the base class of a Cfer DSL
@@ -27,7 +29,14 @@ module Cfer
     # @param args [Array<Object>] (see: #build_from_block)
     # @param file [File] The Ruby script to evaluate
     def build_from_file(*args, file)
-      build_from_string File.read(file), file
+      case File.extname(file)
+      when '.json'
+        deep_merge! JSON.parse(IO.read(file))
+      when '.yml', '.yaml'
+        deep_merge! YAML.load_file(file)
+      else
+        build_from_string File.read(file), file
+      end
     end
 
     # Executed just before the DSL is evaluated

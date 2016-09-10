@@ -211,12 +211,8 @@ module Cfer
       return stack_from_stdin(options) if file == '-'
 
       s = Cfer::Core::Stack.new(options)
-      if file.ends_with?('.json')
-        s.deep_merge! JSON.parse(File.read(file))
-      else
-        templatize_errors(file) do
-          s.build_from_file file
-        end
+      templatize_errors(file) do
+        s.build_from_file file
       end
       s
     end
@@ -247,17 +243,8 @@ module Cfer
       raise "parameter-environment set but parameter_file not set" \
         if options[:parameter_environment] && options[:parameter_file].nil?
 
-      file_params =
         if options[:parameter_file]
-          case File.extname(options[:parameter_file])
-          when '.yaml'
-            require 'yaml'
-            YAML.load_file(options[:parameter_file])
-          when '.json'
-            JSON.parse(IO.read(options[:parameter_file]))
-          else
-            raise "Unrecognized parameter file format: #{File.extname(options[:parameter_file])}"
-          end
+          file_params = Cfer::Config.new(options[:parameter_file]).to_h
         else
           {}
         end
@@ -363,7 +350,6 @@ module Cfer
   end
 end
 
-Dir["#{File.dirname(__FILE__)}/cfer/*.rb"].each { |f| require(f) }
-Dir["#{File.dirname(__FILE__)}/cfer/**/*.rb"].each { |f| require(f) }
+Dir["#{File.dirname(__FILE__)}/cfer/**/*.rb"].each { |f| require(f) unless f.ends_with?('console.rb') }
 Dir["#{File.dirname(__FILE__)}/cferext/**/*.rb"].each { |f| require(f) }
 
