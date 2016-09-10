@@ -169,11 +169,7 @@ module Cfer::Core
       include_base = options[:include_base] || File.dirname(caller.first.split(/:\d/,2).first)
       files.each do |file|
         path = File.join(include_base, file)
-        if path.ends_with?('.json')
-          self.deep_merge! JSON.parse(File.read(path))
-        else
-          instance_eval(File.read(path), path)
-        end
+        include_file(path)
       end
     end
 

@@ -29,13 +29,21 @@ module Cfer
     # @param args [Array<Object>] (see: #build_from_block)
     # @param file [File] The Ruby script to evaluate
     def build_from_file(*args, file)
+      build_from_block(*args) do
+        include_file(file)
+      end
+    end
+
+    def include_file(file)
+      raise Cfer::Util::FileDoesNotExistError, "#{file} does not exist." unless File.exists?(file)
+
       case File.extname(file)
       when '.json'
         deep_merge! JSON.parse(IO.read(file))
       when '.yml', '.yaml'
         deep_merge! YAML.load_file(file)
       else
-        build_from_string File.read(file), file
+        instance_eval File.read(file)
       end
     end
 

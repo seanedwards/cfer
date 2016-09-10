@@ -17,6 +17,9 @@ module Cfer::Util
   class StackDoesNotExistError < CferError
   end
 
+  class FileDoesNotExistError < CferError
+  end
+
   class TemplateError < CferError
     attr_reader :template_backtrace
 

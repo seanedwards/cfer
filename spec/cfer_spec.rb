@@ -28,7 +28,7 @@ describe Cfer do
   end
 
   it 'includes templates from files' do
-    stack = Cfer::stack_from_file('spec/support/includes_stack.rb')
+    stack = Cfer::stack_from_file('spec/support/includes_stack.rb', include_base: 'spec/support')
 
     expect(stack[:Resources]).to have_key :abc
     expect(stack[:Resources][:abc][:Type]).to eq 'Cfer::TestResource'
@@ -36,7 +36,7 @@ describe Cfer do
   end
 
   it 'includes json templates from files' do
-    stack = Cfer::stack_from_file('spec/support/includes_json_stack.rb')
+    stack = Cfer::stack_from_file('spec/support/includes_json_stack.rb', include_base: 'spec/support')
 
     expect(stack[:Resources]).to have_key :abc
     expect(stack[:Resources][:abc][:Type]).to eq 'Cfer::TestResource'
