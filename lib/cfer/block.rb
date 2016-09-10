@@ -35,6 +35,7 @@ module Cfer
     end
 
     def include_file(file)
+      Preconditions.check(file).is_not_nil
       raise Cfer::Util::FileDoesNotExistError, "#{file} does not exist." unless File.exists?(file)
 
       case File.extname(file)
@@ -43,7 +44,7 @@ module Cfer
       when '.yml', '.yaml'
         deep_merge! YAML.load_file(file)
       else
-        instance_eval File.read(file)
+        instance_eval File.read(file), file
       end
     end
 

@@ -243,20 +243,25 @@ module Cfer
       raise "parameter-environment set but parameter_file not set" \
         if options[:parameter_environment] && options[:parameter_file].nil?
 
-        if options[:parameter_file]
-          file_params = Cfer::Config.new(options[:parameter_file]).to_h
-        else
-          {}
-        end
+      file_params = HashWithIndifferentAccess.new
+
+      file_params.deep_merge! Cfer::Config.new(cfer: options) \
+        .build_from_file(options[:parameter_file]) \
+        .to_h
 
       if options[:parameter_environment]
         raise "no key '#{options[:parameter_environment]}' found in parameters file." \
           unless file_params.key?(options[:parameter_environment])
 
-        file_params = file_params.deep_merge(file_params[options[:parameter_environment]])
+        Cfer::LOGGER.debug "Merging in environment key #{options[:parameter_environment]}"
+
+        file_params.deep_merge!(file_params[options[:parameter_environment]])
       end
 
-      file_params.deep_merge(options[:parameters] || {})
+      file_params.deep_merge!(options[:parameters] || {})
+
+      Cfer::LOGGER.debug("Config loaded: #{file_params.to_h}")
+      file_params
     end
 
     def render_json(obj, options = {})

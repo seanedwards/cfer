@@ -57,8 +57,8 @@ describe Cfer do
     options = {
       parameters: { 'CLIValue' => 'from_cli' },
 
-      parameter_file: "#{__dir__}/support/parameters_stack.yaml",
-      parameter_environment: 'my_env'
+      parameter_file: "#{__dir__}/support/parameters_stack_params.rb",
+      parameter_environment: 'MyEnv'
     }
 
     merged_parameters = Cfer.send(:generate_final_parameters, options)
