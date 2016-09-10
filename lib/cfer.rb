@@ -64,13 +64,15 @@ module Cfer
       cfn = options[:aws_options] || {}
 
       cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
-      stack = options[:cfer_stack] ||
-              Cfer::stack_from_file(tmpl,
-                options.merge(
-                  client: cfn_stack,
-                  parameters: generate_final_parameters(options)
-                )
-              )
+      raise Cfer::Util::CferError, "No such template file: #{tmpl}" unless File.exists?(tmpl)
+      stack =
+        options[:cfer_stack] ||
+          Cfer::stack_from_file(tmpl,
+            options.merge(
+              client: cfn_stack,
+              parameters: generate_final_parameters(options)
+            )
+          )
 
       begin
         operation = stack.converge!(options)
@@ -93,7 +95,8 @@ module Cfer
             end
           end
         end
-        describe! stack_name, options rescue nil # It's fine if we can't do this.
+        # This is allowed to fail, particularly if we decided to roll back
+        describe! stack_name, options rescue nil
       rescue Aws::CloudFormation::Errors::ValidationError => e
         Cfer::LOGGER.info "CFN validation error: #{e.message}"
       end
@@ -162,6 +165,7 @@ module Cfer
       cfn = options[:aws_options] || {}
 
       cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn)
+      raise Cfer::Util::CferError, "No such template file: #{tmpl}" unless File.exists?(tmpl)
       stack = options[:cfer_stack] || Cfer::stack_from_file(tmpl,
         options.merge(client: cfn_stack, parameters: generate_final_parameters(options))).to_h
       puts render_json(stack, options)
@@ -181,7 +185,7 @@ module Cfer
       config(options)
       cfn = options[:aws_options] || {}
       cfn_stack = options[:cfer_client] || cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
-      cfn_stack.delete_stack(stack_name)
+      cfn_stack.delete_stack(stack_name: stack_name)
 
       if options[:follow]
         tail! stack_name, options.merge(cfer_client: cfn_stack)
@@ -240,28 +244,28 @@ module Cfer
     end
 
     def generate_final_parameters(options)
-      raise "parameter-environment set but parameter_file not set" \
+      raise Cfer::Util::CferError, "parameter-environment set but parameter_file not set" \
         if options[:parameter_environment] && options[:parameter_file].nil?
 
-      file_params = HashWithIndifferentAccess.new
+      final_params = HashWithIndifferentAccess.new
 
-      file_params.deep_merge! Cfer::Config.new(cfer: options) \
+      final_params.deep_merge! Cfer::Config.new(cfer: options) \
         .build_from_file(options[:parameter_file]) \
-        .to_h
+        .to_h if options[:parameter_file]
 
       if options[:parameter_environment]
-        raise "no key '#{options[:parameter_environment]}' found in parameters file." \
-          unless file_params.key?(options[:parameter_environment])
+        raise Cfer::Util::CferError, "no key '#{options[:parameter_environment]}' found in parameters file." \
+          unless final_params.key?(options[:parameter_environment])
 
         Cfer::LOGGER.debug "Merging in environment key #{options[:parameter_environment]}"
 
-        file_params.deep_merge!(file_params[options[:parameter_environment]])
+        final_params.deep_merge!(final_params[options[:parameter_environment]])
       end
 
-      file_params.deep_merge!(options[:parameters] || {})
+      final_params.deep_merge!(options[:parameters] || {})
 
-      Cfer::LOGGER.debug("Config loaded: #{file_params.to_h}")
-      file_params
+      Cfer::LOGGER.debug "Final parameters: #{final_params}"
+      final_params
     end
 
     def render_json(obj, options = {})
@@ -292,53 +296,24 @@ module Cfer
 
 
     COLORS_MAP = {
-      'CREATE_IN_PROGRESS' => {
-        color: :yellow
-      },
-      'DELETE_IN_PROGRESS' => {
-        color: :yellow
-      },
-      'UPDATE_IN_PROGRESS' => {
-        color: :green
-      },
+      'CREATE_IN_PROGRESS' => { color: :yellow },
+      'DELETE_IN_PROGRESS' => { color: :yellow },
+      'UPDATE_IN_PROGRESS' => { color: :green },
 
-      'CREATE_FAILED' => {
-        color: :red,
-        finished: true
-      },
-      'DELETE_FAILED' => {
-        color: :red,
-        finished: true
-      },
-      'UPDATE_FAILED' => {
-        color: :red,
-        finished: true
-      },
+      'CREATE_FAILED' => { color: :red, finished: true },
+      'DELETE_FAILED' => { color: :red, finished: true },
+      'UPDATE_FAILED' => { color: :red, finished: true },
 
-      'CREATE_COMPLETE' => {
-        color: :green,
-        finished: true
-      },
-      'DELETE_COMPLETE' => {
-        color: :green,
-        finished: true
-      },
-      'UPDATE_COMPLETE' => {
-        color: :green,
-        finished: true
-      },
+      'CREATE_COMPLETE' => { color: :green, finished: true },
+      'DELETE_COMPLETE' => { color: :green, finished: true },
+      'UPDATE_COMPLETE' => { color: :green, finished: true },
 
-      'DELETE_SKIPPED' => {
-        color: :yellow
-      },
+      'DELETE_SKIPPED' => { color: :yellow },
 
-      'ROLLBACK_IN_PROGRESS' => {
-        color: :red
-      },
-      'ROLLBACK_COMPLETE' => {
-        color: :red,
-        finished: true
-      }
+      'ROLLBACK_IN_PROGRESS' => { color: :red },
+
+      'UPDATE_ROLLBACK_COMPLETE' => { color: :red, finished: true },
+      'ROLLBACK_COMPLETE' => { color: :red, finished: true }
     }
 
     def color_map(str)

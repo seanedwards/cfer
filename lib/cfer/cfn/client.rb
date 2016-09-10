@@ -24,17 +24,6 @@ module Cfer::Cfn
       end
     end
 
-
-    def delete_stack(stack_name)
-      begin
-        @cfn.delete_stack({
-          stack_name: stack_name, # required
-        })
-      rescue Aws::CloudFormation::Errors
-        raise CferError, "Stack delete #{stack_name}"
-      end
-    end
-
     def responds_to?(method)
       @cfn.responds_to? method
     end

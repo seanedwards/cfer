@@ -2,10 +2,15 @@
 
 ## 0.5.0
 
+### **BREAKING CHANGES**
+* `--parameters <name>:<value>` option is removed from CLI. Use `name=value` instead.
+  For example: `cfer generate stack.rb parameter_name=parameter_value`
+
 ### Enhancements
 * Adds support for Pre-build and Post-build hooks for resources and stacks.
 * Adds `json-to-cfer` script to automatically convert json templates to Cfer DSL code.
 * Adds support for directly converging JSON files.
+* Replaces [Thor](https://github.com/erikhuda/thor) with [Cri](https://github.com/ddfreyne/cri) as a CLI option parser.
 * Relaxes some version constraints to make it easier to integrate with older Rails projects.
 * Pulled stack validation out into an extension using post-build hooks.
 * Adds some extension methods to improve usability of certain resources.
@@ -13,6 +18,7 @@
 * Supports reading ruby template from stdin by specifying the filename `-`
 * Adds exponential backoff to `tail` command.
 * `--on-failure` flag is now case insensitive.
+* Removes `--pretty-print` as a global option and adds `--minified` to the `generate` command.
 * Various test improvements.
 
 ### Bugfixes

@@ -41,7 +41,7 @@ To quickly see Cfer in action, try converging the example stacks:
 
 ```bash
 cfer converge vpc -t examples/vpc.rb --profile [YOUR-PROFILE] --region [YOUR-REGION]
-cfer converge instance -t examples/instance.rb --profile [YOUR-PROFILE] --region [YOUR-REGION] --parameters KeyName:[YOUR-EC2-SSH-KEY]
+cfer converge instance -t examples/instance.rb --profile [YOUR-PROFILE] --region [YOUR-REGION] KeyName=[YOUR-EC2-SSH-KEY]
 ```
 
 You should see something like this:
@@ -50,65 +50,14 @@ You should see something like this:
 
 ### Command line
 
-    Commands:
-      cfer converge [OPTIONS] <stack-name>   # Creates or updates a cloudformation stack according to the template
-      cfer generate [OPTIONS] <template.rb>  # Generates a CloudFormation template by evaluating a Cfer template
-      cfer help [COMMAND]                    # Describe available commands or one specific command
-      cfer tail <stack-name>                 # Follows stack events on standard output as they occur
-
-#### Global options
-
-* `--profile <profile>`: The AWS profile to use (from your `~/.aws/credentials` file)
-* `--region <region>`: The AWS region to use
-* `--verbose`: Also print debugging messages
-
-#### `generate <template.rb>`
-
-The `generate` subcommand evaluates the given Ruby script and prints the CloudFormation stack JSON to standard output.
-
-The following options may be used with the `generate` command:
-
-* `--no-pretty-print`: Print minified JSON
-
-#### `converge <stack-name>`
-
-Creates or updates a CloudFormation stack according to the specified template.
-
-The following options may be used with the `converge` command:
-
-* `--follow` (`-f`): Follows stack events on standard output as the create/update process takes place.
-* `--stack-file <template.rb>`: Reads this file from the filesystem, rather than the default `<stack-name>.rb`
-* `--parameters <Key1>:<Value1> <Key2>:<Value2> ...`: Specifies input parameters, which will be available to Ruby in the `parameters` hash, or to CloudFormation by using the `Fn::ref` function
-* `--parameter-file <params_file.[yaml|json]`: Specifies input parameters from a YAML or JSON file
-* `--parameter-environment <env_name>`: Requires `--parameter-file`. Merges the specified key in the YAML or JSON file into the root of the parameter file before passing it into the Cfer stack, i.e. to provide different constants for different AWS environments. The priority for parameters is, in ascending order, **stack default**, **file**, **environment**, and **command line**.
-* `--on-failure <DELETE|ROLLBACK|DO_NOTHING>`: Specifies the action to take when a stack creation fails. Has no effect if the stack already exists and is being updated.
-* `--stack-policy <filename|URL|JSON string>` (`-s`): Stack policy to apply to the stack in order to control updates; takes a local filename containing the policy, a URL to an S3 object, or a raw JSON string.
-* `--stack-policy-during-update <filename|URL|JSON string>` (`-u`): Stack policy as in `--stack-policy` option above, but applied as a temporary override to the permanent policy during stack update.
-* `--s3-path <S3_PATH>`: Path to an S3 bucket location where the template will be stored. This is required if the template output exceeds [51,200 bytes](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html).
-* `--force-s3`: Forces Cfer to upload the template to S3, even if it's small enough to be uploaded directly to the cloudformation API.
-* `--change <CHANGE_NAME>`: Creates a [CloudFormation Change Set](https://aws.amazon.com/blogs/aws/new-change-sets-for-aws-cloudformation/), rather than immediately updating the stack.
-
-#### `tail <stack-name>`
-
-Prints the latest `n` stack events, and optionally follows events while a stack is converging.
-
-The following options may be used with the `tail` command:
-
-* `--follow` (`-f`): Follows stack events on standard output as the create/update process takes place.
-* `--number` (`-n`): Print the last `n` stack events.
-
-#### `remove <stack-name>`
-
-Removes or deletes an existing CloudFormation stack. 
-
-```bash
-cfer remove vpc --profile [YOUR-PROFILE] --region [YOUR-REGION]
-```
-
-This can also be done in the following way with the awscli tools, but now eliminates the need to install that package.
-```bash
-aws cloudformation delete-stack --stack-name vpc
-```
+    COMMANDS
+        converge     Create or update a cloudformation stack according to the template
+        delete       Deletes a CloudFormation stack
+        describe     Fetches and prints information about a CloudFormation
+        estimate     Prints a link to the Amazon cost caculator estimating the cost of the resulting CloudFormation stack
+        generate     Generates a CloudFormation template by evaluating a Cfer template
+        help         show help
+        tail         Follows stack events on standard output as they occur
 
 ### Template Anatomy
 
