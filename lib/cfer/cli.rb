@@ -85,7 +85,7 @@ module Cfer
       summary 'Follows stack events on standard output as they occur'
 
       flag :f, 'follow', 'Follow stack events on standard output while the changes are made.'
-      option :n, 'number', 'Prints the last (n) stack events.'
+      optional :n, 'number', 'Prints the last (n) stack events.', type: :number
 
       run do |options, args, cmd|
         Cfer::Cli.fixup_options(options)
@@ -187,9 +187,12 @@ module Cfer
     # Cfer internally uses the latter format, while Cri options must be specified as the former.
     # This approach is better than changing the names of all the options in the CLI.
     def self.fixup_options(opts)
-      opts.keys.each do |k|
-        opts[k.to_s.gsub('-', '_').to_sym] = opts[k]
-        opts.delete(k)
+      opts.keys.map(&:to_s).each do |k|
+        old_k = k.to_sym
+        new_k = k.gsub('-', '_').to_sym
+        val = opts[old_k]
+        opts[new_k] = (Integer(val) rescue Float(val) rescue val)
+        opts.delete(old_k) if old_k != new_k
       end
     end
 

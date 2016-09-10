@@ -85,7 +85,7 @@ describe Cfer::Cfn::Client do
   it 'deletes stacks' do
     cfn = Cfer::Cfn::Client.new stack_name: 'test-stack', region: 'us-east-1'
 
-    expect(cfn).to receive(:delete_stack).with('test-stack')
+    expect(cfn).to receive(:delete_stack).with(stack_name: 'test-stack')
       .exactly(1).times
 
     Cfer::delete! 'test-stack', cfer_client: cfn
