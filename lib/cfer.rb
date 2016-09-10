@@ -14,6 +14,8 @@ end
 
 # Contains the core Cfer logic
 module Cfer
+  DEBUG = false unless defined? DEBUG
+
   # Code relating to working with Amazon CloudFormation
   module Cfn
   end
@@ -109,7 +111,7 @@ module Cfer
       if cfer_version
         cfer_version_str = [cfer_version["major"], cfer_version["minor"], cfer_version["patch"]].join '.'
         cfer_version_str << '-' << cfer_version["pre"] unless cfer_version["pre"].nil?
-        cfer_version_str << '+' << cfer_version["pre"] unless cfer_version["pre"].nil?
+        cfer_version_str << '+' << cfer_version["build"] unless cfer_version["build"].nil?
       end
 
       Cfer::LOGGER.debug "Describe stack: #{cfn_stack}"

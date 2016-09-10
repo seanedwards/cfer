@@ -196,6 +196,9 @@ module Cfer::Cfn
                 q.unshift fetched_event
               end
             end
+          rescue Aws::CloudFormation::Errors::Throttling
+            Cfer::LOGGER.debug "AWS SDK is being throttled..."
+            # Keep going though.
           rescue Aws::CloudFormation::Errors::ValidationError
             running = false
           end
