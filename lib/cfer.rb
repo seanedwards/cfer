@@ -64,7 +64,7 @@ module Cfer
       cfn = options[:aws_options] || {}
 
       cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
-      raise Cfer::Util::CferError, "No such template file: #{tmpl}" unless File.exists?(tmpl)
+      raise Cfer::Util::CferError, "No such template file: #{tmpl}" unless File.exists?(tmpl) || options[:cfer_stack]
       stack =
         options[:cfer_stack] ||
           Cfer::stack_from_file(tmpl,
@@ -165,7 +165,7 @@ module Cfer
       cfn = options[:aws_options] || {}
 
       cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn)
-      raise Cfer::Util::CferError, "No such template file: #{tmpl}" unless File.exists?(tmpl)
+      raise Cfer::Util::CferError, "No such template file: #{tmpl}" unless File.exists?(tmpl) || options[:cfer_stack]
       stack = options[:cfer_stack] || Cfer::stack_from_file(tmpl,
         options.merge(client: cfn_stack, parameters: generate_final_parameters(options))).to_h
       puts render_json(stack, options)
