@@ -330,7 +330,24 @@ module Cfer
   end
 end
 
-Dir["#{File.dirname(__FILE__)}/cfer/*.rb"].each { |f| require(f) unless f.ends_with?('console.rb') }
-Dir["#{File.dirname(__FILE__)}/cfer/**/*.rb"].each { |f| require(f) unless f.ends_with?('console.rb') }
+%w{
+version.rb
+block.rb
+cli.rb
+config.rb
+
+util/error.rb
+
+core/hooks.rb
+core/client.rb
+core/functions.rb
+core/resource.rb
+core/stack.rb
+
+cfn/cfer_credentials_provider.rb
+cfn/client.rb
+}.each do |f|
+  require "#{File.dirname(__FILE__)}/cfer/#{f}"
+end
 Dir["#{File.dirname(__FILE__)}/cferext/**/*.rb"].each { |f| require(f) }
 
