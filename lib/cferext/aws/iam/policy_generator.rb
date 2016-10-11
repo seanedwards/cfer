@@ -26,6 +26,11 @@ module CferExt
       end
 
       module WithPolicyDocument
+        def policy_document(doc = nil, &block)
+          self[:Properties][:PolicyDocument] ||= []
+          doc = CferExt::AWS::IAM.generate_policy(&block) if doc == nil
+          get_property(:PolicyDocument) << doc
+        end
       end
 
       module WithPolicies
