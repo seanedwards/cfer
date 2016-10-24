@@ -22,6 +22,7 @@ module Cfer::Core
     # @param options [Hash] An arbitrary set of additional properties to be added to this tag, for example `PropagateOnLaunch` on `AWS::AutoScaling::AutoScalingGroup`
     def tag(k, v, **options)
       self[:Properties][:Tags] ||= []
+      self[:Properties][:Tags].delete_if { |kv| kv["Key"] == k }
       self[:Properties][:Tags].unshift({"Key" => k, "Value" => v}.merge(options))
     end
 

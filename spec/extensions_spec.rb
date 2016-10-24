@@ -128,4 +128,20 @@ describe CferExt do
     end
     expect(rc[:PolicyDocument][:Statement].first[:Effect]).to eq(:Allow)
   end
+  it 'extends AWS::Route53::RecordSetGroup' do
+    results = []
+
+    rc = describe_resource "AWS::Route53::RecordSetGroup" do
+      %w{a aaaa cname mx ns ptr soa spf srv txt}.each do |type|
+        self.send type, "#{type}.test.com", "record #{type}"
+        results << {
+          Type: type.upcase,
+          Name: "#{type}.test.com",
+          ResourceRecords: [ "record #{type}" ]
+        }
+      end
+    end
+
+    expect(rc[:RecordSets]).to eq(results)
+  end
 end

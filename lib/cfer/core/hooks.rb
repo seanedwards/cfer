@@ -3,13 +3,13 @@ module Cfer::Core
   module Hooks
     def pre_block
       self.class.pre_hooks.each do |hook|
-        instance_eval &hook
+        Docile.dsl_eval(self, &hook)
       end
     end
 
     def post_block
       self.class.post_hooks.each do |hook|
-        instance_eval &hook
+        Docile.dsl_eval(self, &hook)
       end
     end
 
