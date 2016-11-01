@@ -20,14 +20,6 @@ module Cfer::Core::Functions
     {"Fn::Select" => [i, o]}
   end
 
-  def base64(v)
-    {"Fn::Base64" => v}
-  end
-
-  def condition(cond)
-    {"Condition" => cond}
-  end
-
   def and(*conds)
     {"Fn::And" => conds}
   end
@@ -52,35 +44,27 @@ module Cfer::Core::Functions
     {"Fn::GetAZs" => region}
   end
 
-  def account_id
-    Fn::ref 'AWS::AccountId'
-  end
-
   def notification_arns
-    Fn::ref 'AWS::NotificationARNs'
-  end
-
-  def no_value
-    Fn::ref 'AWS::NoValue'
-  end
-
-  def region
-    Fn::ref 'AWS::Region'
-  end
-
-  def stack_id
-    Fn::ref 'AWS::StackId'
-  end
-
-  def stack_name
-    Fn::ref 'AWS::StackName'
+    ref 'AWS::NotificationARNs'
   end
 end
 
 module Cfer::Core::Functions::AWS
   extend Cfer::Core::Functions
+
+  def self.method_missing(sym, *args)
+    method = sym.to_s.camelize
+    raise "AWS::#{method} does not accept arguments" unless args.empty?
+    ref "AWS::#{method}"
+  end
 end
 
 module Cfer::Core::Functions::Fn
   extend Cfer::Core::Functions
+
+  def self.method_missing(sym, *args)
+    method = sym.to_s.camelize
+    raise "Fn::#{method} requires one argument" unless args.size == 1
+    { "Fn::#{method}" => args.first }
+  end
 end

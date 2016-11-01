@@ -29,10 +29,6 @@ describe Cfer::Core::Functions do
     expect(FUNCTIONS::Fn::base64('value')).to eq 'Fn::Base64' => 'value'
   end
 
-  it 'has a working condition function' do
-    expect(FUNCTIONS::Fn::condition(:cond)).to eq 'Condition' => :cond
-  end
-
   it 'has a working and function' do
     expect(FUNCTIONS::Fn::and(:and1, :and2, :and3)).to eq 'Fn::And' => [:and1, :and2, :and3]
   end
@@ -57,6 +53,10 @@ describe Cfer::Core::Functions do
     expect(FUNCTIONS::Fn::get_azs(:region)).to eq 'Fn::GetAZs' => :region
   end
 
+  it 'has working misc functions' do
+    expect(FUNCTIONS::Fn::ImportValue(:asdf)).to eq 'Fn::ImportValue' => :asdf
+  end
+
   it 'has a working AccountID intrinsic' do
     expect(FUNCTIONS::AWS::account_id).to eq 'Ref' => 'AWS::AccountId'
   end
@@ -79,6 +79,10 @@ describe Cfer::Core::Functions do
 
   it 'has a working StackName intrinsic' do
     expect(FUNCTIONS::AWS::stack_name).to eq 'Ref' => 'AWS::StackName'
+  end
+
+  it 'has working misc functions' do
+    expect(FUNCTIONS::AWS::test_thing).to eq 'Ref' => 'AWS::TestThing'
   end
 
   it 'has a working lookup function' do
