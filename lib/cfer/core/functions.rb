@@ -44,6 +44,10 @@ module Cfer::Core::Functions
     {"Fn::GetAZs" => region}
   end
 
+  def sub(str, vals = {})
+    {"Fn::Sub" => [str, vals]}
+  end
+
   def notification_arns
     ref 'AWS::NotificationARNs'
   end
