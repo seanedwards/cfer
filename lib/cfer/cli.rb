@@ -10,7 +10,7 @@ module Cfer
     class_option :verbose, type: :boolean, default: false
     class_option :profile, type: :string, aliases: :p, desc: 'The AWS profile to use from your credentials file'
     class_option :region, type: :string, aliases: :r, desc: 'The AWS region to use'
-    class_option :pretty_print, type: :boolean, default: :true, desc: 'Render JSON in a more human-friendly format'
+    class_option :pretty_print, type: :boolean, default: true, desc: 'Render JSON in a more human-friendly format'
 
     def self.template_options
       method_option :parameters,
