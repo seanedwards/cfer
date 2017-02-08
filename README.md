@@ -9,7 +9,7 @@
 
 Cfer is a lightweight toolkit for managing CloudFormation templates.
 
-Read about Cfer [here](http://tilmonedwards.com/2015/07/28/cfer.html).
+Read about Cfer [here](https://github.com/seanedwards/cfer/blob/master/examples/vpc.md).
 
 ## Support
 
