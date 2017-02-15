@@ -130,6 +130,8 @@ Any parameter can be referenced either in Ruby by using the `parameters` hash:
 parameters[:ParameterName]
 ```
 
+**Note**: using this syntax results in parameter substitution during template generation. In other words a resource that references a parameter using this syntax cannot be changed through the CloudFormation console. Use the syntax below if this is desirable.
+
 Parameters can also be used in a CloudFormation reference by using the `Fn::ref` function:
 
 ```ruby
