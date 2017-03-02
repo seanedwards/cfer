@@ -7,8 +7,16 @@ Cfer::Core::Resource.extend_resource 'Cfer::CustomResource' do
   end
 end
 
+Cfer::Core::Resource.before 'Cfer::CustomResource', nice: 10 do
+  properties BeforeValue2: get_property(:BeforeValue)
+end
+
 Cfer::Core::Resource.before 'Cfer::CustomResource' do
   properties BeforeValue: 1234
+end
+
+Cfer::Core::Resource.after 'Cfer::CustomResource', nice: 10 do
+  properties AfterValue2: get_property(:AfterValue)
 end
 
 Cfer::Core::Resource.after 'Cfer::CustomResource' do
@@ -32,9 +40,11 @@ describe CferExt do
     end
 
     expect(rc[:BeforeValue]).to eq 1234
+    expect(rc[:BeforeValue2]).to eq 1234
     expect(rc[:TestValue]).to eq "asdf"
     expect(rc[:TestValue2]).to eq "asdf"
     expect(rc[:AfterValue]).to eq "asdf"
+    expect(rc[:AfterValue2]).to eq "asdf"
   end
 
   it 'extends AWS::CloudFormation::WaitCondition' do

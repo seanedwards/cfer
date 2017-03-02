@@ -121,7 +121,6 @@ module Cfer::Cfn
       stack_options[:timeout_in_minutes] = options[:timeout] if options[:timeout]
 
       stack_options.merge! parse_stack_policy(:stack_policy, options[:stack_policy])
-      stack_options.merge! parse_stack_policy(:stack_policy_during_update, options[:stack_policy_during_update])
 
       stack_options.merge! template_options
 
@@ -133,6 +132,7 @@ module Cfer::Cfn
           if options[:change]
             create_change_set stack_options.merge change_set_name: options[:change], description: options[:change_description], parameters: update_params
           else
+            stack_options.merge! parse_stack_policy(:stack_policy_during_update, options[:stack_policy_during_update])
             update_stack stack_options.merge parameters: update_params
           end
           :updated

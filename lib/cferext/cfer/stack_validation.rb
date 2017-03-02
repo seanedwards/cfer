@@ -38,7 +38,7 @@ Cfer::Core::Stack.extend_stack do
   end
 end
 
-Cfer::Core::Stack.after do
+Cfer::Core::Stack.after(nice: 100) do
   begin
     validate_stack!(self)
   rescue Cfer::Util::CferValidationError => e

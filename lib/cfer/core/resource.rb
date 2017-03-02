@@ -54,14 +54,14 @@ module Cfer::Core
 
       # Registers a hook that will be run before properties are set on a resource
       # @param type [String] The type of resource, for example `AWS::EC2::Instance`
-      def before(type, &block)
-        resource_class(type).pre_hooks << block
+      def before(type, options = {}, &block)
+        resource_class(type).pre_hooks << options.merge(block: block)
       end
 
       # Registers a hook that will be run after properties have been set on a resource
       # @param type [String] The type of resource, for example `AWS::EC2::Instance`
-      def after(type, &block)
-        resource_class(type).post_hooks << block
+      def after(type, options = {}, &block)
+        resource_class(type).post_hooks << options.merge(block: block)
       end
     end
   end

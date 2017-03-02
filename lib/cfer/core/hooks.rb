@@ -2,14 +2,14 @@ module Cfer::Core
   # Provides support for hooking into resource types, and evaluating code before or after properties are set
   module Hooks
     def pre_block
-      self.class.pre_hooks.each do |hook|
-        Docile.dsl_eval(self, &hook)
+      self.class.pre_hooks.sort { |a, b| (a[:nice] || 0) <=> (b[:nice] || 0) }.each do |hook|
+        Docile.dsl_eval(self, &hook[:block])
       end
     end
 
     def post_block
-      self.class.post_hooks.each do |hook|
-        Docile.dsl_eval(self, &hook)
+      self.class.post_hooks.sort { |a, b| (a[:nice] || 0) <=> (b[:nice] || 0) }.each do |hook|
+        Docile.dsl_eval(self, &hook[:block])
       end
     end
 
@@ -18,12 +18,12 @@ module Cfer::Core
     end
 
     module ClassMethods
-      def before(&block)
-        self.pre_hooks << block
+      def before(options = {}, &block)
+        self.pre_hooks << options.merge(block: block)
       end
 
-      def after(&block)
-        self.post_hooks << block
+      def after(options = {}, &block)
+        self.post_hooks << options.merge(block: block)
       end
 
       def pre_hooks
