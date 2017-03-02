@@ -1,10 +1,10 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'pp'
 require 'aws-sdk'
-require "codeclimate-test-reporter"
+require "simplecov"
 require 'pry' rescue nil
-CodeClimate::TestReporter.start
 
+SimpleCov.start
 Aws.config[:stub_responses] = true
 
 def create_stack(options = {}, &block)

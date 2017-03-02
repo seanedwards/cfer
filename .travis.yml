@@ -14,6 +14,7 @@ branches:
   - develop
 script:
 - bundle exec rspec
+- bundle exec codeclimate-test-reporter
 - bundle exec yard
 addons:
   code_climate:

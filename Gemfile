@@ -7,8 +7,8 @@ group :test do
   gem 'rspec'
   gem 'rspec-mocks'
   gem 'guard-rspec'
-  gem 'coveralls', require: false
-  gem "codeclimate-test-reporter", require: nil
+  gem 'simplecov'
+  gem "codeclimate-test-reporter", "~> 1.0.0"
 end
 
 group :debug do
