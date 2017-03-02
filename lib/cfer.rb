@@ -64,7 +64,7 @@ module Cfer
       cfn = options[:aws_options] || {}
 
       cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
-      raise Cfer::Util::CferError, "No such template file: #{tmpl}" unless File.exists?(tmpl) || options[:cfer_stack]
+      raise Cfer::Util::CferError, "No such template file: #{tmpl}" unless File.exist?(tmpl) || options[:cfer_stack]
       stack =
         options[:cfer_stack] ||
           Cfer::stack_from_file(tmpl,
@@ -126,7 +126,7 @@ module Cfer
       when 'table', nil
         puts "Status: #{cfn_stack[:stack_status]}"
         puts "Description: #{cfn_stack[:description]}" if cfn_stack[:description]
-        puts "Created with Cfer version: #{Semantic::Version.new(cfer_version_str).to_s} (current: #{Cfer::SEMANTIC_VERSION.to_s})" if cfer_version
+        puts "Created with Cfer version: #{Semantic::Version.new(cfer_version_str)} (current: #{Cfer::SEMANTIC_VERSION.to_s})" if cfer_version
         puts ""
         def tablify(list, type)
           list ||= []
@@ -165,7 +165,7 @@ module Cfer
       cfn = options[:aws_options] || {}
 
       cfn_stack = options[:cfer_client] || Cfer::Cfn::Client.new(cfn)
-      raise Cfer::Util::CferError, "No such template file: #{tmpl}" unless File.exists?(tmpl) || options[:cfer_stack]
+      raise Cfer::Util::CferError, "No such template file: #{tmpl}" unless File.exist?(tmpl) || options[:cfer_stack]
       stack = options[:cfer_stack] || Cfer::stack_from_file(tmpl,
         options.merge(client: cfn_stack, parameters: generate_final_parameters(options))).to_h
       puts render_json(stack, options)
@@ -333,7 +333,6 @@ end
 %w{
 version.rb
 block.rb
-cli.rb
 config.rb
 
 util/error.rb

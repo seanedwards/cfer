@@ -6,7 +6,7 @@ module Cfer
   DEBUG = false
 end
 
-require 'cfer'
+require 'cfer/cli'
 
 
 Cfer::Cli::main(ARGV)

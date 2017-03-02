@@ -5,7 +5,7 @@ module Cfer
   DEBUG = true
 end
 
-require "cfer"
+require "cfer/cli"
 
 Cfer::LOGGER.level = Logger::DEBUG
 

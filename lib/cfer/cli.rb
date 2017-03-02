@@ -1,3 +1,4 @@
+require 'cfer'
 require 'cri'
 require 'rainbow'
 require 'table_print'

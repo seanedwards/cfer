@@ -36,7 +36,7 @@ module Cfer
 
     def include_file(file)
       Preconditions.check(file).is_not_nil
-      raise Cfer::Util::FileDoesNotExistError, "#{file} does not exist." unless File.exists?(file)
+      raise Cfer::Util::FileDoesNotExistError, "#{file} does not exist." unless File.exist?(file)
 
       case File.extname(file)
       when '.json'
