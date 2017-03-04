@@ -270,7 +270,7 @@ module Cfer
 
     def render_json(obj, options = {})
       if options[:pretty_print]
-        puts JSON.pretty_generate(obj, options)
+        puts Cfer::Util::Json.format_json(obj)
       else
         puts obj.to_json
       end
@@ -336,6 +336,7 @@ block.rb
 config.rb
 
 util/error.rb
+util/json.rb
 
 core/hooks.rb
 core/client.rb
