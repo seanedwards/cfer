@@ -5,11 +5,11 @@ module Cfer::Util::Json
   class << self
 
   QUOTE = '"'
-  LBRACE = Rainbow('{').color :green
-  RBRACE = Rainbow('}').color :green
-  LBRACKET = Rainbow('[').color :green
-  RBRACKET = Rainbow(']').color :green
-  COLON = Rainbow(': ').color :green
+  LBRACE = Rainbow('{').green
+  RBRACE = Rainbow('}').green
+  LBRACKET = Rainbow('[').green
+  RBRACKET = Rainbow(']').green
+  COLON = Rainbow(': ').green
 
   def format_json(item)
     case item
@@ -56,7 +56,7 @@ module Cfer::Util::Json
   end
 
   def format_pair(k, v)
-    QUOTE + Rainbow(k).color(:white) + QUOTE + COLON + format_json(v)
+    QUOTE + Rainbow(k).bright + QUOTE + COLON + format_json(v)
   end
 
   def format_array(a)
