@@ -190,6 +190,12 @@ module Cfer
       if options[:follow]
         tail! stack_name, options.merge(cfer_client: cfn_stack)
       end
+    rescue Aws::CloudFormation::Errors::ValidationError => e
+      if e.message =~ /Stack .* does not exist/
+        raise Cfer::Util::StackDoesNotExistError, e.message
+      else
+        raise e
+      end
     end
 
     # Builds a Cfer::Core::Stack from a Ruby block
