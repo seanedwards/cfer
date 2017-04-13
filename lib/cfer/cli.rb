@@ -156,10 +156,10 @@ module Cfer
         Cfer::LOGGER.fatal "Template error: #{e.message}"
         Cfer::LOGGER.fatal Cfer::Cli.format_backtrace(e.template_backtrace) unless e.template_backtrace.empty?
         exit 1
-      rescue Cfer::Util::CferError => e
+      rescue Cfer::Util::CferError, Cfer::Util::StackDoesNotExistError => e
         Cfer::LOGGER.error "#{e.message}"
         exit 1
-      rescue  StandardError => e
+      rescue StandardError => e
         Cfer::LOGGER.fatal "#{e.class.name}: #{e.message}"
         Cfer::LOGGER.fatal Cfer::Cli.format_backtrace(e.backtrace) unless e.backtrace.empty?
 
