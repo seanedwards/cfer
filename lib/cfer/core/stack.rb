@@ -155,7 +155,11 @@ module Cfer::Core
     # Renders the stack into a CloudFormation template.
     # @return [String] The final template
     def to_cfn
-      to_h.to_json
+      if @options[:pretty_print]
+        JSON.pretty_generate(to_h)
+      else
+        to_h.to_json
+      end
     end
 
     # Gets the Cfn client, if one exists, or throws an error if one does not
