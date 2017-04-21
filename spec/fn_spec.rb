@@ -6,83 +6,104 @@ describe Cfer::Core::Functions do
 
   it 'has a working join function' do
     expect(FUNCTIONS::Fn::join('-', ['a', 'b', 'c'])).to eq 'Fn::Join' => ['-', ['a', 'b', 'c']]
+    expect(FUNCTIONS::Fn.join('-', ['a', 'b', 'c'])).to eq 'Fn::Join' => ['-', ['a', 'b', 'c']]
     expect(FUNCTIONS::Fn::join('-', 'a', 'b', 'c')).to eq 'Fn::Join' => ['-', ['a', 'b', 'c']]
+    expect(FUNCTIONS::Fn.join('-', 'a', 'b', 'c')).to eq 'Fn::Join' => ['-', ['a', 'b', 'c']]
   end
 
   it 'has a working ref function' do
     expect(FUNCTIONS::Fn::ref(:abc)).to eq 'Ref' => :abc
+    expect(FUNCTIONS::Fn.ref(:abc)).to eq 'Ref' => :abc
   end
 
   it 'has a working get_att function' do
     expect(FUNCTIONS::Fn::get_att(:stack, :output)).to eq 'Fn::GetAtt' => [:stack, :output]
+    expect(FUNCTIONS::Fn.get_att(:stack, :output)).to eq 'Fn::GetAtt' => [:stack, :output]
   end
 
   it 'has a working find_in_map function' do
     expect(FUNCTIONS::Fn::find_in_map(:map_name, :key1, :key2)).to eq 'Fn::FindInMap' => [:map_name, :key1, :key2]
+    expect(FUNCTIONS::Fn.find_in_map(:map_name, :key1, :key2)).to eq 'Fn::FindInMap' => [:map_name, :key1, :key2]
   end
 
   it 'has a working select function' do
     expect(FUNCTIONS::Fn::select(:list, :item)).to eq 'Fn::Select' => [:list, :item]
+    expect(FUNCTIONS::Fn.select(:list, :item)).to eq 'Fn::Select' => [:list, :item]
   end
 
   it 'has a working base64 function' do
     expect(FUNCTIONS::Fn::base64('value')).to eq 'Fn::Base64' => 'value'
+    expect(FUNCTIONS::Fn.base64('value')).to eq 'Fn::Base64' => 'value'
   end
 
   it 'has a working and function' do
     expect(FUNCTIONS::Fn::and(:and1, :and2, :and3)).to eq 'Fn::And' => [:and1, :and2, :and3]
+    expect(FUNCTIONS::Fn.and(:and1, :and2, :and3)).to eq 'Fn::And' => [:and1, :and2, :and3]
   end
 
   it 'has a working or function' do
     expect(FUNCTIONS::Fn::or(:and1, :and2, :and3)).to eq 'Fn::Or' => [:and1, :and2, :and3]
+    expect(FUNCTIONS::Fn.or(:and1, :and2, :and3)).to eq 'Fn::Or' => [:and1, :and2, :and3]
   end
 
   it 'has a working equals function' do
     expect(FUNCTIONS::Fn::equals(:a, :b)).to eq 'Fn::Equals' => [:a, :b]
+    expect(FUNCTIONS::Fn.equals(:a, :b)).to eq 'Fn::Equals' => [:a, :b]
   end
 
   it 'has a working if function' do
     expect(FUNCTIONS::Fn::if(:cond, :truthy, :falsy)).to eq 'Fn::If' => [:cond, :truthy, :falsy]
+    expect(FUNCTIONS::Fn.if(:cond, :truthy, :falsy)).to eq 'Fn::If' => [:cond, :truthy, :falsy]
   end
 
   it 'has a working not function' do
     expect(FUNCTIONS::Fn::not(:expr)).to eq 'Fn::Not' => [:expr]
+    expect(FUNCTIONS::Fn.not(:expr)).to eq 'Fn::Not' => [:expr]
   end
 
   it 'has a working get_azs function' do
     expect(FUNCTIONS::Fn::get_azs(:region)).to eq 'Fn::GetAZs' => :region
+    expect(FUNCTIONS::Fn.get_azs(:region)).to eq 'Fn::GetAZs' => :region
   end
 
   it 'has working misc functions' do
     expect(FUNCTIONS::Fn::ImportValue(:asdf)).to eq 'Fn::ImportValue' => :asdf
+    expect(FUNCTIONS::Fn.ImportValue(:asdf)).to eq 'Fn::ImportValue' => :asdf
   end
 
   it 'has a working AccountID intrinsic' do
     expect(FUNCTIONS::AWS::account_id).to eq 'Ref' => 'AWS::AccountId'
+    expect(FUNCTIONS::AWS.account_id).to eq 'Ref' => 'AWS::AccountId'
   end
 
   it 'has a working NotificationARNs intrinsic' do
     expect(FUNCTIONS::AWS::notification_arns).to eq 'Ref' => 'AWS::NotificationARNs'
+    expect(FUNCTIONS::AWS.notification_arns).to eq 'Ref' => 'AWS::NotificationARNs'
   end
 
   it 'has a working NoValue intrinsic' do
     expect(FUNCTIONS::AWS::no_value).to eq 'Ref' => 'AWS::NoValue'
+    expect(FUNCTIONS::AWS.no_value).to eq 'Ref' => 'AWS::NoValue'
   end
 
   it 'has a working Region intrinsic' do
     expect(FUNCTIONS::AWS::region).to eq 'Ref' => 'AWS::Region'
+    expect(FUNCTIONS::AWS.region).to eq 'Ref' => 'AWS::Region'
   end
 
   it 'has a working StackId intrinsic' do
     expect(FUNCTIONS::AWS::stack_id).to eq 'Ref' => 'AWS::StackId'
+    expect(FUNCTIONS::AWS.stack_id).to eq 'Ref' => 'AWS::StackId'
   end
 
   it 'has a working StackName intrinsic' do
     expect(FUNCTIONS::AWS::stack_name).to eq 'Ref' => 'AWS::StackName'
+    expect(FUNCTIONS::AWS.stack_name).to eq 'Ref' => 'AWS::StackName'
   end
 
   it 'has working misc functions' do
     expect(FUNCTIONS::AWS::test_thing).to eq 'Ref' => 'AWS::TestThing'
+    expect(FUNCTIONS::AWS.test_thing).to eq 'Ref' => 'AWS::TestThing'
   end
 
   it 'has a working lookup function' do
