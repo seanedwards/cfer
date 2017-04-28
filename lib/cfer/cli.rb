@@ -39,6 +39,10 @@ module Cfer
       optional nil, 'on-failure', 'The action to take if the stack creation fails'
       optional nil, 'timeout', 'The timeout (in minutes) before the stack operation aborts'
       #flag   nil, 'git-lock', 'When enabled, Cfer will not converge a stack in a dirty git tree'
+      optional nil,
+               'notification-arns',
+               'SNS topic ARN to publish stack related events. This option can be supplied multiple times.',
+               multiple: true
 
       optional :s,  'stack-policy', 'Set a new stack policy on create or update of the stack [file|url|json]'
       optional :u,  'stack-policy-during-update', 'Set a temporary overriding stack policy during an update [file|url|json]'
