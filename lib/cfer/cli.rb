@@ -46,6 +46,7 @@ module Cfer
 
       optional :s,  'stack-policy', 'Set a new stack policy on create or update of the stack [file|url|json]'
       optional :u,  'stack-policy-during-update', 'Set a temporary overriding stack policy during an update [file|url|json]'
+      optional nil, 'role-arn', 'Pass a specific role ARN for CloudFormation to use (--role-arn in AWS CLI)'
 
       optional nil, 'change', 'Issues updates as a Cfn change set.'
       optional nil, 'change-description', 'The description of this Cfn change'
