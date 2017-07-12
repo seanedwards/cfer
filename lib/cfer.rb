@@ -85,11 +85,17 @@ module Cfer
             when 'Continue'
               retry
             when 'Rollback'
+              rollback_opts = {
+                stack_name: stack_name
+              }
+
+              rollback_opts[:role_arn] = options[:role_arn] if options[:role_arn]
+
               case operation
               when :created
-                cfn_stack.delete_stack stack_name: stack_name
+                cfn_stack.delete_stack rollback_opts
               when :updated
-                cfn_stack.cancel_update_stack stack_name: stack_name
+                cfn_stack.cancel_update_stack rollback_opts
               end
               retry
             end
@@ -185,7 +191,12 @@ module Cfer
       config(options)
       cfn = options[:aws_options] || {}
       cfn_stack = options[:cfer_client] || cfn_stack = Cfer::Cfn::Client.new(cfn.merge(stack_name: stack_name))
-      cfn_stack.delete_stack(stack_name: stack_name)
+
+      delete_opts = {
+        stack_name: stack_name
+      }
+      delete_opts[:role_arn] = options[:role_arn] if options[:role_arn]
+      cfn_stack.delete_stack(delete_opts)
 
       if options[:follow]
         tail! stack_name, options.merge(cfer_client: cfn_stack)
@@ -356,4 +367,3 @@ cfn/client.rb
   require "#{File.dirname(__FILE__)}/cfer/#{f}"
 end
 Dir["#{File.dirname(__FILE__)}/cferext/**/*.rb"].each { |f| require(f) }
-
