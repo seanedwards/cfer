@@ -120,6 +120,7 @@ module Cfer::Cfn
       stack_options[:on_failure] = options[:on_failure] if options[:on_failure]
       stack_options[:timeout_in_minutes] = options[:timeout] if options[:timeout]
       stack_options[:notification_arns] = options[:notification_arns] if options[:notification_arns]
+      stack_options[:role_arn] = options[:role_arn]
 
       stack_options.merge! parse_stack_policy(:stack_policy, options[:stack_policy])
 
