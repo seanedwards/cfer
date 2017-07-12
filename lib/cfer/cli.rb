@@ -133,6 +133,8 @@ module Cfer
       usage 'delete <stack>'
       summary 'Deletes a CloudFormation stack'
 
+      optional nil, 'role-arn', 'Pass a specific role ARN for CloudFormation to use (--role-arn in AWS CLI)'
+
       run do |options, args, cmd|
         Cfer::Cli.fixup_options(options)
         options[:number] = 0
