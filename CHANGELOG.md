@@ -1,5 +1,15 @@
 # Cfer Change Log
 
+## 0.6.0
+
+### Enhancements
+* Colorized JSON in `generate` for more readable output. #41
+* Adds `--notification-arns` CLI option. #43
+* Adds `--role-arn` CLI option. #46
+
+### Bugfixes
+* Don't dump backtrace when trying to delete a nonexistent stack. #42
+
 ## 0.5.0
 
 ### **BREAKING CHANGES**
