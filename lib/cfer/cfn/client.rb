@@ -112,10 +112,9 @@ module Cfer::Cfn
 
       Cfer::LOGGER.debug "==================="
 
-      stack_options = {
-        stack_name: name,
-        capabilities: response.capabilities
-      }
+      stack_options = options[:aws_options] || {}
+
+      stack_options.merge! stack_name: name, capabilities: response.capabilities
 
       stack_options[:on_failure] = options[:on_failure] if options[:on_failure]
       stack_options[:timeout_in_minutes] = options[:timeout] if options[:timeout]
