@@ -112,7 +112,7 @@ module Cfer::Cfn
 
       Cfer::LOGGER.debug "==================="
 
-      stack_options = options[:aws_options] || {}
+      stack_options = options[:stack_options] || {}
 
       stack_options.merge! stack_name: name, capabilities: response.capabilities
 
