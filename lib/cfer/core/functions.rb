@@ -4,6 +4,10 @@ module Cfer::Core::Functions
     {"Fn::Join" => [sep, [ *args ].flatten ]}
   end
 
+  def split(sep, str)
+    {"Fn::Split" => [sep, str ]}
+  end
+
   def ref(r)
     {"Ref" => r}
   end
