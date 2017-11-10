@@ -120,6 +120,7 @@ module Cfer::Cfn
       stack_options[:timeout_in_minutes] = options[:timeout] if options[:timeout]
       stack_options[:role_arn] = options[:role_arn] if options[:role_arn]
       stack_options[:notification_arns] = options[:notification_arns] if options[:notification_arns]
+      stack_options[:enable_termination_protection] = options[:enable_termination_protection] if options[:enable_termination_protection]
 
       stack_options.merge! parse_stack_policy(:stack_policy, options[:stack_policy])
 
