@@ -8,7 +8,7 @@ group :test do
   gem 'rspec-mocks'
   gem 'guard-rspec'
   gem 'simplecov'
-  gem 'rubocop', '~> 0.47.1'
+  gem 'rubocop', '~> 0.51'
   gem "codeclimate-test-reporter", "~> 1.0.0"
 end
 
