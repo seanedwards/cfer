@@ -2,6 +2,21 @@ module Cfer::Core
   class Resource < Cfer::BlockHash
     include Cfer::Core::Hooks
 
+    class Handle
+      attr_reader :name
+      def initialize(name)
+        @name = name.to_s
+      end
+
+      def ref
+        Functions::Fn::ref(name)
+      end
+
+      def method_missing(method)
+        Functions::Fn::get_att(name, method.to_s.camelize)
+      end
+    end
+
     @@types = {}
 
     attr_reader :stack
@@ -14,6 +29,10 @@ module Cfer::Core
       self.merge!(options)
       self[:Properties] = HashWithIndifferentAccess.new
       build_from_block(&block)
+    end
+
+    def handle
+      @handle ||= Handle.new(@name)
     end
 
     # Sets a tag on this resource. The resource must support the CloudFormation `Tags` property.

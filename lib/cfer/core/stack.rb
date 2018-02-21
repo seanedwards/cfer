@@ -140,7 +140,7 @@ module Cfer::Core
       rc = clazz.new(name, type, self, options, &block)
 
       self[:Resources][name] = rc
-      rc
+      rc.handle
     end
 
     # Adds an output to the CloudFormation stack.

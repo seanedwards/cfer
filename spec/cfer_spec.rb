@@ -126,6 +126,32 @@ describe Cfer do
     expect(stack[:Resources][:test_resource][:Properties][:Tags]).to contain_exactly 'Key' => 'a', 'Value' => 'b', :xyz => 'abc'
   end
 
+  it 'has handles' do
+    handle = Cfer::Core::Resource::Handle.new("Test")
+
+    expect(JSON.generate(handle.ref)).to eq '{"Ref":"Test"}'
+    expect(JSON.generate(handle.xyz)).to eq '{"Fn::GetAtt":["Test","Xyz"]}'
+  end
+
+  it 'creates resources and returns handles' do
+    stack = create_stack do
+      test1 = resource :test_resource, 'Cfer::TestResource' do
+        tag 'a', 'b', xyz: 'abc'
+      end
+
+      resource :test_resource_2, 'Cfer::TestResource' do
+        test_resource test1.ref
+        test_attribute test1.att
+
+      end
+    end
+    stack = JSON.parse(stack.to_cfn)
+
+    expect(stack['Resources']['test_resource_2']['Properties']).to eq \
+      'TestResource' => { 'Ref' => 'test_resource' },
+      'TestAttribute' => { 'Fn::GetAtt' => [ 'test_resource', 'Att' ] }
+  end
+
   it 'executes hooks in the right order' do
     list = []
 

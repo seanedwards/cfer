@@ -89,10 +89,9 @@ module Cfer
                 stack_name: stack_name
               }
 
-              rollback_opts[:role_arn] = options[:role_arn] if options[:role_arn]
-
               case operation
               when :created
+                rollback_opts[:role_arn] = options[:role_arn] if options[:role_arn]
                 cfn_stack.delete_stack rollback_opts
               when :updated
                 cfn_stack.cancel_update_stack rollback_opts
