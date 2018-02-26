@@ -47,8 +47,6 @@ module Cfer::Core
 
       if options[:client] && git = options[:client].git
         begin
-          require 'pry'
-          binding.pry
           @git_state = git.object('HEAD^')
           self[:Metadata][:Cfer][:Git] = {
             Rev: git_state.sha,
