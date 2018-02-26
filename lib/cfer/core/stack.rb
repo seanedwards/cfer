@@ -13,7 +13,7 @@ module Cfer::Core
 
     attr_reader :options
 
-    attr_reader :git_version
+    attr_reader :git_state
 
     def client
       @options[:client] || raise('No client set on this stack')
@@ -45,11 +45,18 @@ module Cfer::Core
       self[:Resources] = {}
       self[:Outputs] = {}
 
-      if options[:client] && git = options[:client].git && @git_version = (git.object('HEAD^').sha rescue nil)
-        self[:Metadata][:Cfer][:Git] = {
-          Rev: @git_version,
-          Clean: git.status.changed.empty?
-        }
+      if options[:client] && git = options[:client].git
+        begin
+          require 'pry'
+          binding.pry
+          @git_state = git.object('HEAD^')
+          self[:Metadata][:Cfer][:Git] = {
+            Rev: git_state.sha,
+            Clean: git.status.changed.empty?
+          }
+        rescue e
+          Cfer::LOGGER.warn("Unable to add Git information to CloudFormation Metadata.", e)
+        end
       end
 
       @parameters = HashWithIndifferentAccess.new

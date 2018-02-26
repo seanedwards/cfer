@@ -8,7 +8,7 @@ module Cfer::Cfn
     attr_reader :stack
 
     def initialize(options)
-      super
+      super(options)
       @name = options[:stack_name]
       @options = options
       @options.delete :stack_name
@@ -72,7 +72,7 @@ module Cfer::Cfn
       current_version = Cfer::SEMANTIC_VERSION
       previous_version = fetch_cfer_version rescue nil
 
-      current_hash = stack.git_version
+      current_hash = stack.git_state.sha
       previous_hash = fetch_git_hash rescue nil
 
       # Compare current and previous versions and hashes?

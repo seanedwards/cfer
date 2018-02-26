@@ -13,4 +13,10 @@ describe Cfer::Cfn::Client do
     expect(cfn.fetch_output(cfn.name, 'value')).to eq('remote_value')
   end
 
+  it 'has a git' do
+    stack = create_stack { }
+    cfn = stack.client
+    expect(cfn.git).to be
+  end
+
 end
