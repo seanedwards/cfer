@@ -176,7 +176,7 @@ output :vpcid, Fn::ref(:vpc)
 
 Now that you have your template ready, you'll be able to use Cfer to create or update a CloudFormation stack:
 
-{% highlight bash %}
+```bash
 cfer converge vpc -t examples/vpc.rb --profile ${AWS_PROFILE} --region ${AWS_REGION}
 ```
 
