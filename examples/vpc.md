@@ -182,7 +182,7 @@ cfer converge vpc -t examples/vpc.rb --profile ${AWS_PROFILE} --region ${AWS_REG
 
 Which should produce something like this.
 
-![Cfer Demo]({{ site.url }}/images/cfer/cfer-demo.gif)
+![Cfer Demo](https://raw.githubusercontent.com/seanedwards/cfer/master/doc/cfer-demo.gif)
 
 Use `cfer help` to get more usage information, or check `README.md` and `Rakefile` in the source repository to see how to embed Cfer into your own projects.
 
