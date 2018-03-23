@@ -44,7 +44,7 @@ module Cfer::Core::Functions
     {"Fn::Not" => [cond]}
   end
 
-  def get_azs(region)
+  def get_azs(region = '')
     {"Fn::GetAZs" => region}
   end
 
