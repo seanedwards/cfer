@@ -129,6 +129,12 @@ Outputs may be retireved from other stacks anywhere in a template by using the `
 lookup_output('stack_name', 'output_name')
 ```
 
+Outputs may also be exported for use by `Fn::ImportValue` in other cloudformation stacks:
+
+```ruby
+output :OutputName, Fn::ref(:ResourceName), export: Fn::sub('${AWS::StackName}-OutputName')
+```
+
 #### Including code from multiple files
 
 Templates can get pretty large, and splitting template code into multiple
