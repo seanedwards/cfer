@@ -117,6 +117,12 @@ Outputs may be defined using the `output` function:
 output :OutputName, Fn::ref(:ResourceName)
 ```
 
+Outputs may have an optional description:
+
+```ruby
+output :OutputName, Fn::ref(:ResourceName), description: 'The resource that does stuff'
+```
+
 Outputs may be retireved from other stacks anywhere in a template by using the `lookup_output` function.
 
 ```ruby
