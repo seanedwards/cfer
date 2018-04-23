@@ -51,6 +51,10 @@ module Cfer::Core::Functions
   def split(*args)
     {"Fn::Split" => [ *args ].flatten }
   end
+  
+  def cidr(ip_block, count, size_mask)
+    {"Fn::Cidr" => [ip_block, count, size_mask]}
+  end
 
   def sub(str, vals = {})
     {"Fn::Sub" => [str, vals]}
