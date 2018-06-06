@@ -52,8 +52,8 @@ module Cfer::Core
             Rev: git_state.sha,
             Clean: git.status.changed.empty?
           }
-        rescue e
-          Cfer::LOGGER.warn("Unable to add Git information to CloudFormation Metadata.", e)
+        rescue => e
+          Cfer::LOGGER.warn("Unable to add Git information to CloudFormation Metadata. #{e}")
         end
       end
 
