@@ -91,7 +91,7 @@ module Cfer
       summary 'Follows stack events on standard output as they occur'
 
       flag :f, 'follow', 'Follow stack events on standard output while the changes are made.'
-      optional :n, 'number', 'Prints the last (n) stack events.', type: :number
+      option :n, 'number', 'Prints the last (n) stack events.', argument: :optional, transform: method(:Integer)
 
       run do |options, args, cmd|
         Cfer::Cli.fixup_options(options)
