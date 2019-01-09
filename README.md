@@ -11,6 +11,8 @@ Cfer is a lightweight toolkit for managing CloudFormation templates.
 
 Read about Cfer [here](https://github.com/seanedwards/cfer/blob/master/examples/vpc.md).
 
+Sign up for the [Cfer mailing list](http://eepurl.com/bVA-Hr) to receive updates when changes are made. Cfer is a slow-moving project, so you can expect around one or two updates per year at most.
+
 ## Support
 
 Cfer is pre-1.0 software, and may contain bugs or incomplete features. Please see the [license](https://github.com/seanedwards/cfer/blob/master/LICENSE.txt) for disclaimers.
