@@ -33,6 +33,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'table_print', '~> 1.5'
   spec.add_runtime_dependency "git", '~> 1.3'
 
-  spec.add_development_dependency "yard", '~> 0.8.7.6'
+  spec.add_development_dependency "yard"
   spec.add_development_dependency "rake"
 end
