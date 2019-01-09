@@ -1,5 +1,10 @@
 # Cfer Change Log
 
+## 0.6.1
+### Bugfixes
+* Fixes an issue with version pinning of Docile. Docile 1.3 makes breaking changes, so Cfer now pins Docile 1.1.*
+* Removes Yard version specification. There's no particular need to pin yard to a version, and Github reported security problems with the old version.
+
 ## 0.6.0
 
 ### Enhancements
