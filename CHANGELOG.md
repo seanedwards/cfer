@@ -1,5 +1,19 @@
 # Cfer Change Log
 
+## 0.7.0
+
+### Enhancements
+* Adds `Fn::split()` and  `Fn::cidr()` from the CloudFormation spec.
+* Changes the return type of the `resource` function to a `Handle` object, which eases certain uses of references and attributes.
+
+### Bugfixes
+* Fixes an issue with canceling stack updates when specifying a CloudFormation Role ARN.
+* Fixes the git integration that records the current git hash into the stack metadata.
+
+## 0.6.2
+### Bugfixes
+* Fixes a Cri compatibility issue, which should have gone out in 0.6.1
+
 ## 0.6.1
 ### Bugfixes
 * Fixes an issue with version pinning of Docile. Docile 1.3 makes breaking changes, so Cfer now pins Docile 1.1.*
