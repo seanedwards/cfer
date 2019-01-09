@@ -48,6 +48,10 @@ module Cfer::Core::Functions
     {"Fn::GetAZs" => region}
   end
 
+  def split(*args)
+    {"Fn::Split" => [ *args ].flatten }
+  end
+  
   def cidr(ip_block, count, size_mask)
     {"Fn::Cidr" => [ip_block, count, size_mask]}
   end
