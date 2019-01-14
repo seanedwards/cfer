@@ -1,5 +1,9 @@
 # Cfer Change Log
 
+## 0.6.2
+### Bugfixes
+* Fixes a Cri compatibility issue, which should have gone out in 0.6.1
+
 ## 0.6.1
 ### Bugfixes
 * Fixes an issue with version pinning of Docile. Docile 1.3 makes breaking changes, so Cfer now pins Docile 1.1.*
