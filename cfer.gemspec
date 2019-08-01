@@ -4,22 +4,22 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'cfer/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "cfer"
+  spec.name          = 'cfer'
   spec.version       = Cfer::VERSION
-  spec.authors       = ["Sean Edwards"]
-  spec.email         = ["stedwards87+cfer@gmail.com"]
+  spec.authors       = ['Sean Edwards']
+  spec.email         = ['stedwards87+cfer@gmail.com']
 
   spec.summary       = %q{Toolkit for automating infrastructure using AWS CloudFormation}
   spec.description   = spec.summary
-  spec.homepage      = "https://github.com/seanedwards/cfer"
-  spec.license       = "MIT"
+  spec.homepage      = 'https://github.com/seanedwards/cfer'
+  spec.license       = 'MIT'
 
   spec.required_ruby_version = ['~> 2.2', '>= 2.2.5']
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = 'bin'
   spec.executables   = ['cfer', 'json-to-cfer']
-  spec.require_paths = ["lib"]
+  spec.require_paths = ['lib']
 
   spec.add_runtime_dependency 'docile', '~> 1.1.5'
   spec.add_runtime_dependency 'cri', '~> 2.7'
@@ -30,8 +30,8 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'rainbow', '~> 2.2'
   spec.add_runtime_dependency 'highline', '~> 1.7'
   spec.add_runtime_dependency 'table_print', '~> 1.5'
-  spec.add_runtime_dependency "git", '~> 1.3'
+  spec.add_runtime_dependency 'git', '~> 1.3'
 
-  spec.add_development_dependency "yard"
-  spec.add_development_dependency "rake"
+  spec.add_development_dependency 'yard'
+  spec.add_development_dependency 'rake'
 end
