@@ -1,5 +1,5 @@
 require 'active_support/all'
-require 'aws-sdk'
+require 'aws-sdk-cloudformation'
 require 'logger'
 require 'json'
 require 'preconditions'
