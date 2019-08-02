@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'cri', '~> 2.7'
   spec.add_runtime_dependency 'activesupport', '>= 3'
   spec.add_runtime_dependency 'aws-sdk-cloudformation', '~> 1'
+  spec.add_runtime_dependency 'aws-sdk-s3', '~> 1'
   spec.add_runtime_dependency 'preconditions', '~> 0.3.0'
   spec.add_runtime_dependency 'semantic', '~> 1.4'
   spec.add_runtime_dependency 'rainbow', '~> 2.2'
