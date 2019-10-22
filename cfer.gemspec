@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   spec.executables   = ['cfer', 'json-to-cfer']
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency 'docile', '~> 1.1.5'
+  spec.add_runtime_dependency 'docile', '~> 1.3', '>= 1.3.2'
   spec.add_runtime_dependency 'cri', '~> 2.7'
   spec.add_runtime_dependency 'activesupport', '>= 3'
   spec.add_runtime_dependency 'aws-sdk', '~> 2'
