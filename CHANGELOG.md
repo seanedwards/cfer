@@ -1,5 +1,8 @@
 # Cfer Change Log
 
+## 0.8.0
+Upgrade to AWS SDK v3
+
 ## 0.7.0
 
 ### Enhancements
