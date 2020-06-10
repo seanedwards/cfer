@@ -119,10 +119,22 @@ Outputs may be defined using the `output` function:
 output :OutputName, Fn::ref(:ResourceName)
 ```
 
+Outputs may have an optional description:
+
+```ruby
+output :OutputName, Fn::ref(:ResourceName), description: 'The resource that does stuff'
+```
+
 Outputs may be retireved from other stacks anywhere in a template by using the `lookup_output` function.
 
 ```ruby
 lookup_output('stack_name', 'output_name')
+```
+
+Outputs may also be exported for use by `Fn::ImportValue` in other cloudformation stacks:
+
+```ruby
+output :OutputName, Fn::ref(:ResourceName), export: Fn::sub('${AWS::StackName}-OutputName')
 ```
 
 #### Including code from multiple files
