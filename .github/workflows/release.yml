@@ -24,7 +24,7 @@ jobs:
           bundler-cache: true
       - run: bundle install --without debug --without test --jobs=3 --retry=3
       - run: |
-          bundle exec bump ${{inputs.release_type}} --tag --tag-prefix v
+          bundle exec bump ${{inputs.release_type}} --tag --tag-prefix v --changelog
       - name: Publish to RubyGems
         run: |
           mkdir -p $HOME/.gem
@@ -39,5 +39,5 @@ jobs:
         run: |
           git config --global user.name "CI"
           git config --global user.email "seanedwards@users.noreply.github.com"
-          git add lib/cfer/version.rb CHANGELOG.md
+          git merge v${{bundle exec bump current}} -m ${{bundle exec bump current}}
           git push --tags
