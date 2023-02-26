@@ -24,9 +24,9 @@ jobs:
       - run: bundle install --without debug --without test --jobs=3 --retry=3
       - name: Bump version
         run: |
-          bundle exec bump ${{inputs.release_type}} --tag --tag-prefix v --changelog
           git config --global user.name "CI"
           git config --global user.email "seanedwards@users.noreply.github.com"
+          bundle exec bump ${{inputs.release_type}} --tag --tag-prefix v --changelog
           git merge v$(bundle exec bump current)
           git push --tags
       - name: Publish to RubyGems
