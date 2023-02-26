@@ -5,6 +5,7 @@
 * Deps updates
 
 ### Enhancements
+## 0.8.2
 * Syntactic sugar for exporting values from a Cfn stackq
 
 

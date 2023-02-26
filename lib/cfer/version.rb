@@ -1,5 +1,5 @@
 module Cfer
-  VERSION = "0.8.1"
+  VERSION = "0.8.2"
 
   begin
     require 'semantic'
