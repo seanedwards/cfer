@@ -2,11 +2,10 @@
 
 ## Next
 ## 1.0.0
-## 0.8.1
 
 * Support for Ruby 3
 * Deps updates
-* Syntactic sugar for exporting values from a Cfn stackq
+* Syntactic sugar for exporting values from a Cfn stack
 
 ## 0.8.0
 Upgrade to AWS SDK v3
