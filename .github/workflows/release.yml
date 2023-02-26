@@ -38,6 +38,6 @@ jobs:
         run: |
           git config --global user.name "CI"
           git config --global user.email "seanedwards@users.noreply.github.com"
-          git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
+          git commit -a -m "Version ${bump current}"
           git tag "v${bump current}"
           git push --tags
