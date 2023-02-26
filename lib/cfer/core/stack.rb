@@ -159,7 +159,7 @@ module Cfer::Core
       export = opt.has_key?('Export') ? {'Name' => opt['Export']} : nil
       self[:Outputs][name] = opt.merge('Value' => value, 'Export' => export).compact
     end
-
+    
     # Renders the stack into a CloudFormation template.
     # @return [String] The final template
     def to_cfn
