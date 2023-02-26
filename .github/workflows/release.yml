@@ -28,7 +28,6 @@ jobs:
           git config --global user.email "seanedwards@users.noreply.github.com"
           bundle exec bump ${{inputs.release_type}} --tag --tag-prefix v --changelog
           git merge v$(bundle exec bump current)
-          git commit -m "Version $(bundle exec bump current)"
           git push --all --tags
       - name: Publish to RubyGems
         run: |
