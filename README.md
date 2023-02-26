@@ -11,16 +11,6 @@ Cfer is a lightweight toolkit for managing CloudFormation templates.
 
 Read about Cfer [here](https://github.com/seanedwards/cfer/blob/master/examples/vpc.md).
 
-Sign up for the [Cfer mailing list](http://eepurl.com/bVA-Hr) to receive updates when changes are made. Cfer is a slow-moving project, so you can expect around one or two updates per year at most.
-
-## Support
-
-Cfer is pre-1.0 software, and may contain bugs or incomplete features. Please see the [license](https://github.com/seanedwards/cfer/blob/master/LICENSE.txt) for disclaimers.
-
-If you would like support or guidance on Cfer, or CloudFormation in general, I offer DevOps consulting services. Please [Contact me](mailto:stedwards87+cfer@gmail.com) and I'll be happy to discuss your needs.
-
-You can also find me at [@tilmonedwards](https://twitter.com/tilmonedwards). If you use Cfer, or are considering it, I'd love to hear from you.
-
 ## Installation
 
 Add this line to your application's Gemfile:
