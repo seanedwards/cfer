@@ -1,14 +1,9 @@
 # Cfer Change Log
 
 ## Next
-## 1.0.1
-## 1.0.0
+
 * Support for Ruby 3
 * Deps updates
-
-## 0.8.3
-
-## 0.8.2
 * Syntactic sugar for exporting values from a Cfn stackq
 
 ## 0.8.0
