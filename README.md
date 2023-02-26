@@ -1,10 +1,7 @@
 # Cfer
 
-[![Build Status](https://travis-ci.org/seanedwards/cfer.svg?branch=master)](https://travis-ci.org/seanedwards/cfer)
+![Build Status](https://github.com/seanedwards/cfer/actions/workflows/build.yml/badge.svg?branch=master)
 [![Gem Version](https://badge.fury.io/rb/cfer.svg)](http://badge.fury.io/rb/cfer)
-[![Code Climate](https://codeclimate.com/github/seanedwards/cfer/badges/gpa.svg)](https://codeclimate.com/github/seanedwards/cfer)
-[![Test Coverage](https://codeclimate.com/github/seanedwards/cfer/badges/coverage.svg)](https://codeclimate.com/github/seanedwards/cfer/coverage)
-[![Issue Count](https://codeclimate.com/github/seanedwards/cfer/badges/issue_count.svg)](https://codeclimate.com/github/seanedwards/cfer)
 
 
 Cfer is a lightweight toolkit for managing CloudFormation templates.

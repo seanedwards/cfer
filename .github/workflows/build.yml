@@ -1,0 +1,18 @@
+name: Build Cfer
+on: [push]
+jobs:
+  Build:
+    strategy:
+      matrix:
+        os: [ubuntu, macos]
+        ruby: ["2.7", "3.0", "3.1"]
+    runs-on: ${{matrix.os}}-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{matrix.ruby}}
+          bundler-cache: true
+      - run: bundle install --without debug --jobs=3 --retry=3
+      - run: bundle exec rspec
+      - run: bundle exec yard

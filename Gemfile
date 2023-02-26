@@ -7,9 +7,6 @@ group :test do
   gem 'rspec'
   gem 'rspec-mocks'
   gem 'guard-rspec'
-  gem 'simplecov'
-  gem 'rubocop', '~> 0.51'
-  gem "codeclimate-test-reporter", "~> 1.0.0"
 end
 
 group :debug do
@@ -17,5 +14,4 @@ group :debug do
   gem 'pry-byebug'
   gem 'pry-rescue'
   gem 'pry-stack_explorer'
-  gem 'travis'
 end
