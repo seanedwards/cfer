@@ -1,6 +1,7 @@
 # Cfer Change Log
 
 ## Next
+## 1.0.0
 * Support for Ruby 3
 * Deps updates
 
