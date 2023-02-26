@@ -52,8 +52,8 @@ module Cfer::Core
             Rev: git_state.sha,
             Clean: git.status.changed.empty?
           }
-        rescue e
-          Cfer::LOGGER.warn("Unable to add Git information to CloudFormation Metadata.", e)
+        rescue => e
+          Cfer::LOGGER.warn("Unable to add Git information to CloudFormation Metadata. #{e}")
         end
       end
 
@@ -101,7 +101,7 @@ module Cfer::Core
     #     By adding a constraint description, such as must only contain upper- and lowercase letters, and numbers, you can display a customized error message:
     #
     #     ```Malformed input-Parameter MyParameter must only contain upper and lower case letters and numbers```
-    def parameter(name, options = {})
+    def parameter(name, **options)
       param = {}
       options.each do |key, v|
         next if v === nil
@@ -138,7 +138,7 @@ module Cfer::Core
     # @param name [String] The name of the resource (must be alphanumeric)
     # @param type [String] The type of CloudFormation resource to create.
     # @param options [Hash] Additional attributes to add to the resource block (such as the `UpdatePolicy` for an `AWS::AutoScaling::AutoScalingGroup`)
-    def resource(name, type, options = {}, &block)
+    def resource(name, type, **options, &block)
       Preconditions.check_argument(/[[:alnum:]]+/ =~ name, "Resource name must be alphanumeric")
 
       clazz = Cfer::Core::Resource.resource_class(type)
@@ -154,7 +154,7 @@ module Cfer::Core
     # @param options [Hash] Extra options for this output parameter
     # @option options [String] :description Information about the value
     # @option options [String] :export Name be exported for cross-stack reference
-    def output(name, value, options = {})
+    def output(name, value, **options)
       opt = options.each_with_object({}) { |(k,v),h| h[k.to_s.capitalize] = v } # capitalize all keys
       export = opt.has_key?('Export') ? {'Name' => opt['Export']} : nil
       self[:Outputs][name] = opt.merge('Value' => value, 'Export' => export).compact

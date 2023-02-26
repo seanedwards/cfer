@@ -54,7 +54,8 @@ end
     # Other CloudFormation intrinsics, such as `Fn::Select` and `AWS::Region` are available as Ruby objects
     # Inspecting these functions will reveal that they simply return a Ruby hash representing the same CloudFormation structures
     availability_zone Fn::select(i, Fn::get_azs(AWS::region))
-    cidr_block "172.42.#{i}.0/24"
+    # this calculates "172.42.#{i}.0/24"
+    cidr_block Fn::select(i, Fn::cidr(Fn::get_att(:vpc, :CidrBlock), 256, 8))
     vpc_id Fn::ref(:vpc)
   end
 

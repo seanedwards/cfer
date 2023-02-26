@@ -72,7 +72,7 @@ module Cfer::Cfn
       current_version = Cfer::SEMANTIC_VERSION
       previous_version = fetch_cfer_version rescue nil
 
-      current_hash = stack.git_state.sha
+      current_hash = stack.git_state.sha rescue nil
       previous_hash = fetch_git_hash rescue nil
 
       # Compare current and previous versions and hashes?

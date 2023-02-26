@@ -4,10 +4,6 @@ module Cfer::Core::Functions
     {"Fn::Join" => [sep, [ *args ].flatten ]}
   end
 
-  def split(sep, str)
-    {"Fn::Split" => [sep, str ]}
-  end
-
   def ref(r)
     {"Ref" => r}
   end
@@ -44,8 +40,16 @@ module Cfer::Core::Functions
     {"Fn::Not" => [cond]}
   end
 
-  def get_azs(region)
+  def get_azs(region = '')
     {"Fn::GetAZs" => region}
+  end
+
+  def split(*args)
+    {"Fn::Split" => [ *args ].flatten }
+  end
+  
+  def cidr(ip_block, count, size_mask)
+    {"Fn::Cidr" => [ip_block, count, size_mask]}
   end
 
   def sub(str, vals = {})
