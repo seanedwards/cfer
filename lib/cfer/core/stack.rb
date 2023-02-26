@@ -101,7 +101,7 @@ module Cfer::Core
     #     By adding a constraint description, such as must only contain upper- and lowercase letters, and numbers, you can display a customized error message:
     #
     #     ```Malformed input-Parameter MyParameter must only contain upper and lower case letters and numbers```
-    def parameter(name, options = {})
+    def parameter(name, **options)
       param = {}
       options.each do |key, v|
         next if v === nil
@@ -138,7 +138,7 @@ module Cfer::Core
     # @param name [String] The name of the resource (must be alphanumeric)
     # @param type [String] The type of CloudFormation resource to create.
     # @param options [Hash] Additional attributes to add to the resource block (such as the `UpdatePolicy` for an `AWS::AutoScaling::AutoScalingGroup`)
-    def resource(name, type, options = {}, &block)
+    def resource(name, type, **options, &block)
       Preconditions.check_argument(/[[:alnum:]]+/ =~ name, "Resource name must be alphanumeric")
 
       clazz = Cfer::Core::Resource.resource_class(type)
@@ -153,7 +153,7 @@ module Cfer::Core
     # @param value [String] Value to return
     # @param options [Hash] Extra options for this output parameter
     # @option options [String] :Description Information about the value
-    def output(name, value, options = {})
+    def output(name, value, **options)
       self[:Outputs][name] = options.merge('Value' => value)
     end
 

@@ -1,10 +1,8 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'pp'
 require 'aws-sdk-cloudformation'
-require 'simplecov'
 require 'pry' rescue nil
 
-SimpleCov.start
 Aws.config[:stub_responses] = true
 
 def create_stack(options = {}, &block)

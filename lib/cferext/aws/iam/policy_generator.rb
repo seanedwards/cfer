@@ -3,13 +3,13 @@ require 'docile'
 module CferExt
   module AWS
     module IAM
-      class PolicyGenerator < Cfer::BlockHash
+      class PolicyGenerator < Cfer::Block
         def initialize
           self[:Version] = '2012-10-17'
           self[:Statement] = []
         end
 
-        def statement(options = {}, &block)
+        def statement(**options, &block)
           statement = ::Cfer::BlockHash.new(&block)
           statement.merge! options
           statement.build_from_block(&block)

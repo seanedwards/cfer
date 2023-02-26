@@ -14,14 +14,14 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/seanedwards/cfer'
   spec.license       = 'MIT'
 
-  spec.required_ruby_version = ['~> 2.2', '>= 2.2.5']
+  spec.required_ruby_version = ['>= 2.2.5']
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = 'bin'
   spec.executables   = ['cfer', 'json-to-cfer']
   spec.require_paths = ['lib']
 
-  spec.add_runtime_dependency 'docile', '~> 1.1.5'
+  spec.add_runtime_dependency 'docile', '~> 1.4'
   spec.add_runtime_dependency 'cri', '~> 2.7'
   spec.add_runtime_dependency 'activesupport', '>= 3'
   spec.add_runtime_dependency 'aws-sdk-cloudformation', '~> 1'

@@ -26,7 +26,7 @@ end
 def describe_resource(type, &block)
   stack = create_stack do
     resource :test_resource, type do
-      instance_eval(&block)
+      build_from_block(&block)
     end
   end
 
@@ -81,14 +81,14 @@ describe CferExt do
 
   it 'extends AWS::KMS::Key' do
     rc = describe_resource 'AWS::KMS::Key' do
-      key_policy {
-        statement {
+      key_policy do
+        statement do
           effect :Allow
           principal AWS: "arn:aws:iam::123456789012:user/Alice"
           action '*'
           resource '*'
-        }
-      }
+        end
+      end
     end
 
     expect(rc[:KeyPolicy][:Statement].first[:Effect]).to eq(:Allow)

@@ -10,7 +10,7 @@ describe Cfer::Cfn::Client do
 
     expect(cfn).to receive(:validate_template)
       .exactly(1).times
-      .with(template_body: stack.to_cfn) {
+      .with({template_body: stack.to_cfn}) {
       double(
         capabilities: [],
         parameters: [
@@ -21,7 +21,7 @@ describe Cfer::Cfn::Client do
 
     expect(cfn).to receive(:create_stack)
       .exactly(1).times
-      .with(
+      .with({
         stack_name: 'test',
         template_body: stack.to_cfn,
         parameters: [
@@ -29,7 +29,7 @@ describe Cfer::Cfn::Client do
         ],
         capabilities: [],
         stack_policy_body: File.read('spec/support/stack_policy.json')
-      )
+    })
 
     Cfer::converge! cfn.name,  cfer_client: cfn, cfer_stack: stack, stack_policy: 'spec/support/stack_policy.json', output_format: 'json'
   end
@@ -48,7 +48,7 @@ describe Cfer::Cfn::Client do
 
     expect(cfn).to receive(:validate_template)
       .exactly(1).times
-      .with(template_body: stack.to_cfn) {
+      .with({template_body: stack.to_cfn}) {
         double(
           capabilities: [],
           parameters: [
@@ -85,7 +85,7 @@ describe Cfer::Cfn::Client do
   it 'deletes stacks' do
     cfn = Cfer::Cfn::Client.new stack_name: 'test-stack', region: 'us-east-1'
 
-    expect(cfn).to receive(:delete_stack).with(stack_name: 'test-stack')
+    expect(cfn).to receive(:delete_stack).with({stack_name: 'test-stack'})
       .exactly(1).times
 
     Cfer::delete! 'test-stack', cfer_client: cfn
@@ -104,7 +104,7 @@ describe Cfer::Cfn::Client do
 
     expect(cfn).to receive(:describe_stack_events)
       .exactly(3).times
-      .with(stack_name: 'test')
+      .with({stack_name: 'test'})
       .and_return(
         double(stack_events: event_list.take(2).reverse),
         double(stack_events: event_list.take(4).reverse),
@@ -113,7 +113,7 @@ describe Cfer::Cfn::Client do
 
     expect(cfn).to receive(:describe_stacks)
       .exactly(2).times
-      .with(stack_name: 'test')
+      .with({stack_name: 'test'})
       .and_return(
         double(stacks: [ double(:stack_status => 'a status') ]),
         double(stacks: [ double(:stack_status => 'TEST_COMPLETE')])

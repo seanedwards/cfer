@@ -299,7 +299,7 @@ module Cfer
     rescue SyntaxError => e
       raise Cfer::Util::TemplateError.new([]), e.message
     rescue StandardError => e
-      raise Cfer::Util::TemplateError.new(convert_backtrace(base_loc, e)), e.message
+      raise e #Cfer::Util::TemplateError.new(convert_backtrace(base_loc, e)), e.message
     end
 
     def convert_backtrace(base_loc, exception)

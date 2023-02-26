@@ -63,7 +63,8 @@ module Cfer
       :parameters,
       :options,
       :lookup_output,
-      :lookup_outputs
+      :lookup_outputs,
+      :__docile_undo_fallback__
     ].freeze
 
     # Directly sets raw properties in the underlying CloudFormation structure.

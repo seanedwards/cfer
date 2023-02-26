@@ -17,6 +17,7 @@ describe Cfer do
     expect(stack[:Parameters]).to have_key :test
     expect(stack[:Resources]).to have_key :abc
     expect(stack[:Resources][:abc][:Type]).to eq 'Cfer::TestResource'
+    expect(stack[:Resources][:abc][:SomeAttribute]).to eq 'Value'
   end
 
   it 'reads templates from json files' do

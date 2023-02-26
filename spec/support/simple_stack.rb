@@ -1,4 +1,4 @@
 parameter :test
 
-resource :abc, "Cfer::TestResource"
+resource :abc, "Cfer::TestResource", SomeAttribute: "Value"
 
