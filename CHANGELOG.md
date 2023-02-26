@@ -1,13 +1,11 @@
 # Cfer Change Log
 
 ## Next
+## 0.8.1
+
 * Support for Ruby 3
 * Deps updates
-
-### Enhancements
-## 0.8.2
 * Syntactic sugar for exporting values from a Cfn stackq
-
 
 ## 0.8.0
 Upgrade to AWS SDK v3
