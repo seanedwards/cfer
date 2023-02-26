@@ -152,11 +152,14 @@ module Cfer::Core
     # @param name [String] The Logical ID of the output parameter
     # @param value [String] Value to return
     # @param options [Hash] Extra options for this output parameter
-    # @option options [String] :Description Information about the value
+    # @option options [String] :description Information about the value
+    # @option options [String] :export Name be exported for cross-stack reference
     def output(name, value, **options)
-      self[:Outputs][name] = options.merge('Value' => value)
+      opt = options.each_with_object({}) { |(k,v),h| h[k.to_s.capitalize] = v } # capitalize all keys
+      export = opt.has_key?('Export') ? {'Name' => opt['Export']} : nil
+      self[:Outputs][name] = opt.merge('Value' => value, 'Export' => export).compact
     end
-
+    
     # Renders the stack into a CloudFormation template.
     # @return [String] The final template
     def to_cfn
