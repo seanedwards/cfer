@@ -10,7 +10,6 @@ on:
           - major
           - minor
           - patch
-          - pre
 jobs:
   Publish:
     runs-on: ubuntu-latest
