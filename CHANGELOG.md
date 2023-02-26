@@ -4,6 +4,8 @@
 * Support for Ruby 3
 * Deps updates
 
+## 0.8.3
+
 ## 0.8.2
 * Syntactic sugar for exporting values from a Cfn stackq
 
