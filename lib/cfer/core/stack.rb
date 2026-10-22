@@ -50,7 +50,10 @@ module Cfer::Core
           @git_state = git.object('HEAD^')
           self[:Metadata][:Cfer][:Git] = {
             Rev: git_state.sha,
-            Clean: git.status.changed.empty?
+            # git.status walks every work tree path, including ignored
+            # directories such as .terragrunt-cache. diff_files compares
+            # tracked files to the index and leaves those trees alone.
+            Clean: git.lib.diff_files.empty?
           }
         rescue => e
           Cfer::LOGGER.warn("Unable to add Git information to CloudFormation Metadata. #{e}")
